@@ -1,87 +1,23 @@
-
 @startuml
-title Sistema de Prestamos Interbibliotecarios - Biblioteca
+title Sistema de Préstamos Interbibliotecarios - Modelo de Auditoría y Logística
 
 skinparam classAttributeIconSize 0
 hide empty methods
+skinparam noteBackgroundColor #LightYellow
+skinparam noteBorderColor #DarkGoldenRod
 
+' =========================
+' ENUMS
+' =========================
 
-class Sede {
-    - nombre
-    - telefono
-    - email
-    - horarioAtencion
-}
-
-class Socio {
-    - nombre
-    - apellido
-    - documento
-    - email
-    - telefono
-}
-
-class Libro {
-    - titulo 
-    - añoPublicacion
-    - editorial
-    - edicion
-}
-
-class Autor {
-    - nombre
-    - apellido
-}
-
-class Ejemplar {
-    - codigo 
-}
-
-class SolicitudPrestamo {
-    - numero
-}
-
-class Prestamo {
-    - fechaInicio
-    - fechaVencimiento
-    - fechaDevolucion
-}
-
-class Reserva {
-    - fecha 
-}
-
-class Devolucion {
-    - fecha
-}
-
-class DetalleDevolucion {
-    - observaciones
-}
-
-class Envio {
-    - fechaDespacho
-    - fechaRecepcion
-}
-
-class Remito {
-    - numero 
-    - fechaEmision
-}
-
-class EnvioSeguimiento {
-    - fecha
-    - observacion
+enum EstadoSocio {
+    HABILITADO
+    INHABILITADO
 }
 
 enum EstadoSede {
     ACTIVA
     BAJA
-}
-
-enum EstadoSocio {
-    HABILITADO
-    INHABILITADO
 }
 
 enum EstadoEjemplar {
@@ -129,54 +65,130 @@ enum EstadoEnvio {
     CON_INCIDENCIA
 }
 
-enum EstadoRemito {
-    EMITIDO
-    DESPACHADO
-    RECIBIDO
-    CON_INCIDENCIA
-    CERRADO
+' =========================
+' CLASES
+' =========================
+
+class Socio {
+    nombre
+    apellido
+    documento
+    email
+    telefono
+    estado: EstadoSocio
+}
+
+class Sede {
+    nombre
+    telefono
+    email
+    horarioAtencion
+    estado: EstadoSede
+}
+
+class Libro {
+    titulo 
+    añoPublicacion
+    editorial
+    edicion
+}
+
+class Autor {
+    nombre
+    apellido
+}
+
+class Ejemplar {
+    codigo 
+    estado: EstadoEjemplar
+}
+
+class Reserva {
+    fecha 
+    estado: EstadoReserva
+}
+
+class SolicitudPrestamo {
+    numero
+    tipo: TipoPrestamo
+    estado: EstadoSolicitud
+}
+
+class Prestamo {
+    fechaInicio
+    fechaVencimiento
+    fechaDevolucion
+    estado: EstadoPrestamo
+}
+
+class Devolucion {
+    fecha
+    observaciones
+    estadoDevuelto: EstadoEjemplar
+}
+
+' --- CLASES DE LOGÍSTICA REESTRUCTURADAS ---
+
+class Remito {
+    numero 
+    fechaEmision
+    fechaDespacho
+    fechaRecepcion
+}
+
+class HistorialEstadoRemito {
+    fechaInicio
+    fechaFin
+    estado: EstadoEnvio
 }
 
 ' =========================
 ' RELACIONES
 ' =========================
 
-Socio --> "0..*" SolicitudPrestamo : solicitudes
-Socio --> "0..*" Reserva : reservas 
-Socio --> "1" EstadoSocio : estado
+' 1. Flujo de usuario
+Socio --> "0..*" Reserva
+Socio --> "0..*" SolicitudPrestamo
+Reserva --> "1" Libro
+Reserva ..> SolicitudPrestamo : genera >
 
-SolicitudPrestamo --> "0, 1" Prestamo : prestamo 
-SolicitudPrestamo --> "1" EstadoSolicitud : estado
+' 2. Flujo de solicitud y logística
 SolicitudPrestamo --> "1" Sede : sedeOrigen
 SolicitudPrestamo --> "1" Sede : sedeDestino
-SolicitudPrestamo --> "0, 1" Envio : envio 
-SolicitudPrestamo --> "1" TipoPrestamo : tipoPrestamo
+SolicitudPrestamo --> "0..1" Prestamo : se_convierte_en >
+SolicitudPrestamo --> "0..1" Remito : tiene >
 
-Prestamo --> "0, 1" Devolucion : devolucion 
-Prestamo --> "1" EstadoPrestamo : estado
-Prestamo --> "1, *" Ejemplar : ejemplares
+' 3. Flujo de préstamo y ejemplares
+Prestamo --> "1" Ejemplar
+Sede --> "1" Ejemplar
+Libro --> "1..*" Autor
+Libro --> "1..*" Ejemplar
 
-Devolucion --> "1, *" DetalleDevolucion : detalles
+' 4. Flujo de devolución
+Prestamo --> "0..1" Devolucion
 
-DetalleDevolucion --> "1" Ejemplar : ejemplar
-DetalleDevolucion --> "1" EstadoEjemplar : estadoDevuelto
+' 5. Logística y Trazabilidad (Relaciones Corregidas)
+Remito --> "1..*" HistorialEstadoRemito : tiene_historial >
 
-Sede --> "1" EstadoSede : estado
-Sede --> "0, *" Ejemplar : ejemplares 
+' 6. Dependencias de tipo (Enums)
+Socio ..> EstadoSocio
+Sede ..> EstadoSede
+Ejemplar ..> EstadoEjemplar
+Reserva ..> EstadoReserva
+SolicitudPrestamo ..> EstadoSolicitud
+SolicitudPrestamo ..> TipoPrestamo
+Prestamo ..> EstadoPrestamo
+HistorialEstadoRemito ..> EstadoEnvio
+Devolucion ..> EstadoEjemplar
 
-Reserva --> "1" EstadoReserva : estado
-Reserva --> "1" Libro : libro
+' =========================
+' NOTAS
+' =========================
 
-Libro --> "1, *" Autor : autor 
-
-Ejemplar --> "1" EstadoEjemplar : estado
-
-Envio --> "1, *" EnvioSeguimiento : seguimientos
-Envio --> "1" Remito : remito
-Envio --> "1" EstadoEnvio : estado
-
-EnvioSeguimiento --> "1" EstadoEnvio : estado
-
-Remito --> "1" EstadoRemito : estado
+note top of Remito
+  **Remito:** Documento legal independiente
+  que respalda el traslado de la mercadería.
+  No tiene estado directo, se determina consultando el último registro del historial.
+end note
 
 @enduml
