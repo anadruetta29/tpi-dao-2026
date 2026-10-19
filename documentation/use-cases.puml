@@ -1,0 +1,67 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+' Actores
+actor "Personal de Biblioteca" as Personal
+actor "Administrador" as Admin
+
+rectangle "Sistema de Préstamos Interbibliotecarios - Biblioteca" {
+
+  ' Módulo 1: Gestión de Sedes y Socios
+  package "Módulo 1: Sedes y Socios" {
+    usecase "CU-01: Registrar Sede" as UC01
+    usecase "CU-02: Modificar / Dar de Baja Sede" as UC02
+    usecase "CU-03: Registrar Socio" as UC03
+    usecase "CU-04: Gestionar Estado de Socio" as UC04
+  }
+
+  ' Módulo 2: Catálogo y Ejemplares
+  package "Módulo 2: Catálogo y Ejemplares" {
+    usecase "CU-05: Registrar Libro y Autores" as UC05
+    usecase "CU-06: Registrar Ejemplar Físico" as UC06
+    usecase "CU-07: Actualizar Estado de Ejemplar" as UC07
+  }
+
+  ' Módulo 3: Solicitudes y Préstamos
+  package "Módulo 3: Solicitudes y Préstamos" {
+    usecase "CU-08: Registrar Solicitud de Préstamo" as UC08
+    usecase "CU-09: Aprobar Solicitud y Efectuar Préstamo" as UC09
+  }
+
+  ' Módulo 4: Logística, Envíos y Remitos
+  package "Módulo 4: Logística y Envíos" {
+    usecase "CU-10: Generar Envío y Remito" as UC10
+    usecase "CU-11: Registrar Seguimiento y Estados de Envío" as UC11
+  }
+
+  ' Módulo 5: Devoluciones y Control Físico
+  package "Módulo 5: Devoluciones" {
+    usecase "CU-12: Registrar Devolución y Estado Físico" as UC12
+  }
+
+  ' Módulo 6: Reservas 
+  package "Módulo 6: Reservas y Reportes" {
+    usecase "CU-13: Registrar Reserva" as UC13
+  }
+}
+
+' Relaciones del Actor Personal de Biblioteca
+Personal --> UC03
+Personal --> UC04
+Personal --> UC05
+Personal --> UC06
+Personal --> UC07
+Personal --> UC08
+Personal --> UC09
+Personal --> UC10
+Personal --> UC11
+Personal --> UC12
+Personal --> UC13
+
+' Relaciones del Actor Administrador
+Admin --> UC01
+Admin --> UC02
+Admin --> UC04
+
+@enduml

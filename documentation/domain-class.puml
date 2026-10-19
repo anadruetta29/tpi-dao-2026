@@ -1,0 +1,182 @@
+
+@startuml
+title Sistema de Prestamos Interbibliotecarios - Biblioteca
+
+skinparam classAttributeIconSize 0
+hide empty methods
+
+
+class Sede {
+    - nombre
+    - telefono
+    - email
+    - horarioAtencion
+}
+
+class Socio {
+    - nombre
+    - apellido
+    - documento
+    - email
+    - telefono
+}
+
+class Libro {
+    - titulo 
+    - añoPublicacion
+    - editorial
+    - edicion
+}
+
+class Autor {
+    - nombre
+    - apellido
+}
+
+class Ejemplar {
+    - codigo 
+}
+
+class SolicitudPrestamo {
+    - numero
+}
+
+class Prestamo {
+    - fechaInicio
+    - fechaVencimiento
+    - fechaDevolucion
+}
+
+class Reserva {
+    - fecha 
+}
+
+class Devolucion {
+    - fecha
+}
+
+class DetalleDevolucion {
+    - observaciones
+}
+
+class Envio {
+    - fechaDespacho
+    - fechaRecepcion
+}
+
+class Remito {
+    - numero 
+    - fechaEmision
+}
+
+class EnvioSeguimiento {
+    - fecha
+    - observacion
+}
+
+enum EstadoSede {
+    ACTIVA
+    BAJA
+}
+
+enum EstadoSocio {
+    HABILITADO
+    INHABILITADO
+}
+
+enum EstadoEjemplar {
+    DISPONIBLE
+    PRESTADO
+    RESERVADO
+    EN_TRANSITO
+    EN_REVISION
+    DANADO
+    EXTRAVIADO
+    DESTRUIDO
+}
+
+enum TipoPrestamo {
+    LOCAL
+    INTERBIBLIOTECARIO
+}
+
+enum EstadoSolicitud {
+    PENDIENTE
+    APROBADA
+    RECHAZADA
+    CANCELADA
+}
+
+enum EstadoPrestamo {
+    ACTIVO
+    DEVUELTO
+    VENCIDO
+}
+
+enum EstadoReserva {
+    ACTIVA
+    ATENDIDA
+    CANCELADA
+    VENCIDA
+}
+
+enum EstadoEnvio {
+    PENDIENTE
+    EMPACADO
+    DESPACHADO
+    EN_TRANSITO
+    RECIBIDO
+    CON_INCIDENCIA
+}
+
+enum EstadoRemito {
+    EMITIDO
+    DESPACHADO
+    RECIBIDO
+    CON_INCIDENCIA
+    CERRADO
+}
+
+' =========================
+' RELACIONES
+' =========================
+
+Socio --> "0..*" SolicitudPrestamo : solicitudes
+Socio --> "0..*" Reserva : reservas 
+Socio --> "1" EstadoSocio : estado
+
+SolicitudPrestamo --> "0, 1" Prestamo : prestamo 
+SolicitudPrestamo --> "1" EstadoSolicitud : estado
+SolicitudPrestamo --> "1" Sede : sedeOrigen
+SolicitudPrestamo --> "1" Sede : sedeDestino
+SolicitudPrestamo --> "0, 1" Envio : envio 
+SolicitudPrestamo --> "1" TipoPrestamo : tipoPrestamo
+
+Prestamo --> "0, 1" Devolucion : devolucion 
+Prestamo --> "1" EstadoPrestamo : estado
+Prestamo --> "1, *" Ejemplar : ejemplares
+
+Devolucion --> "1, *" DetalleDevolucion : detalles
+
+DetalleDevolucion --> "1" Ejemplar : ejemplar
+DetalleDevolucion --> "1" EstadoEjemplar : estadoDevuelto
+
+Sede --> "1" EstadoSede : estado
+Sede --> "0, *" Ejemplar : ejemplares 
+
+Reserva --> "1" EstadoReserva : estado
+Reserva --> "1" Libro : libro
+
+Libro --> "1, *" Autor : autor 
+
+Ejemplar --> "1" EstadoEjemplar : estado
+
+Envio --> "1, *" EnvioSeguimiento : seguimientos
+Envio --> "1" Remito : remito
+Envio --> "1" EstadoEnvio : estado
+
+EnvioSeguimiento --> "1" EstadoEnvio : estado
+
+Remito --> "1" EstadoRemito : estado
+
+@enduml
