@@ -65,6 +65,23 @@ enum EstadoEnvio {
     CON_INCIDENCIA
 }
 
+enum ModalidadPrestamoLocal {
+    DOMICILIO
+    SALA_LECTURA
+}
+
+enum MotivoMulta {
+    ENTREGA_TARDIA
+    EXTRAVIO
+    DESTRUCCION
+}
+
+enum EstadoMulta {
+    PENDIENTE
+    PAGADA
+    ANULADA
+}
+
 ' =========================
 ' CLASES
 ' =========================
@@ -119,12 +136,22 @@ class Prestamo {
     fechaVencimiento
     fechaDevolucion
     estado: EstadoPrestamo
+    modalidad: ModalidadPrestamoLocal
 }
 
 class Devolucion {
     fecha
     observaciones
     estadoDevuelto: EstadoEjemplar
+}
+
+' --- MULTAS --- '
+class Multa {
+    fechaEmision
+    motivo: MotivoMulta
+    monto
+    estado: EstadoMulta
+    fechaPago
 }
 
 ' --- CLASES DE LOGÍSTICA REESTRUCTURADAS ---
@@ -180,6 +207,12 @@ SolicitudPrestamo ..> TipoPrestamo
 Prestamo ..> EstadoPrestamo
 HistorialEstadoRemito ..> EstadoEnvio
 Devolucion ..> EstadoEjemplar
+
+' 7. Multas 
+Prestamo -- "0..1" Multa : genera
+Prestamo ..> ModalidadPrestamo
+Multa ..> MotivoMulta
+Multa ..> EstadoMulta
 
 ' =========================
 ' NOTAS
