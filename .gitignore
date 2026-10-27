@@ -1,0 +1,29 @@
+# Environment & Secrets
+.env
+*.env
+backend/.env
+
+# Python Virtual Environments
+.venv/
+backend/.venv/
+env/
+venv/
+ENV/
+
+# Python Cache & Bytecode
+__pycache__/
+*/__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDEs & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
