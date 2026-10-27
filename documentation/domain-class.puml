@@ -10,6 +10,12 @@ skinparam noteBorderColor #DarkGoldenRod
 ' ENUMS
 ' =========================
 
+enum Rol {
+    RECEPCIONISTA
+    MODERADOR
+    ADMIN
+}
+
 enum EstadoSocio {
     HABILITADO
     INHABILITADO
@@ -154,7 +160,7 @@ class Multa {
     fechaPago
 }
 
-' --- CLASES DE LOGÍSTICA REESTRUCTURADAS ---
+' --- CLASES DE LOGÍSTICA  ---
 
 class Remito {
     numero 
@@ -167,6 +173,16 @@ class HistorialEstadoRemito {
     fechaInicio
     fechaFin
     estado: EstadoEnvio
+}
+
+' --- CLASES DE USUARIO ---
+class Usuario {
+    nombre
+    apellido
+    email
+    password
+    activo
+    role: Role
 }
 
 ' =========================
@@ -213,6 +229,11 @@ Prestamo -- "0..1" Multa : genera
 Prestamo ..> ModalidadPrestamoLocal
 Multa ..> MotivoMulta
 Multa ..> EstadoMulta
+
+' 8. Usuarios
+Usuario --> "1" Rol : tiene
+Usuario --> "1" Sede : trabaja en
+
 
 ' =========================
 ' NOTAS
