@@ -1,0 +1,12 @@
+from enum import Enum
+
+
+class EstadoEjemplar(str, Enum):
+    DISPONIBLE = "DISPONIBLE"
+    PRESTADO = "PRESTADO"
+    RESERVADO = "RESERVADO"
+    EN_TRANSITO = "EN_TRANSITO"
+    EN_REVISION = "EN_REVISION"
+    DANADO = "DANADO"
+    EXTRAVIADO = "EXTRAVIADO"
+    DESTRUIDO = "DESTRUIDO"
