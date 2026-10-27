@@ -210,7 +210,7 @@ Devolucion ..> EstadoEjemplar
 
 ' 7. Multas 
 Prestamo -- "0..1" Multa : genera
-Prestamo ..> ModalidadPrestamo
+Prestamo ..> ModalidadPrestamoLocal
 Multa ..> MotivoMulta
 Multa ..> EstadoMulta
 
