@@ -1,0 +1,10 @@
+from enum import Enum
+
+
+class EstadoEnvio(str, Enum):
+    PENDIENTE = "PENDIENTE"
+    EMPACADO = "EMPACADO"
+    DESPACHADO = "DESPACHADO"
+    EN_TRANSITO = "EN_TRANSITO"
+    RECIBIDO = "RECIBIDO"
+    CON_INCIDENCIA = "CON_INCIDENCIA"
