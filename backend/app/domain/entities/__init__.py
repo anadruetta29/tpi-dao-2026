@@ -1,3 +1,4 @@
+from app.domain.entities.rol import Rol
 from app.domain.entities.estado_socio import EstadoSocio
 from app.domain.entities.estado_sede import EstadoSede
 from app.domain.entities.estado_ejemplar import EstadoEjemplar
@@ -10,6 +11,7 @@ from app.domain.entities.modalidad_prestamo_local import ModalidadPrestamoLocal
 from app.domain.entities.motivo_multa import MotivoMulta
 from app.domain.entities.estado_multa import EstadoMulta
 
+from app.domain.entities.usuario import Usuario
 from app.domain.entities.socio import Socio
 from app.domain.entities.sede import Sede
 from app.domain.entities.libro import Libro
@@ -25,6 +27,7 @@ from app.domain.entities.historial_estado_remito import HistorialEstadoRemito
 
 __all__ = [
     # Enums
+    "Rol",
     "EstadoSocio",
     "EstadoSede",
     "EstadoEjemplar",
@@ -37,6 +40,7 @@ __all__ = [
     "MotivoMulta",
     "EstadoMulta",
     # Entities
+    "Usuario",
     "Socio",
     "Sede",
     "Libro",

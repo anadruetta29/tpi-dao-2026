@@ -1,8 +1,11 @@
-from dataclasses import dataclass
 from typing import Optional
 
 
-@dataclass
 class Autor:
-    nombre: Optional[str] = None
-    apellido: Optional[str] = None
+    def __init__(
+        self,
+        nombre: Optional[str] = None,
+        apellido: Optional[str] = None,
+    ) -> None:
+        self.nombre = nombre
+        self.apellido = apellido

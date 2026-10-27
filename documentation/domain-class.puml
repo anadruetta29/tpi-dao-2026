@@ -232,7 +232,9 @@ Multa ..> EstadoMulta
 
 ' 8. Usuarios
 Usuario --> "1" Rol : tiene
-Usuario --> "1" Sede : trabaja en
+SolicitudPrestamo --> "1" Usuario : responsableOrigen
+SolicitudPrestamo --> "1" Usuario : responsableDestino
+Sede --> "1..*" Usuario : responsablesSede
 
 
 ' =========================
