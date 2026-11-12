@@ -6,6 +6,9 @@ export interface CacheConfig {
 export class CacheTags {
     public static readonly AUTH_ME = "auth:me";
     public static readonly USUARIOS = "usuarios";
+    public static usuarioDetail(id: string): string {
+        return `usuario:${id}`;
+    }
     public static readonly SOCIOS = "socios";
     public static readonly SEDES = "sedes";
     public static readonly LIBROS = "libros";
