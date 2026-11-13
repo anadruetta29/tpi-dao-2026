@@ -12,8 +12,17 @@ export class CacheTags {
     public static readonly SOCIOS = "socios";
     public static readonly SEDES = "sedes";
     public static readonly LIBROS = "libros";
+    public static libroDetail(id: string): string {
+        return `libro:${id}`;
+    }
+    public static libroDisponibilidad(id: string): string {
+        return `libro:${id}:disponibilidad`;
+    }
     public static readonly AUTORES = "autores";
     public static readonly EJEMPLARES = "ejemplares";
+    public static ejemplarDetail(id: string): string {
+        return `ejemplar:${id}`;
+    }
     public static readonly RESERVAS = "reservas";
     public static readonly SOLICITUDES_PRESTAMO = "solicitudes-prestamo";
     public static readonly PRESTAMOS = "prestamos";

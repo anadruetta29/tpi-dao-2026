@@ -10,5 +10,12 @@ export const ErrorMessages = {
     USUARIO_NOT_FOUND: "Usuario no encontrado.",
     USUARIO_CREATE_ERROR: "No se pudo registrar el usuario.",
     USUARIO_UPDATE_ERROR: "No se pudo actualizar el usuario.",
+    LIBRO_NOT_FOUND: "Libro no encontrado.",
+    LIBRO_CREATE_ERROR: "No se pudo registrar el libro.",
+    LIBRO_UPDATE_ERROR: "No se pudo actualizar el libro.",
+    LIBRO_DELETE_ERROR: "No se pudo eliminar el libro.",
+    EJEMPLAR_NOT_FOUND: "Ejemplar no encontrado.",
+    EJEMPLAR_CREATE_ERROR: "No se pudo registrar el ejemplar.",
+    AUTOR_CREATE_ERROR: "No se pudo registrar el autor.",
     UNEXPECTED_ERROR: "Ocurrió un error inesperado. Intentá nuevamente."
 } as const;
