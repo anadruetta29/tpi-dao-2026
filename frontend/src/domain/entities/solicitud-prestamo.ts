@@ -16,7 +16,13 @@ export class SolicitudPrestamo extends BaseEntity {
         public id: string,
         public numero: string = "",
         public tipo: TipoPrestamo = TipoPrestamo.LOCAL,
-        public estado: EstadoSolicitud = EstadoSolicitud.PENDIENTE
+        public estado: EstadoSolicitud = EstadoSolicitud.PENDIENTE,
+        public socioId: string = "",
+        public ejemplarId: string = "",
+        public sedeOrigenId: string = "",
+        public sedeDestinoId: string = "",
+        public responsableOrigenId: string = "",
+        public responsableDestinoId: string = ""
     ) {
         super();
         this.tipoName = this.tipo.name;
@@ -49,7 +55,13 @@ export class SolicitudPrestamo extends BaseEntity {
             obj.id !== undefined && obj.id !== null ? String(obj.id) : "",
             obj.numero || "",
             tipo,
-            estado
+            estado,
+            String(obj.socioId ?? obj.socio_id ?? ""),
+            String(obj.ejemplarId ?? obj.ejemplar_id ?? ""),
+            String(obj.sedeOrigenId ?? obj.sede_origen_id ?? ""),
+            String(obj.sedeDestinoId ?? obj.sede_destino_id ?? ""),
+            String(obj.responsableOrigenId ?? obj.responsable_origen_id ?? ""),
+            String(obj.responsableDestinoId ?? obj.responsable_destino_id ?? "")
         );
     }
 

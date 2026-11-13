@@ -18,7 +18,10 @@ export class Prestamo extends BaseEntity {
         public fechaVencimiento?: string | Date | null,
         public fechaDevolucion?: string | Date | null,
         public estado: EstadoPrestamo = EstadoPrestamo.ACTIVO,
-        public modalidad: ModalidadPrestamoLocal = ModalidadPrestamoLocal.DOMICILIO
+        public modalidad: ModalidadPrestamoLocal = ModalidadPrestamoLocal.DOMICILIO,
+        public solicitudId: string = "",
+        public sedeId: string = "",
+        public ejemplarId: string = ""
     ) {
         super();
         this.estadoName = this.estado.name;
@@ -53,7 +56,10 @@ export class Prestamo extends BaseEntity {
             obj.fechaVencimiento || null,
             obj.fechaDevolucion || null,
             estado,
-            modalidad
+            modalidad,
+            String(obj.solicitudId ?? obj.solicitud_id ?? ""),
+            String(obj.sedeId ?? obj.sede_id ?? ""),
+            String(obj.ejemplarId ?? obj.ejemplar_id ?? "")
         );
     }
 

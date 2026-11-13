@@ -18,7 +18,8 @@ export class Multa extends BaseEntity {
         public motivo: MotivoMulta = MotivoMulta.ENTREGA_TARDIA,
         public monto: number = 0,
         public estado: EstadoMulta = EstadoMulta.PENDIENTE,
-        public fechaPago?: string | Date | null
+        public fechaPago?: string | Date | null,
+        public prestamoId: string = ""
     ) {
         super();
         this.motivoName = this.motivo.name;
@@ -53,7 +54,8 @@ export class Multa extends BaseEntity {
             motivo,
             typeof obj.monto === "number" ? obj.monto : Number(obj.monto || 0),
             estado,
-            obj.fechaPago || null
+            obj.fechaPago || null,
+            String(obj.prestamoId ?? obj.prestamo_id ?? "")
         );
     }
 
