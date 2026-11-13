@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional
 from app.core.helper.auth_helper import AuthHelper
-from app.domain.entity.estado_socio import EstadoSocio
 from app.domain.entity.rol import Rol
 from app.domain.entity.socio import Socio
 from app.domain.error.error_handler import ErrorHandler
@@ -43,7 +42,7 @@ class DeleteSocioUseCase:
         if socio is None:
             raise ErrorHandler(ErrorType.SOCIO_NOT_FOUND)
 
-        socio.estado = EstadoSocio.INHABILITADO
+        socio.inhabilitar()
         updated = self.socio_repository.update(command.id, socio)
         if updated is None:
             raise ErrorHandler(ErrorType.SOCIO_NOT_FOUND)

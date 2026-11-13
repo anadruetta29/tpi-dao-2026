@@ -6,7 +6,6 @@ from app.application.strategy.calculo_multa.core.calculo_multa_strategy_factory 
 )
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.estado_multa import EstadoMulta
-from app.domain.entity.estado_socio import EstadoSocio
 from app.domain.entity.motivo_multa import MotivoMulta
 from app.domain.entity.multa import Multa
 from app.domain.entity.rol import Rol
@@ -68,9 +67,7 @@ class CreateMultaUseCase:
 
         monto = command.monto
         if monto is None:
-            dias_atraso = 1
-            if prestamo is not None and prestamo.fechaVencimiento is not None:
-                dias_atraso = max(1, (date.today() - prestamo.fechaVencimiento).days)
+            dias_atraso = max(1, prestamo.dias_de_atraso()) if prestamo is not None else 1
             monto = self.calculo_multa_factory.get_strategy(command.motivo).calcular_monto(
                 dias_atraso=dias_atraso
             )
@@ -85,7 +82,7 @@ class CreateMultaUseCase:
         )
         saved = self.multa_repository.save(multa)
 
-        socio.estado = EstadoSocio.INHABILITADO
+        socio.inhabilitar()
         self.socio_repository.update(socio.id, socio)
 
         return CreateMultaUseCase.Result(multa=saved)

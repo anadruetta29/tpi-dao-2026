@@ -56,6 +56,6 @@ class DevolucionDisponibleStrategy(DevolucionEjemplarStrategy):
                     )
                     reserva.ejemplar_id = ejemplar.id
                     reserva_repository.update(reserva.id, reserva)
-                    ejemplar.estado = EstadoEjemplar.RESERVADO
+                    ejemplar.reservar()
 
         ejemplar_repository.update(ejemplar.id, ejemplar)

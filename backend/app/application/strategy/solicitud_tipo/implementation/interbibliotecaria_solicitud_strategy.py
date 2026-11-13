@@ -3,7 +3,6 @@ from uuid import uuid4
 from app.application.strategy.solicitud_tipo.core.solicitud_tipo_strategy import (
     SolicitudTipoStrategy,
 )
-from app.domain.entity.estado_sede import EstadoSede
 from app.domain.entity.estado_solicitud import EstadoSolicitud
 from app.domain.entity.solicitud_prestamo import SolicitudPrestamo
 from app.domain.entity.tipo_prestamo import TipoPrestamo
@@ -31,8 +30,7 @@ class InterbibliotecariaSolicitudStrategy(SolicitudTipoStrategy):
             sede = sede_repository.get_by_id(sede_id)
             if sede is None:
                 raise ErrorHandler(ErrorType.SEDE_NOT_FOUND)
-            if sede.estado == EstadoSede.BAJA:
-                raise ErrorHandler(ErrorType.SEDE_INACTIVE)
+            sede.validar_activa()
 
         return sede_destino_id
 

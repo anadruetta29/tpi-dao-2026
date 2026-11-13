@@ -7,7 +7,6 @@ from app.application.strategy.solicitud_tipo.core.solicitud_tipo_strategy_factor
     SolicitudTipoStrategyFactory,
 )
 from app.core.helper.auth_helper import AuthHelper
-from app.domain.entity.estado_socio import EstadoSocio
 from app.domain.entity.rol import Rol
 from app.domain.entity.solicitud_prestamo import SolicitudPrestamo
 from app.domain.entity.tipo_prestamo import TipoPrestamo
@@ -64,8 +63,7 @@ class CreateSolicitudLocalUseCase:
         socio = self.socio_repository.get_by_id(command.socio_id)
         if socio is None:
             raise ErrorHandler(ErrorType.SOCIO_NOT_FOUND)
-        if socio.estado == EstadoSocio.INHABILITADO:
-            raise ErrorHandler(ErrorType.SOCIO_INHABILITADO)
+        socio.validar_habilitado()
 
         strategy = self.solicitud_tipo_factory.get_strategy(TipoPrestamo.LOCAL)
         sede_destino_id = strategy.validar_sedes(
@@ -76,8 +74,9 @@ class CreateSolicitudLocalUseCase:
         if ejemplar is None:
             raise ErrorHandler(ErrorType.EJEMPLAR_NOT_FOUND)
         self.ejemplar_state_factory.get_state(ejemplar.estado).validar_prestamo(ejemplar)
-        if ejemplar.sede_id != command.sede_origen_id:
-            raise ErrorHandler(ErrorType.BAD_REQUEST, "El ejemplar no pertenece a la sede indicada.")
+        ejemplar.validar_en_sede(
+            command.sede_origen_id, "El ejemplar no pertenece a la sede indicada."
+        )
 
         solicitud = strategy.construir_solicitud(
             socio_id=command.socio_id,

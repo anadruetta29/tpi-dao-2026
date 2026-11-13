@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional
 from app.core.helper.auth_helper import AuthHelper
-from app.domain.entity.estado_sede import EstadoSede
 from app.domain.entity.rol import Rol
 from app.domain.entity.sede import Sede
 from app.domain.error.error_handler import ErrorHandler
@@ -38,7 +37,7 @@ class DeleteSedeUseCase:
         if sede is None:
             raise ErrorHandler(ErrorType.SEDE_NOT_FOUND)
 
-        sede.estado = EstadoSede.BAJA
+        sede.dar_de_baja()
         updated = self.sede_repository.update(command.id, sede)
         if updated is None:
             raise ErrorHandler(ErrorType.SEDE_NOT_FOUND)

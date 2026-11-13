@@ -41,14 +41,12 @@ class UpdateSedeUseCase:
         if sede is None:
             raise ErrorHandler(ErrorType.SEDE_NOT_FOUND)
 
-        if command.nombre is not None:
-            sede.nombre = command.nombre
-        if command.telefono is not None:
-            sede.telefono = command.telefono
-        if command.email is not None:
-            sede.email = command.email
-        if command.horarioAtencion is not None:
-            sede.horarioAtencion = command.horarioAtencion
+        sede.actualizar_datos(
+            nombre=command.nombre,
+            telefono=command.telefono,
+            email=command.email,
+            horarioAtencion=command.horarioAtencion,
+        )
 
         updated = self.sede_repository.update(command.id, sede)
         if updated is None:

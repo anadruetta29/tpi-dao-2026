@@ -4,7 +4,6 @@ from app.application.strategy.multa_estado.core.multa_estado_state_factory impor
     MultaEstadoStateFactory,
 )
 from app.core.helper.auth_helper import AuthHelper
-from app.domain.entity.estado_socio import EstadoSocio
 from app.domain.entity.multa import Multa
 from app.domain.entity.rol import Rol
 from app.domain.error.error_handler import ErrorHandler
@@ -60,7 +59,7 @@ class AnularMultaUseCase:
         if updated.socio_id is not None and not self.multa_repository.has_pending_by_socio(updated.socio_id):
             socio = self.socio_repository.get_by_id(updated.socio_id)
             if socio is not None and socio.id is not None:
-                socio.estado = EstadoSocio.HABILITADO
+                socio.habilitar()
                 self.socio_repository.update(socio.id, socio)
 
         return AnularMultaUseCase.Result(multa=updated)

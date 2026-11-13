@@ -6,8 +6,6 @@ from app.application.strategy.ejemplar_estado.core.ejemplar_estado_state_factory
 )
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.estado_reserva import EstadoReserva
-from app.domain.entity.estado_sede import EstadoSede
-from app.domain.entity.estado_socio import EstadoSocio
 from app.domain.entity.reserva import Reserva
 from app.domain.entity.rol import Rol
 from app.domain.error.error_handler import ErrorHandler
@@ -66,8 +64,7 @@ class CreateReservaUseCase:
         socio = self.socio_repository.get_by_id(command.socio_id)
         if socio is None:
             raise ErrorHandler(ErrorType.SOCIO_NOT_FOUND)
-        if socio.estado == EstadoSocio.INHABILITADO:
-            raise ErrorHandler(ErrorType.SOCIO_INHABILITADO)
+        socio.validar_habilitado()
 
         if command.libro_id is not None and self.libro_repository.get_by_id(command.libro_id) is None:
             raise ErrorHandler(ErrorType.LIBRO_NOT_FOUND)
@@ -76,8 +73,7 @@ class CreateReservaUseCase:
             sede = self.sede_repository.get_by_id(command.sede_id)
             if sede is None:
                 raise ErrorHandler(ErrorType.SEDE_NOT_FOUND)
-            if sede.estado == EstadoSede.BAJA:
-                raise ErrorHandler(ErrorType.SEDE_INACTIVE)
+            sede.validar_activa()
 
         if command.ejemplar_id is not None:
             ejemplar = self.ejemplar_repository.get_by_id(command.ejemplar_id)

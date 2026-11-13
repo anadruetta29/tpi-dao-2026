@@ -22,3 +22,9 @@ class Remito:
         self.sede_origen_id = sede_origen_id
         self.sede_destino_id = sede_destino_id
         self.ejemplar_ids = ejemplar_ids if ejemplar_ids is not None else []
+
+    def registrar_despacho(self, fecha_despacho: Optional[date] = None) -> None:
+        self.fechaDespacho = fecha_despacho or date.today()
+
+    def registrar_recepcion(self, fecha_recepcion: Optional[date] = None) -> None:
+        self.fechaRecepcion = fecha_recepcion or date.today()

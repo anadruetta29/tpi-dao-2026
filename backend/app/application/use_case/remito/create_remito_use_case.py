@@ -7,7 +7,6 @@ from app.application.strategy.ejemplar_estado.core.ejemplar_estado_state_factory
 )
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.estado_envio import EstadoEnvio
-from app.domain.entity.estado_sede import EstadoSede
 from app.domain.entity.historial_estado_remito import HistorialEstadoRemito
 from app.domain.entity.remito import Remito
 from app.domain.entity.rol import Rol
@@ -67,14 +66,12 @@ class CreateRemitoUseCase:
         sede_origen = self.sede_repository.get_by_id(command.sede_origen_id)
         if sede_origen is None:
             raise ErrorHandler(ErrorType.SEDE_NOT_FOUND)
-        if sede_origen.estado == EstadoSede.BAJA:
-            raise ErrorHandler(ErrorType.SEDE_INACTIVE)
+        sede_origen.validar_activa()
 
         sede_destino = self.sede_repository.get_by_id(command.sede_destino_id)
         if sede_destino is None:
             raise ErrorHandler(ErrorType.SEDE_NOT_FOUND)
-        if sede_destino.estado == EstadoSede.BAJA:
-            raise ErrorHandler(ErrorType.SEDE_INACTIVE)
+        sede_destino.validar_activa()
 
         for ej_id in command.ejemplar_ids:
             ejemplar = self.ejemplar_repository.get_by_id(ej_id)

@@ -7,7 +7,6 @@ from app.application.strategy.devolucion_ejemplar.core.devolucion_ejemplar_strat
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.devolucion import Devolucion
 from app.domain.entity.estado_ejemplar import EstadoEjemplar
-from app.domain.entity.estado_prestamo import EstadoPrestamo
 from app.domain.entity.rol import Rol
 from app.domain.error.error_handler import ErrorHandler
 from app.domain.error.error_type import ErrorType
@@ -69,8 +68,7 @@ class CreateDevolucionUseCase:
         prestamo = self.prestamo_repository.get_by_id(command.prestamo_id)
         if prestamo is None:
             raise ErrorHandler(ErrorType.PRESTAMO_NOT_FOUND)
-        if prestamo.estado == EstadoPrestamo.DEVUELTO:
-            raise ErrorHandler(ErrorType.PRESTAMO_ALREADY_RETURNED)
+        prestamo.validar_no_devuelto()
 
         fecha_dev = command.fecha or date.today()
         estado_devuelto = command.estadoDevuelto or EstadoEjemplar.DISPONIBLE
@@ -92,8 +90,7 @@ class CreateDevolucionUseCase:
             socio_repository=self.socio_repository,
         )
 
-        prestamo.estado = EstadoPrestamo.DEVUELTO
-        prestamo.fechaDevolucion = fecha_dev
+        prestamo.marcar_devuelto(fecha_dev)
         self.prestamo_repository.update(prestamo.id, prestamo)
 
         devolucion = Devolucion(

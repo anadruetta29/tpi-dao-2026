@@ -1,6 +1,8 @@
 from typing import Optional
 from app.domain.entity.tipo_prestamo import TipoPrestamo
 from app.domain.entity.estado_solicitud import EstadoSolicitud
+from app.domain.error.error_handler import ErrorHandler
+from app.domain.error.error_type import ErrorType
 
 
 class SolicitudPrestamo:
@@ -27,3 +29,10 @@ class SolicitudPrestamo:
         self.sede_destino_id = sede_destino_id
         self.responsable_origen_id = responsable_origen_id
         self.responsable_destino_id = responsable_destino_id
+
+    def validar_aprobada(self) -> None:
+        if self.estado != EstadoSolicitud.APROBADA:
+            raise ErrorHandler(ErrorType.SOLICITUD_NOT_APPROVED)
+
+    def sede_efectiva(self) -> Optional[int]:
+        return self.sede_destino_id or self.sede_origen_id

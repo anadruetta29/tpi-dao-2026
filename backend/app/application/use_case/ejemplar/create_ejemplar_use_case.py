@@ -3,7 +3,6 @@ from typing import Optional
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.ejemplar import Ejemplar
 from app.domain.entity.estado_ejemplar import EstadoEjemplar
-from app.domain.entity.estado_sede import EstadoSede
 from app.domain.entity.rol import Rol
 from app.domain.error.error_handler import ErrorHandler
 from app.domain.error.error_type import ErrorType
@@ -57,8 +56,7 @@ class CreateEjemplarUseCase:
         sede = self.sede_repository.get_by_id(command.sede_id)
         if sede is None:
             raise ErrorHandler(ErrorType.SEDE_NOT_FOUND)
-        if sede.estado == EstadoSede.BAJA:
-            raise ErrorHandler(ErrorType.SEDE_INACTIVE)
+        sede.validar_activa()
 
         ejemplar = Ejemplar(
             codigo=command.codigo,

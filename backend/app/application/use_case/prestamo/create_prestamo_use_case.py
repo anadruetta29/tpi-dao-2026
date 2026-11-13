@@ -9,8 +9,6 @@ from app.application.strategy.vencimiento_prestamo.core.vencimiento_prestamo_str
 )
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.estado_prestamo import EstadoPrestamo
-from app.domain.entity.estado_socio import EstadoSocio
-from app.domain.entity.estado_solicitud import EstadoSolicitud
 from app.domain.entity.modalidad_prestamo_local import ModalidadPrestamoLocal
 from app.domain.entity.prestamo import Prestamo
 from app.domain.entity.rol import Rol
@@ -70,15 +68,13 @@ class CreatePrestamoUseCase:
         solicitud = self.solicitud_repository.get_by_id(command.solicitud_id)
         if solicitud is None:
             raise ErrorHandler(ErrorType.SOLICITUD_NOT_FOUND)
-        if solicitud.estado != EstadoSolicitud.APROBADA:
-            raise ErrorHandler(ErrorType.SOLICITUD_NOT_APPROVED)
+        solicitud.validar_aprobada()
 
         if solicitud.socio_id is not None:
             socio = self.socio_repository.get_by_id(solicitud.socio_id)
             if socio is None:
                 raise ErrorHandler(ErrorType.SOCIO_NOT_FOUND)
-            if socio.estado == EstadoSocio.INHABILITADO:
-                raise ErrorHandler(ErrorType.SOCIO_INHABILITADO)
+            socio.validar_habilitado()
 
         if solicitud.ejemplar_id is None:
             raise ErrorHandler(ErrorType.EJEMPLAR_NOT_FOUND)
@@ -105,7 +101,7 @@ class CreatePrestamoUseCase:
             modalidad=modalidad,
             solicitud_id=solicitud.id,
             socio_id=solicitud.socio_id,
-            sede_id=solicitud.sede_destino_id or solicitud.sede_origen_id,
+            sede_id=solicitud.sede_efectiva(),
             ejemplar_id=ejemplar.id,
         )
         saved = self.prestamo_repository.save(prestamo)

@@ -10,7 +10,7 @@ from app.domain.error.error_type import ErrorType
 
 class PendienteEnvioState(RemitoEstadoState):
     def despachar(self, remito: Remito, fecha_despacho: date) -> EstadoEnvio:
-        remito.fechaDespacho = fecha_despacho
+        remito.registrar_despacho(fecha_despacho)
         return EstadoEnvio.EN_TRANSITO
 
     def recibir(

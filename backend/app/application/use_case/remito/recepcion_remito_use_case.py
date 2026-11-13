@@ -5,7 +5,6 @@ from app.application.strategy.remito_estado.core.remito_estado_state_factory imp
     RemitoEstadoStateFactory,
 )
 from app.core.helper.auth_helper import AuthHelper
-from app.domain.entity.estado_ejemplar import EstadoEjemplar
 from app.domain.entity.estado_envio import EstadoEnvio
 from app.domain.entity.historial_estado_remito import HistorialEstadoRemito
 from app.domain.entity.remito import Remito
@@ -86,9 +85,7 @@ class RecepcionRemitoUseCase:
             for ej_id in updated_remito.ejemplar_ids:
                 ejemplar = self.ejemplar_repository.get_by_id(ej_id)
                 if ejemplar is not None and ejemplar.id is not None:
-                    ejemplar.estado = EstadoEjemplar.DISPONIBLE
-                    if updated_remito.sede_destino_id is not None:
-                        ejemplar.sede_id = updated_remito.sede_destino_id
+                    ejemplar.recibir_en_sede(updated_remito.sede_destino_id)
                     self.ejemplar_repository.update(ejemplar.id, ejemplar)
 
         return RecepcionRemitoUseCase.Result(remito=updated_remito)

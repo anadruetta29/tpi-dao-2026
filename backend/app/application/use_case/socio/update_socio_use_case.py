@@ -47,22 +47,22 @@ class UpdateSocioUseCase:
         if socio is None:
             raise ErrorHandler(ErrorType.SOCIO_NOT_FOUND)
 
-        if command.nombre is not None:
-            socio.nombre = command.nombre
-        if command.apellido is not None:
-            socio.apellido = command.apellido
         if command.documento is not None:
             existing_doc = self.socio_repository.get_by_documento(command.documento)
             if existing_doc is not None and existing_doc.id != command.id:
                 raise ErrorHandler(ErrorType.SOCIO_ALREADY_EXISTS)
-            socio.documento = command.documento
         if command.email is not None:
             existing_email = self.socio_repository.get_by_email(command.email)
             if existing_email is not None and existing_email.id != command.id:
                 raise ErrorHandler(ErrorType.SOCIO_ALREADY_EXISTS)
-            socio.email = command.email
-        if command.telefono is not None:
-            socio.telefono = command.telefono
+
+        socio.actualizar_datos(
+            nombre=command.nombre,
+            apellido=command.apellido,
+            documento=command.documento,
+            email=command.email,
+            telefono=command.telefono,
+        )
 
         updated = self.socio_repository.update(command.id, socio)
         if updated is None:

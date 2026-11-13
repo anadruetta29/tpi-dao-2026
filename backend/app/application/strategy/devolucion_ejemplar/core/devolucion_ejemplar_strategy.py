@@ -7,7 +7,6 @@ from app.application.strategy.calculo_multa.core.calculo_multa_strategy_factory 
 from app.domain.entity.ejemplar import Ejemplar
 from app.domain.entity.estado_ejemplar import EstadoEjemplar
 from app.domain.entity.estado_multa import EstadoMulta
-from app.domain.entity.estado_socio import EstadoSocio
 from app.domain.entity.motivo_multa import MotivoMulta
 from app.domain.entity.multa import Multa
 from app.domain.entity.prestamo import Prestamo
@@ -60,7 +59,7 @@ class DevolucionEjemplarStrategy(ABC):
         if socio_repository is not None:
             socio = socio_repository.get_by_id(socio_id)
             if socio is not None and socio.id is not None:
-                socio.estado = EstadoSocio.INHABILITADO
+                socio.inhabilitar()
                 socio_repository.update(socio.id, socio)
 
     @classmethod
@@ -71,11 +70,8 @@ class DevolucionEjemplarStrategy(ABC):
         multa_repository: Optional[MultaRepositoryI],
         socio_repository: Optional[SocioRepositoryI],
     ) -> None:
-        if (
-            prestamo.fechaVencimiento is not None
-            and fecha_devolucion > prestamo.fechaVencimiento
-        ):
-            dias_atraso = (fecha_devolucion - prestamo.fechaVencimiento).days
+        if prestamo.esta_vencido(fecha_devolucion):
+            dias_atraso = prestamo.dias_de_atraso(fecha_devolucion)
             cls._generar_multa(
                 socio_id=prestamo.socio_id,
                 prestamo_id=prestamo.id,
