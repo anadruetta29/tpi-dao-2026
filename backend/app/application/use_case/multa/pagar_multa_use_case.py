@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from datetime import date
 from typing import Optional
+from app.application.strategy.multa_estado.core.multa_estado_state_factory import (
+    MultaEstadoStateFactory,
+)
 from app.core.helper.auth_helper import AuthHelper
-from app.domain.entity.estado_multa import EstadoMulta
 from app.domain.entity.estado_socio import EstadoSocio
 from app.domain.entity.multa import Multa
 from app.domain.entity.rol import Rol
@@ -19,10 +21,12 @@ class PagarMultaUseCase:
         multa_repository: MultaRepositoryI,
         socio_repository: SocioRepositoryI,
         usuario_repository: UsuarioRepositoryI,
+        multa_state_factory: Optional[MultaEstadoStateFactory] = None,
     ) -> None:
         self.multa_repository = multa_repository
         self.socio_repository = socio_repository
         self.usuario_repository = usuario_repository
+        self.multa_state_factory = multa_state_factory or MultaEstadoStateFactory()
 
     @dataclass(frozen=True)
     class Command:
@@ -48,11 +52,9 @@ class PagarMultaUseCase:
         multa = self.multa_repository.get_by_id(command.id)
         if multa is None:
             raise ErrorHandler(ErrorType.MULTA_NOT_FOUND)
-        if multa.estado != EstadoMulta.PENDIENTE:
-            raise ErrorHandler(ErrorType.MULTA_ALREADY_CLOSED)
 
-        multa.estado = EstadoMulta.PAGADA
-        multa.fechaPago = command.fechaPago or date.today()
+        state = self.multa_state_factory.get_state(multa.estado)
+        state.pagar(multa, command.fechaPago or date.today())
         updated = self.multa_repository.update(command.id, multa)
         if updated is None:
             raise ErrorHandler(ErrorType.MULTA_NOT_FOUND)

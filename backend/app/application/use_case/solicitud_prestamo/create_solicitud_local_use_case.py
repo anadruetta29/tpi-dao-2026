@@ -1,11 +1,13 @@
 from dataclasses import dataclass
 from typing import Optional
-from uuid import uuid4
+from app.application.strategy.ejemplar_estado.core.ejemplar_estado_state_factory import (
+    EjemplarEstadoStateFactory,
+)
+from app.application.strategy.solicitud_tipo.core.solicitud_tipo_strategy_factory import (
+    SolicitudTipoStrategyFactory,
+)
 from app.core.helper.auth_helper import AuthHelper
-from app.domain.entity.estado_ejemplar import EstadoEjemplar
-from app.domain.entity.estado_sede import EstadoSede
 from app.domain.entity.estado_socio import EstadoSocio
-from app.domain.entity.estado_solicitud import EstadoSolicitud
 from app.domain.entity.rol import Rol
 from app.domain.entity.solicitud_prestamo import SolicitudPrestamo
 from app.domain.entity.tipo_prestamo import TipoPrestamo
@@ -26,12 +28,16 @@ class CreateSolicitudLocalUseCase:
         ejemplar_repository: EjemplarRepositoryI,
         sede_repository: SedeRepositoryI,
         usuario_repository: UsuarioRepositoryI,
+        solicitud_tipo_factory: Optional[SolicitudTipoStrategyFactory] = None,
+        ejemplar_state_factory: Optional[EjemplarEstadoStateFactory] = None,
     ) -> None:
         self.solicitud_repository = solicitud_repository
         self.socio_repository = socio_repository
         self.ejemplar_repository = ejemplar_repository
         self.sede_repository = sede_repository
         self.usuario_repository = usuario_repository
+        self.solicitud_tipo_factory = solicitud_tipo_factory or SolicitudTipoStrategyFactory()
+        self.ejemplar_state_factory = ejemplar_state_factory or EjemplarEstadoStateFactory()
 
     @dataclass(frozen=True)
     class Command:
@@ -61,28 +67,23 @@ class CreateSolicitudLocalUseCase:
         if socio.estado == EstadoSocio.INHABILITADO:
             raise ErrorHandler(ErrorType.SOCIO_INHABILITADO)
 
-        sede = self.sede_repository.get_by_id(command.sede_origen_id)
-        if sede is None:
-            raise ErrorHandler(ErrorType.SEDE_NOT_FOUND)
-        if sede.estado == EstadoSede.BAJA:
-            raise ErrorHandler(ErrorType.SEDE_INACTIVE)
+        strategy = self.solicitud_tipo_factory.get_strategy(TipoPrestamo.LOCAL)
+        sede_destino_id = strategy.validar_sedes(
+            command.sede_origen_id, command.sede_origen_id, self.sede_repository
+        )
 
         ejemplar = self.ejemplar_repository.get_by_id(command.ejemplar_id)
         if ejemplar is None:
             raise ErrorHandler(ErrorType.EJEMPLAR_NOT_FOUND)
-        if ejemplar.estado != EstadoEjemplar.DISPONIBLE:
-            raise ErrorHandler(ErrorType.EJEMPLAR_NOT_AVAILABLE)
+        self.ejemplar_state_factory.get_state(ejemplar.estado).validar_prestamo(ejemplar)
         if ejemplar.sede_id != command.sede_origen_id:
             raise ErrorHandler(ErrorType.BAD_REQUEST, "El ejemplar no pertenece a la sede indicada.")
 
-        solicitud = SolicitudPrestamo(
-            numero=f"SOL-{uuid4().hex[:8].upper()}",
-            tipo=TipoPrestamo.LOCAL,
-            estado=EstadoSolicitud.PENDIENTE,
+        solicitud = strategy.construir_solicitud(
             socio_id=command.socio_id,
             ejemplar_id=command.ejemplar_id,
             sede_origen_id=command.sede_origen_id,
-            sede_destino_id=command.sede_origen_id,
+            sede_destino_id=sede_destino_id,
             responsable_origen_id=user.id,
         )
         saved = self.solicitud_repository.save(solicitud)

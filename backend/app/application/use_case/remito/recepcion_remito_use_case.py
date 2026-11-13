@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from datetime import date
 from typing import Optional
+from app.application.strategy.remito_estado.core.remito_estado_state_factory import (
+    RemitoEstadoStateFactory,
+)
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.estado_ejemplar import EstadoEjemplar
 from app.domain.entity.estado_envio import EstadoEnvio
@@ -22,11 +25,13 @@ class RecepcionRemitoUseCase:
         historial_repository: HistorialEstadoRemitoRepositoryI,
         ejemplar_repository: EjemplarRepositoryI,
         usuario_repository: UsuarioRepositoryI,
+        remito_state_factory: Optional[RemitoEstadoStateFactory] = None,
     ) -> None:
         self.remito_repository = remito_repository
         self.historial_repository = historial_repository
         self.ejemplar_repository = ejemplar_repository
         self.usuario_repository = usuario_repository
+        self.remito_state_factory = remito_state_factory or RemitoEstadoStateFactory()
 
     @dataclass(frozen=True)
     class Command:
@@ -55,19 +60,19 @@ class RecepcionRemitoUseCase:
             raise ErrorHandler(ErrorType.REMITO_NOT_FOUND)
 
         fecha_recepcion = command.fechaRecepcion or date.today()
-        remito.fechaRecepcion = fecha_recepcion
+        latest = self.historial_repository.get_latest_by_remito_id(command.id)
+        estado_actual = latest.estado if latest is not None else EstadoEnvio.PENDIENTE
+        state = self.remito_state_factory.get_state(estado_actual)
+        nuevo_estado = state.recibir(remito, fecha_recepcion, command.con_incidencia)
+
         updated_remito = self.remito_repository.update(command.id, remito)
         if updated_remito is None:
             raise ErrorHandler(ErrorType.REMITO_NOT_FOUND)
 
-        latest = self.historial_repository.get_latest_by_remito_id(command.id)
         if latest is not None and latest.id is not None and latest.fechaFin is None:
             latest.fechaFin = fecha_recepcion
             self.historial_repository.update(latest.id, latest)
 
-        nuevo_estado = (
-            EstadoEnvio.CON_INCIDENCIA if command.con_incidencia else EstadoEnvio.RECIBIDO
-        )
         self.historial_repository.save(
             HistorialEstadoRemito(
                 fechaInicio=fecha_recepcion,

@@ -1,8 +1,13 @@
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date
 from typing import Optional
+from app.application.strategy.ejemplar_estado.core.ejemplar_estado_state_factory import (
+    EjemplarEstadoStateFactory,
+)
+from app.application.strategy.vencimiento_prestamo.core.vencimiento_prestamo_strategy_factory import (
+    VencimientoPrestamoStrategyFactory,
+)
 from app.core.helper.auth_helper import AuthHelper
-from app.domain.entity.estado_ejemplar import EstadoEjemplar
 from app.domain.entity.estado_prestamo import EstadoPrestamo
 from app.domain.entity.estado_socio import EstadoSocio
 from app.domain.entity.estado_solicitud import EstadoSolicitud
@@ -26,12 +31,18 @@ class CreatePrestamoUseCase:
         socio_repository: SocioRepositoryI,
         ejemplar_repository: EjemplarRepositoryI,
         usuario_repository: UsuarioRepositoryI,
+        ejemplar_state_factory: Optional[EjemplarEstadoStateFactory] = None,
+        vencimiento_strategy_factory: Optional[VencimientoPrestamoStrategyFactory] = None,
     ) -> None:
         self.prestamo_repository = prestamo_repository
         self.solicitud_repository = solicitud_repository
         self.socio_repository = socio_repository
         self.ejemplar_repository = ejemplar_repository
         self.usuario_repository = usuario_repository
+        self.ejemplar_state_factory = ejemplar_state_factory or EjemplarEstadoStateFactory()
+        self.vencimiento_strategy_factory = (
+            vencimiento_strategy_factory or VencimientoPrestamoStrategyFactory()
+        )
 
     @dataclass(frozen=True)
     class Command:
@@ -75,14 +86,16 @@ class CreatePrestamoUseCase:
         ejemplar = self.ejemplar_repository.get_by_id(solicitud.ejemplar_id)
         if ejemplar is None:
             raise ErrorHandler(ErrorType.EJEMPLAR_NOT_FOUND)
-        if ejemplar.estado != EstadoEjemplar.DISPONIBLE:
-            raise ErrorHandler(ErrorType.EJEMPLAR_NOT_AVAILABLE)
+        self.ejemplar_state_factory.get_state(ejemplar.estado).prestar(ejemplar)
 
         fecha_inicio = command.fechaInicio or date.today()
-        fecha_vencimiento = command.fechaVencimiento or (fecha_inicio + timedelta(days=14))
         modalidad = command.modalidad or ModalidadPrestamoLocal.DOMICILIO
+        fecha_vencimiento = command.fechaVencimiento or (
+            self.vencimiento_strategy_factory.get_strategy(modalidad).calcular_vencimiento(
+                fecha_inicio
+            )
+        )
 
-        ejemplar.estado = EstadoEjemplar.PRESTADO
         self.ejemplar_repository.update(ejemplar.id, ejemplar)
 
         prestamo = Prestamo(

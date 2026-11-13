@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from datetime import date
 from typing import Optional
+from app.application.strategy.devolucion_ejemplar.core.devolucion_ejemplar_strategy_factory import (
+    DevolucionEjemplarStrategyFactory,
+)
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.devolucion import Devolucion
 from app.domain.entity.estado_ejemplar import EstadoEjemplar
@@ -10,7 +13,10 @@ from app.domain.error.error_handler import ErrorHandler
 from app.domain.error.error_type import ErrorType
 from app.domain.repository.devolucion_repository_i import DevolucionRepositoryI
 from app.domain.repository.ejemplar_repository_i import EjemplarRepositoryI
+from app.domain.repository.multa_repository_i import MultaRepositoryI
 from app.domain.repository.prestamo_repository_i import PrestamoRepositoryI
+from app.domain.repository.reserva_repository_i import ReservaRepositoryI
+from app.domain.repository.socio_repository_i import SocioRepositoryI
 from app.domain.repository.usuario_repository_i import UsuarioRepositoryI
 
 
@@ -21,11 +27,21 @@ class CreateDevolucionUseCase:
         prestamo_repository: PrestamoRepositoryI,
         ejemplar_repository: EjemplarRepositoryI,
         usuario_repository: UsuarioRepositoryI,
+        reserva_repository: Optional[ReservaRepositoryI] = None,
+        multa_repository: Optional[MultaRepositoryI] = None,
+        socio_repository: Optional[SocioRepositoryI] = None,
+        devolucion_strategy_factory: Optional[DevolucionEjemplarStrategyFactory] = None,
     ) -> None:
         self.devolucion_repository = devolucion_repository
         self.prestamo_repository = prestamo_repository
         self.ejemplar_repository = ejemplar_repository
         self.usuario_repository = usuario_repository
+        self.reserva_repository = reserva_repository
+        self.multa_repository = multa_repository
+        self.socio_repository = socio_repository
+        self.devolucion_strategy_factory = (
+            devolucion_strategy_factory or DevolucionEjemplarStrategyFactory()
+        )
 
     @dataclass(frozen=True)
     class Command:
@@ -59,15 +75,26 @@ class CreateDevolucionUseCase:
         fecha_dev = command.fecha or date.today()
         estado_devuelto = command.estadoDevuelto or EstadoEjemplar.DISPONIBLE
 
+        ejemplar = (
+            self.ejemplar_repository.get_by_id(prestamo.ejemplar_id)
+            if prestamo.ejemplar_id is not None
+            else None
+        )
+        strategy = self.devolucion_strategy_factory.get_strategy(estado_devuelto)
+        strategy.procesar_devolucion(
+            prestamo=prestamo,
+            ejemplar=ejemplar,
+            fecha_devolucion=fecha_dev,
+            estado_devuelto=estado_devuelto,
+            ejemplar_repository=self.ejemplar_repository,
+            reserva_repository=self.reserva_repository,
+            multa_repository=self.multa_repository,
+            socio_repository=self.socio_repository,
+        )
+
         prestamo.estado = EstadoPrestamo.DEVUELTO
         prestamo.fechaDevolucion = fecha_dev
         self.prestamo_repository.update(prestamo.id, prestamo)
-
-        if prestamo.ejemplar_id is not None:
-            ejemplar = self.ejemplar_repository.get_by_id(prestamo.ejemplar_id)
-            if ejemplar is not None and ejemplar.id is not None:
-                ejemplar.estado = estado_devuelto
-                self.ejemplar_repository.update(ejemplar.id, ejemplar)
 
         devolucion = Devolucion(
             fecha=fecha_dev,

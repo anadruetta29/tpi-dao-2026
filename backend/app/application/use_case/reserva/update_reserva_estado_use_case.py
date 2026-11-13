@@ -1,5 +1,8 @@
 from dataclasses import dataclass
 from typing import Optional
+from app.application.strategy.reserva_estado.core.reserva_estado_state_factory import (
+    ReservaEstadoStateFactory,
+)
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.estado_reserva import EstadoReserva
 from app.domain.entity.reserva import Reserva
@@ -15,9 +18,11 @@ class UpdateReservaEstadoUseCase:
         self,
         reserva_repository: ReservaRepositoryI,
         usuario_repository: UsuarioRepositoryI,
+        reserva_state_factory: Optional[ReservaEstadoStateFactory] = None,
     ) -> None:
         self.reserva_repository = reserva_repository
         self.usuario_repository = usuario_repository
+        self.reserva_state_factory = reserva_state_factory or ReservaEstadoStateFactory()
 
     @dataclass(frozen=True)
     class Command:
@@ -44,7 +49,8 @@ class UpdateReservaEstadoUseCase:
         if reserva is None:
             raise ErrorHandler(ErrorType.RESERVA_NOT_FOUND)
 
-        reserva.estado = command.estado
+        state = self.reserva_state_factory.get_state(reserva.estado)
+        state.transicionar(reserva, command.estado)
         updated = self.reserva_repository.update(command.id, reserva)
         if updated is None:
             raise ErrorHandler(ErrorType.RESERVA_NOT_FOUND)

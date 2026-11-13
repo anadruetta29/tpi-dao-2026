@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from datetime import date
 from typing import Optional
+from app.application.strategy.ejemplar_estado.core.ejemplar_estado_state_factory import (
+    EjemplarEstadoStateFactory,
+)
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.estado_reserva import EstadoReserva
 from app.domain.entity.estado_sede import EstadoSede
@@ -26,6 +29,7 @@ class CreateReservaUseCase:
         sede_repository: SedeRepositoryI,
         ejemplar_repository: EjemplarRepositoryI,
         usuario_repository: UsuarioRepositoryI,
+        ejemplar_state_factory: Optional[EjemplarEstadoStateFactory] = None,
     ) -> None:
         self.reserva_repository = reserva_repository
         self.socio_repository = socio_repository
@@ -33,6 +37,7 @@ class CreateReservaUseCase:
         self.sede_repository = sede_repository
         self.ejemplar_repository = ejemplar_repository
         self.usuario_repository = usuario_repository
+        self.ejemplar_state_factory = ejemplar_state_factory or EjemplarEstadoStateFactory()
 
     @dataclass(frozen=True)
     class Command:
@@ -75,8 +80,12 @@ class CreateReservaUseCase:
                 raise ErrorHandler(ErrorType.SEDE_INACTIVE)
 
         if command.ejemplar_id is not None:
-            if self.ejemplar_repository.get_by_id(command.ejemplar_id) is None:
+            ejemplar = self.ejemplar_repository.get_by_id(command.ejemplar_id)
+            if ejemplar is None:
                 raise ErrorHandler(ErrorType.EJEMPLAR_NOT_FOUND)
+            self.ejemplar_state_factory.get_state(ejemplar.estado).validar_reserva(
+                ejemplar
+            )
 
         reserva = Reserva(
             fecha=command.fecha or date.today(),
