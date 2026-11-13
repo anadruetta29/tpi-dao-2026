@@ -10,5 +10,21 @@ export const SuccessMessages = {
     LIBRO_UPDATED: "Libro actualizado correctamente.",
     LIBRO_DELETED: "Libro eliminado correctamente.",
     EJEMPLAR_CREATED: "Ejemplar registrado correctamente.",
-    AUTOR_CREATED: "Autor registrado correctamente."
+    AUTOR_CREATED: "Autor registrado correctamente.",
+    CREATE_SOCIO_SUCCESS: "Socio registrado correctamente.",
+    UPDATE_SOCIO_SUCCESS: "Socio modificado correctamente.",
+    DELETE_SOCIO_SUCCESS: "Socio dado de baja correctamente.",
+    CREATE_SOLICITUD_LOCAL_SUCCESS: "Solicitud local registrada correctamente.",
+    CREATE_SOLICITUD_INTERBIBLIOTECARIA_SUCCESS: "Solicitud interbibliotecaria registrada correctamente.",
+    UPDATE_SOLICITUD_ESTADO_SUCCESS: "Estado de la solicitud actualizado correctamente.",
+    CREATE_RESERVA_SUCCESS: "Reserva registrada correctamente.",
+    UPDATE_RESERVA_ESTADO_SUCCESS: "Estado de la reserva actualizado correctamente.",
+    CREATE_DEVOLUCION_SUCCESS: "Devolución registrada correctamente.",
+    PRESTAMO_CREATED: "Préstamo efectivizado correctamente.",
+    REMITO_CREATED: "Remito emitido correctamente.",
+    REMITO_DESPACHADO: "Despacho registrado correctamente.",
+    REMITO_RECIBIDO: "Recepción registrada correctamente.",
+    MULTA_CREATED: "Multa registrada correctamente.",
+    MULTA_PAGADA: "Pago de multa registrado correctamente.",
+    MULTA_ANULADA: "Multa anulada correctamente."
 } as const;

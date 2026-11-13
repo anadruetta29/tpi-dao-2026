@@ -1,5 +1,11 @@
 # React + TypeScript + Vite
 
+## Conexión a la API
+
+Con `npm run dev`, el frontend usa `/api`. Vite reenvía esas solicitudes a `http://localhost:8000` y quita el prefijo `/api`.
+
+El build usa `http://localhost:8000` por defecto. Para usar el proxy con `npm run preview`, definí `VITE_API_URL=/api` al compilar. Si servís ese build fuera de Vite, configurá el mismo reenvío en el servidor que hospeda el frontend. Una URL de otro origen requiere que la API permita ese origen.
+
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
 Currently, two official plugins are available:

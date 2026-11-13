@@ -13,7 +13,8 @@ export class Devolucion extends BaseEntity {
         public id: string,
         public fecha?: string | Date | null,
         public observaciones?: string | null,
-        public estadoDevuelto: EstadoEjemplar = EstadoEjemplar.DISPONIBLE
+        public estadoDevuelto: EstadoEjemplar = EstadoEjemplar.DISPONIBLE,
+        public prestamoId: string = ""
     ) {
         super();
         this.estadoDevueltoName = this.estadoDevuelto.name;
@@ -40,7 +41,8 @@ export class Devolucion extends BaseEntity {
             obj.id !== undefined && obj.id !== null ? String(obj.id) : "",
             obj.fecha || null,
             obj.observaciones || null,
-            estadoDevuelto
+            estadoDevuelto,
+            String(obj.prestamoId ?? obj.prestamo_id ?? "")
         );
     }
 

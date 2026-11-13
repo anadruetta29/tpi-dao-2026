@@ -12,7 +12,11 @@ export class Reserva extends BaseEntity {
     constructor(
         public id: string,
         public fecha?: string | Date | null,
-        public estado: EstadoReserva = EstadoReserva.ACTIVA
+        public estado: EstadoReserva = EstadoReserva.ACTIVA,
+        public socioId: string = "",
+        public libroId: string = "",
+        public sedeId: string = "",
+        public ejemplarId: string = ""
     ) {
         super();
         this.estadoName = this.estado.name;
@@ -38,7 +42,11 @@ export class Reserva extends BaseEntity {
         return new Reserva(
             obj.id !== undefined && obj.id !== null ? String(obj.id) : "",
             obj.fecha || null,
-            estado
+            estado,
+            String(obj.socioId ?? obj.socio_id ?? ""),
+            String(obj.libroId ?? obj.libro_id ?? ""),
+            String(obj.sedeId ?? obj.sede_id ?? ""),
+            String(obj.ejemplarId ?? obj.ejemplar_id ?? "")
         );
     }
 
