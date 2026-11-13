@@ -2,6 +2,9 @@ from dataclasses import dataclass
 from datetime import date
 from typing import List, Optional
 from uuid import uuid4
+from app.application.strategy.ejemplar_estado.core.ejemplar_estado_state_factory import (
+    EjemplarEstadoStateFactory,
+)
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.estado_envio import EstadoEnvio
 from app.domain.entity.estado_sede import EstadoSede
@@ -25,12 +28,14 @@ class CreateRemitoUseCase:
         sede_repository: SedeRepositoryI,
         ejemplar_repository: EjemplarRepositoryI,
         usuario_repository: UsuarioRepositoryI,
+        ejemplar_state_factory: Optional[EjemplarEstadoStateFactory] = None,
     ) -> None:
         self.remito_repository = remito_repository
         self.historial_repository = historial_repository
         self.sede_repository = sede_repository
         self.ejemplar_repository = ejemplar_repository
         self.usuario_repository = usuario_repository
+        self.ejemplar_state_factory = ejemplar_state_factory or EjemplarEstadoStateFactory()
 
     @dataclass(frozen=True)
     class Command:
@@ -72,8 +77,10 @@ class CreateRemitoUseCase:
             raise ErrorHandler(ErrorType.SEDE_INACTIVE)
 
         for ej_id in command.ejemplar_ids:
-            if self.ejemplar_repository.get_by_id(ej_id) is None:
+            ejemplar = self.ejemplar_repository.get_by_id(ej_id)
+            if ejemplar is None:
                 raise ErrorHandler(ErrorType.EJEMPLAR_NOT_FOUND)
+            self.ejemplar_state_factory.get_state(ejemplar.estado).validar_envio(ejemplar)
 
         fecha_emision = command.fechaEmision or date.today()
         remito = Remito(

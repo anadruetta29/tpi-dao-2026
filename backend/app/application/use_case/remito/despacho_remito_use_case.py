@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from datetime import date
 from typing import Optional
+from app.application.strategy.remito_estado.core.remito_estado_state_factory import (
+    RemitoEstadoStateFactory,
+)
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.estado_ejemplar import EstadoEjemplar
 from app.domain.entity.estado_envio import EstadoEnvio
@@ -22,11 +25,13 @@ class DespachoRemitoUseCase:
         historial_repository: HistorialEstadoRemitoRepositoryI,
         ejemplar_repository: EjemplarRepositoryI,
         usuario_repository: UsuarioRepositoryI,
+        remito_state_factory: Optional[RemitoEstadoStateFactory] = None,
     ) -> None:
         self.remito_repository = remito_repository
         self.historial_repository = historial_repository
         self.ejemplar_repository = ejemplar_repository
         self.usuario_repository = usuario_repository
+        self.remito_state_factory = remito_state_factory or RemitoEstadoStateFactory()
 
     @dataclass(frozen=True)
     class Command:
@@ -54,12 +59,15 @@ class DespachoRemitoUseCase:
             raise ErrorHandler(ErrorType.REMITO_NOT_FOUND)
 
         fecha_despacho = command.fechaDespacho or date.today()
-        remito.fechaDespacho = fecha_despacho
+        latest = self.historial_repository.get_latest_by_remito_id(command.id)
+        estado_actual = latest.estado if latest is not None else EstadoEnvio.PENDIENTE
+        state = self.remito_state_factory.get_state(estado_actual)
+        nuevo_estado = state.despachar(remito, fecha_despacho)
+
         updated_remito = self.remito_repository.update(command.id, remito)
         if updated_remito is None:
             raise ErrorHandler(ErrorType.REMITO_NOT_FOUND)
 
-        latest = self.historial_repository.get_latest_by_remito_id(command.id)
         if latest is not None and latest.id is not None and latest.fechaFin is None:
             latest.fechaFin = fecha_despacho
             self.historial_repository.update(latest.id, latest)
@@ -68,7 +76,7 @@ class DespachoRemitoUseCase:
             HistorialEstadoRemito(
                 fechaInicio=fecha_despacho,
                 fechaFin=None,
-                estado=EstadoEnvio.EN_TRANSITO,
+                estado=nuevo_estado,
                 remito_id=command.id,
             )
         )

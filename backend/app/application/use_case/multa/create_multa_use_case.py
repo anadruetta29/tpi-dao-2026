@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from datetime import date
 from typing import Optional
+from app.application.strategy.calculo_multa.core.calculo_multa_strategy_factory import (
+    CalculoMultaStrategyFactory,
+)
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.estado_multa import EstadoMulta
 from app.domain.entity.estado_socio import EstadoSocio
@@ -22,11 +25,13 @@ class CreateMultaUseCase:
         socio_repository: SocioRepositoryI,
         prestamo_repository: PrestamoRepositoryI,
         usuario_repository: UsuarioRepositoryI,
+        calculo_multa_factory: Optional[CalculoMultaStrategyFactory] = None,
     ) -> None:
         self.multa_repository = multa_repository
         self.socio_repository = socio_repository
         self.prestamo_repository = prestamo_repository
         self.usuario_repository = usuario_repository
+        self.calculo_multa_factory = calculo_multa_factory or CalculoMultaStrategyFactory()
 
     @dataclass(frozen=True)
     class Command:
@@ -48,25 +53,32 @@ class CreateMultaUseCase:
             Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
-        if (
-            command.socio_id is None
-            or command.motivo is None
-            or command.monto is None
-        ):
+        if command.socio_id is None or command.motivo is None:
             raise ErrorHandler(ErrorType.MISSING_REQUIRED_FIELDS)
 
         socio = self.socio_repository.get_by_id(command.socio_id)
         if socio is None:
             raise ErrorHandler(ErrorType.SOCIO_NOT_FOUND)
 
+        prestamo = None
         if command.prestamo_id is not None:
-            if self.prestamo_repository.get_by_id(command.prestamo_id) is None:
+            prestamo = self.prestamo_repository.get_by_id(command.prestamo_id)
+            if prestamo is None:
                 raise ErrorHandler(ErrorType.PRESTAMO_NOT_FOUND)
+
+        monto = command.monto
+        if monto is None:
+            dias_atraso = 1
+            if prestamo is not None and prestamo.fechaVencimiento is not None:
+                dias_atraso = max(1, (date.today() - prestamo.fechaVencimiento).days)
+            monto = self.calculo_multa_factory.get_strategy(command.motivo).calcular_monto(
+                dias_atraso=dias_atraso
+            )
 
         multa = Multa(
             fechaEmision=date.today(),
             motivo=command.motivo,
-            monto=command.monto,
+            monto=monto,
             estado=EstadoMulta.PENDIENTE,
             socio_id=command.socio_id,
             prestamo_id=command.prestamo_id,
