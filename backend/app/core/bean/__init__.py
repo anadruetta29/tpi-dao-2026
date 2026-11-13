@@ -1,0 +1,31 @@
+from app.core.bean.dependencies import (
+    get_auth_service,
+    get_autor_service,
+    get_devolucion_service,
+    get_ejemplar_service,
+    get_libro_service,
+    get_multa_service,
+    get_prestamo_service,
+    get_remito_service,
+    get_reserva_service,
+    get_sede_service,
+    get_socio_service,
+    get_solicitud_prestamo_service,
+    get_usuario_service,
+)
+
+__all__ = [
+    "get_auth_service",
+    "get_sede_service",
+    "get_usuario_service",
+    "get_socio_service",
+    "get_autor_service",
+    "get_libro_service",
+    "get_ejemplar_service",
+    "get_solicitud_prestamo_service",
+    "get_prestamo_service",
+    "get_reserva_service",
+    "get_remito_service",
+    "get_devolucion_service",
+    "get_multa_service",
+]
