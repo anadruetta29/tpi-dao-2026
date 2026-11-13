@@ -1,0 +1,45 @@
+from dataclasses import dataclass
+from typing import Optional
+from app.core.helper.auth_helper import AuthHelper
+from app.domain.entity.rol import Rol
+from app.domain.entity.socio import Socio
+from app.domain.error.error_handler import ErrorHandler
+from app.domain.error.error_type import ErrorType
+from app.domain.repository.socio_repository_i import SocioRepositoryI
+from app.domain.repository.usuario_repository_i import UsuarioRepositoryI
+
+
+class GetSocioByIdUseCase:
+    def __init__(
+        self,
+        socio_repository: SocioRepositoryI,
+        usuario_repository: UsuarioRepositoryI,
+    ) -> None:
+        self.socio_repository = socio_repository
+        self.usuario_repository = usuario_repository
+
+    @dataclass(frozen=True)
+    class Command:
+        token: Optional[str]
+        id: Optional[int]
+
+    @dataclass(frozen=True)
+    class Result:
+        socio: Socio
+
+    def execute(self, command: Command) -> Result:
+        AuthHelper.authenticate(
+            command.token,
+            self.usuario_repository,
+            Rol.ADMIN,
+            Rol.MODERADOR,
+            Rol.RECEPCIONISTA,
+        )
+        if command.id is None:
+            raise ErrorHandler(ErrorType.MISSING_REQUIRED_FIELDS)
+
+        socio = self.socio_repository.get_by_id(command.id)
+        if socio is None:
+            raise ErrorHandler(ErrorType.SOCIO_NOT_FOUND)
+
+        return GetSocioByIdUseCase.Result(socio=socio)
