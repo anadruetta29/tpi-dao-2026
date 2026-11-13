@@ -36,5 +36,15 @@ export const ErrorMessages = {
     GET_ALL_DEVOLUCIONES_ERROR: "No se pudieron obtener las devoluciones.",
     GET_DEVOLUCION_BY_ID_ERROR: "No se pudo obtener la devolución.",
     CREATE_DEVOLUCION_ERROR: "No se pudo registrar la devolución.",
+    PRESTAMO_NOT_FOUND: "Préstamo no encontrado.",
+    PRESTAMO_CREATE_ERROR: "No se pudo efectivizar el préstamo.",
+    REMITO_NOT_FOUND: "Remito no encontrado.",
+    REMITO_CREATE_ERROR: "No se pudo emitir el remito.",
+    REMITO_DESPACHO_ERROR: "No se pudo registrar el despacho del envío.",
+    REMITO_RECEPCION_ERROR: "No se pudo registrar la recepción del envío.",
+    MULTA_NOT_FOUND: "Multa no encontrada.",
+    MULTA_CREATE_ERROR: "No se pudo registrar la multa.",
+    MULTA_PAGAR_ERROR: "No se pudo registrar el pago de la multa.",
+    MULTA_ANULAR_ERROR: "No se pudo anular la multa.",
     UNEXPECTED_ERROR: "Ocurrió un error inesperado. Intentá nuevamente."
 } as const;

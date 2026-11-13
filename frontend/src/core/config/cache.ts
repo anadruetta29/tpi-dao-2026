@@ -26,9 +26,21 @@ export class CacheTags {
     public static readonly RESERVAS = "reservas";
     public static readonly SOLICITUDES_PRESTAMO = "solicitudes-prestamo";
     public static readonly PRESTAMOS = "prestamos";
+    public static prestamoDetail(id: string): string {
+        return `prestamo:${id}`;
+    }
     public static readonly DEVOLUCIONES = "devoluciones";
     public static readonly MULTAS = "multas";
+    public static multaDetail(id: string): string {
+        return `multa:${id}`;
+    }
     public static readonly REMITOS = "remitos";
+    public static remitoDetail(id: string): string {
+        return `remito:${id}`;
+    }
+    public static remitoTrazabilidad(id: string): string {
+        return `remito:${id}:trazabilidad`;
+    }
 }
 
 export function withCacheTags(...tags: Array<string | false | null | undefined>): CacheConfig {

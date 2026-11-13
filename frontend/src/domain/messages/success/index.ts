@@ -19,5 +19,12 @@ export const SuccessMessages = {
     UPDATE_SOLICITUD_ESTADO_SUCCESS: "Estado de la solicitud actualizado correctamente.",
     CREATE_RESERVA_SUCCESS: "Reserva registrada correctamente.",
     UPDATE_RESERVA_ESTADO_SUCCESS: "Estado de la reserva actualizado correctamente.",
-    CREATE_DEVOLUCION_SUCCESS: "Devolución registrada correctamente."
+    CREATE_DEVOLUCION_SUCCESS: "Devolución registrada correctamente.",
+    PRESTAMO_CREATED: "Préstamo efectivizado correctamente.",
+    REMITO_CREATED: "Remito emitido correctamente.",
+    REMITO_DESPACHADO: "Despacho registrado correctamente.",
+    REMITO_RECIBIDO: "Recepción registrada correctamente.",
+    MULTA_CREATED: "Multa registrada correctamente.",
+    MULTA_PAGADA: "Pago de multa registrado correctamente.",
+    MULTA_ANULADA: "Multa anulada correctamente."
 } as const;
