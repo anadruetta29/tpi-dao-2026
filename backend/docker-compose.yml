@@ -1,8 +1,8 @@
 services:
 
-  ecommerce-db:
+  dao-db:
     image: postgres:17-alpine
-    container_name: ecommerce-db
+    container_name: dao-db
     restart: no
     environment:
       POSTGRES_DB: dao
@@ -11,11 +11,11 @@ services:
     volumes:
       - ./database/data-dev:/var/lib/postgresql/data
     ports:
-      - "$5432:5432"
+      - "5432:5432"
     networks:
       - dao-dev-net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${develop} -d ${dao}"]
+      test: ["CMD-SHELL", "pg_isready -U $develop -d $dao"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -26,5 +26,5 @@ services:
         max-file: "3"
 
 networks:
-  ecommerce-dev-net:
+  dao-dev-net:
     driver: bridge
