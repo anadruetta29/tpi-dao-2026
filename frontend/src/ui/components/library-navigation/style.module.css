@@ -1,0 +1,50 @@
+.sidebar {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-self: start;
+    gap: 1.7rem;
+    overflow: auto;
+    padding: 1.65rem 1rem 1rem;
+    color: #f1f5ff;
+    background: var(--nav);
+}
+
+.sidebar > div { margin-inline-start: 0.45rem; }
+.navigation { display: grid; gap: 1.1rem; }
+
+.group h2 {
+    margin: 0 0 0.35rem 0.7rem;
+    color: #acbbda;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.115em;
+    text-transform: uppercase;
+}
+
+.group ul { list-style: none; display: grid; gap: 0.12rem; margin: 0; padding: 0; }
+.group button {
+    width: 100%;
+    min-height: 36px;
+    padding: 0.38rem 0.65rem;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: #d9e2f7;
+    font-size: 0.86rem;
+    text-align: left;
+    transition: background-color 140ms;
+}
+
+.group button:hover { background: #263755; }
+.group button[aria-pressed="true"] { border-color: #7188c9; color: #fff; background: #344976; font-weight: 700; }
+
+@media (max-width: 860px) {
+    .sidebar { position: static; height: auto; gap: 0.8rem; padding: 1rem; overflow: visible; }
+    .navigation { display: flex; overflow-x: auto; gap: 1rem; padding: 0.25rem 0.25rem 0.55rem; }
+    .group { flex: 0 0 auto; }
+    .group ul { display: flex; gap: 0.18rem; }
+    .group button { white-space: nowrap; padding-inline: 0.6rem; }
+}

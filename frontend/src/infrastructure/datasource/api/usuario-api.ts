@@ -76,8 +76,7 @@ export class UsuarioApiDataSource implements UsuarioDataSourceI {
                     apellido: dto.apellido,
                     email: dto.email,
                     password: dto.password,
-                    role: roleValue,
-                    activo: dto.activo ?? true
+                    role: roleValue
                 },
                 dto.session?.accessToken
             );

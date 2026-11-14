@@ -21,7 +21,8 @@ export class Prestamo extends BaseEntity {
         public modalidad: ModalidadPrestamoLocal = ModalidadPrestamoLocal.DOMICILIO,
         public solicitudId: string = "",
         public sedeId: string = "",
-        public ejemplarId: string = ""
+        public ejemplarId: string = "",
+        public socioId: string = ""
     ) {
         super();
         this.estadoName = this.estado.name;
@@ -59,7 +60,8 @@ export class Prestamo extends BaseEntity {
             modalidad,
             String(obj.solicitudId ?? obj.solicitud_id ?? ""),
             String(obj.sedeId ?? obj.sede_id ?? ""),
-            String(obj.ejemplarId ?? obj.ejemplar_id ?? "")
+            String(obj.ejemplarId ?? obj.ejemplar_id ?? ""),
+            String(obj.socioId ?? obj.socio_id ?? "")
         );
     }
 

@@ -1,5 +1,5 @@
 import { MultaDataSourceI } from "@/domain/datasources/multa";
-import { Multa, MotivoMulta, EstadoMulta } from "@/domain/entities/multa";
+import { Multa, MotivoMulta } from "@/domain/entities/multa";
 import { MultaFilters } from "@/domain/filters/multa-filters";
 import { type GetAllMultasReq } from "@/domain/dto/multa/request/GetAllMultasReq";
 import { type GetAllMultasRes } from "@/domain/dto/multa/response/GetAllMultasRes";
@@ -73,18 +73,13 @@ export class MultaApiDataSource implements MultaDataSourceI {
                 ? dto.motivo.value
                 : dto.motivo;
 
-            const estadoValue = dto.estado instanceof EstadoMulta
-                ? dto.estado.value
-                : (dto.estado || EstadoMulta.PENDIENTE.value);
-
             const response = await this.httpClient.post(
                 "/multas",
                 {
-                    socio_id: dto.socio_id,
-                    prestamo_id: dto.prestamo_id,
+                    socio_id: Number(dto.socio_id),
+                    prestamo_id: Number(dto.prestamo_id),
                     motivo: motivoValue,
-                    monto: dto.monto,
-                    estado: estadoValue
+                    monto: dto.monto
                 },
                 dto.session?.accessToken
             );

@@ -9,7 +9,8 @@ export class Libro extends BaseEntity {
         public titulo: string = "",
         public añoPublicacion: number = 0,
         public editorial: string = "",
-        public edicion: string = ""
+        public edicion: string = "",
+        public autoresIds: string[] = []
     ) {
         super();
     }
@@ -28,7 +29,8 @@ export class Libro extends BaseEntity {
             obj.titulo || "",
             typeof obj.añoPublicacion === "number" ? obj.añoPublicacion : Number(obj.añoPublicacion || 0),
             obj.editorial || "",
-            obj.edicion || ""
+            obj.edicion || "",
+            (obj.autoresIds ?? obj.autor_ids ?? []).map(String)
         );
     }
 

@@ -1,26 +1,27 @@
-import React from "react";
-import { libraryButtonStyle, libraryControlsStyle } from "@/ui/components/library-records/library-records.styles";
+import { type FormEventHandler } from "react";
+import { LibraryButton } from "@/ui/components/library-button/library-button";
+import { LibraryField, type LibraryFieldProps } from "@/ui/components/library-field/library-field";
+import styles from "./style.module.css";
 
 interface LibraryFormProps {
-    children: React.ReactNode;
     label: string;
+    fields: LibraryFieldProps[];
     isSaving?: boolean;
-    onSubmit: (field: (name: string) => string) => void;
+    disabled?: boolean;
+    submitDisabled?: boolean;
+    layout?: "grid" | "stack" | "filters";
+    onSubmit: FormEventHandler<HTMLFormElement>;
 }
 
-export const LibraryForm: React.FC<LibraryFormProps> = ({ children, label, isSaving, onSubmit }) => {
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        onSubmit((name) => String(data.get(name) ?? "").trim());
-    };
-
+export function LibraryForm({ fields, label, isSaving, disabled, submitDisabled, layout = "grid", onSubmit }: LibraryFormProps) {
     return (
-        <form onSubmit={handleSubmit}>
-            <fieldset disabled={isSaving} style={{ ...libraryControlsStyle, border: 0, padding: 0, margin: 0 }}>
-                {children}
-                <button type="submit" style={libraryButtonStyle}>{isSaving ? "Guardando..." : label}</button>
+        <form onSubmit={onSubmit}>
+            <fieldset disabled={isSaving || disabled} className={styles[layout]}>
+                {fields.map((field) => <LibraryField key={field.name} {...field} />)}
+                <LibraryButton className={styles.submit} disabled={submitDisabled} type="submit" tone={layout === "filters" ? "secondary" : "primary"}>
+                    {isSaving ? "Guardando..." : label}
+                </LibraryButton>
             </fieldset>
         </form>
     );
-};
+}

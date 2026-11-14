@@ -7,8 +7,6 @@ export interface RegistrarRecepcionRemitoCommand {
     id: string;
     fechaRecepcion?: string | null;
     conIncidencia?: boolean;
-    observaciones?: string | null;
-    ejemplaresRecibidosIds?: string[];
 }
 
 export interface RegistrarRecepcionRemitoResult {
@@ -29,9 +27,7 @@ export class RegistrarRecepcionRemitoUseCase {
             session: command.session,
             id: command.id,
             fechaRecepcion: command.fechaRecepcion,
-            conIncidencia: command.conIncidencia,
-            observaciones: command.observaciones,
-            ejemplaresRecibidosIds: command.ejemplaresRecibidosIds
+            conIncidencia: command.conIncidencia
         });
 
         return {

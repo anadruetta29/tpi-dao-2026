@@ -49,7 +49,7 @@ class CreateSedeUseCase:
             nombre=command.nombre,
             telefono=command.telefono,
             email=command.email,
-            horarioAtencion=command.horarioAtencion,
+            horarioAtencion=Sede.normalizar_horario_atencion(command.horarioAtencion),
             estado=EstadoSede.ACTIVA,
         )
         saved = self.sede_repository.save(sede)

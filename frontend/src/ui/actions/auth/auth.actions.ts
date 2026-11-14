@@ -44,12 +44,13 @@ export async function loginAction(command: LoginCommand): Promise<ActionState<Au
     }
 }
 
-export async function getCurrentUserAction(customSession?: Session | null): Promise<ActionState<{ user: Usuario; session: Session }>> {
+export async function getCurrentUserAction(customSession?: Session | null): Promise<ActionState<{ user: Usuario; session: Session } | null>> {
     try {
         const currentSession = customSession ?? authStorageDataSource.getSession();
         if (!currentSession || !currentSession.accessToken) {
             return {
                 success: false,
+                data: null,
                 error: "No hay una sesión activa."
             };
         }
@@ -59,7 +60,9 @@ export async function getCurrentUserAction(customSession?: Session | null): Prom
         });
 
         const updatedSession = new Session(currentSession.accessToken, result.user);
-        authStorageDataSource.saveSession(updatedSession);
+        if (authStorageDataSource.getSession()?.accessToken === currentSession.accessToken) {
+            authStorageDataSource.saveSession(updatedSession);
+        }
 
         return {
             success: true,
@@ -71,6 +74,7 @@ export async function getCurrentUserAction(customSession?: Session | null): Prom
     } catch (error: any) {
         return {
             success: false,
+            ...(error?.status === 401 || error?.status === 403 ? { data: null } : {}),
             error: error?.message || "No se pudo obtener el usuario actual."
         };
     }

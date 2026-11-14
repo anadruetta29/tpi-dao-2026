@@ -19,7 +19,8 @@ export class Multa extends BaseEntity {
         public monto: number = 0,
         public estado: EstadoMulta = EstadoMulta.PENDIENTE,
         public fechaPago?: string | Date | null,
-        public prestamoId: string = ""
+        public prestamoId: string = "",
+        public socioId: string = ""
     ) {
         super();
         this.motivoName = this.motivo.name;
@@ -55,7 +56,8 @@ export class Multa extends BaseEntity {
             typeof obj.monto === "number" ? obj.monto : Number(obj.monto || 0),
             estado,
             obj.fechaPago || null,
-            String(obj.prestamoId ?? obj.prestamo_id ?? "")
+            String(obj.prestamoId ?? obj.prestamo_id ?? ""),
+            String(obj.socioId ?? obj.socio_id ?? "")
         );
     }
 

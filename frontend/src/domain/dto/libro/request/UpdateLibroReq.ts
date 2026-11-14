@@ -7,4 +7,5 @@ export interface UpdateLibroReq {
     añoPublicacion?: number;
     editorial?: string;
     edicion?: string;
+    autoresIds?: string[];
 }

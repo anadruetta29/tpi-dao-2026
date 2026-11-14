@@ -1,4 +1,8 @@
-# React + TypeScript + Vite
+# Biblioteca · Frontend
+
+Las pantallas viven en `src/ui/routes/<módulo>/`. Cada ruta llama a su `viewmodel.ts`, que prepara las consultas, los formularios y las acciones. Los componentes de `src/ui/components/` reciben datos y callbacks; no acceden a la sesión ni a la API. Las acciones siguen usando los casos de uso, repositorios y datasources del proyecto.
+
+Para verificar cambios, ejecutá `npm run build`, `npm run lint` y `npm test` desde `frontend/`. Las pruebas de contrato simulan las respuestas de la API y comprueban el método, la ruta, los filtros, el cuerpo y el token de las operaciones.
 
 ## Conexión a la API
 

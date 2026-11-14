@@ -1,0 +1,22 @@
+.layout { display: grid; grid-template-columns: 224px minmax(0, 1fr); min-height: 100svh; }
+.workspace { min-width: 0; }
+
+.bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 68px;
+    padding: 0.55rem clamp(1rem, 3vw, 3rem);
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+}
+
+.bar > span { color: var(--muted); font-size: 0.84rem; font-weight: 650; }
+.content { width: min(100%, 1340px); margin-inline: auto; padding: 2.25rem clamp(1rem, 3.5vw, 3rem) 3rem; }
+
+@media (max-width: 860px) {
+    .layout { grid-template-columns: minmax(0, 1fr); }
+    .bar { min-height: 60px; }
+    .content { padding-top: 1.4rem; }
+}

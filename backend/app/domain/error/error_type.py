@@ -23,6 +23,11 @@ class ErrorType(Enum):
     # Sede
     SEDE_NOT_FOUND = (404, "SEDE_NOT_FOUND", "Sede no encontrada.")
     SEDE_INACTIVE = (400, "SEDE_INACTIVE", "La sede se encuentra dada de baja.")
+    SEDE_HORARIO_INVALIDO = (
+        400,
+        "SEDE_HORARIO_INVALIDO",
+        "Ingresá un horario en formato HH:mm - HH:mm, con el cierre posterior a la apertura.",
+    )
     SEDE_ALREADY_EXISTS = (409, "SEDE_ALREADY_EXISTS", "Ya existe una sede con ese nombre.")
 
     # Socio

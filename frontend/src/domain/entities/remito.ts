@@ -9,7 +9,10 @@ export class Remito extends BaseEntity {
         public numero: string = "",
         public fechaEmision?: string | Date | null,
         public fechaDespacho?: string | Date | null,
-        public fechaRecepcion?: string | Date | null
+        public fechaRecepcion?: string | Date | null,
+        public sedeOrigenId: string = "",
+        public sedeDestinoId: string = "",
+        public ejemplaresIds: string[] = []
     ) {
         super();
     }
@@ -28,7 +31,10 @@ export class Remito extends BaseEntity {
             obj.numero || "",
             obj.fechaEmision || null,
             obj.fechaDespacho || null,
-            obj.fechaRecepcion || null
+            obj.fechaRecepcion || null,
+            String(obj.sedeOrigenId ?? obj.sede_origen_id ?? ""),
+            String(obj.sedeDestinoId ?? obj.sede_destino_id ?? ""),
+            (obj.ejemplaresIds ?? obj.ejemplar_ids ?? []).map(String)
         );
     }
 

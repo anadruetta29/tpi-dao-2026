@@ -1,5 +1,5 @@
 import { EjemplarDataSourceI } from "../../../domain/datasources/ejemplar";
-import { Ejemplar, EstadoEjemplar } from "../../../domain/entities/ejemplar";
+import { Ejemplar } from "@/domain/entities/ejemplar";
 import { EjemplarFilters } from "../../../domain/filters/ejemplar-filters";
 import { type GetAllEjemplaresReq } from "../../../domain/dto/ejemplar/request/GetAllEjemplaresReq";
 import { type GetAllEjemplaresRes } from "../../../domain/dto/ejemplar/response/GetAllEjemplaresRes";
@@ -65,17 +65,12 @@ export class EjemplarApiDataSource implements EjemplarDataSourceI {
 
     public async createEjemplar(dto: CreateEjemplarReq): Promise<CreateEjemplarRes> {
         try {
-            const estadoValue = dto.estado instanceof EstadoEjemplar
-                ? dto.estado.value
-                : (dto.estado || EstadoEjemplar.DISPONIBLE.value);
-
             const response = await this.httpClient.post(
                 "/ejemplares",
                 {
                     codigo: dto.codigo,
-                    libro_id: dto.libro_id,
-                    sede_id: dto.sede_id,
-                    estado: estadoValue
+                    libro_id: Number(dto.libro_id),
+                    sede_id: Number(dto.sede_id)
                 },
                 dto.session?.accessToken
             );

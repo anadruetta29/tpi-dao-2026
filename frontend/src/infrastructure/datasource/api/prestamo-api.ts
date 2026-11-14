@@ -1,5 +1,5 @@
 import { PrestamoDataSourceI } from "@/domain/datasources/prestamo";
-import { Prestamo, EstadoPrestamo, ModalidadPrestamoLocal } from "@/domain/entities/prestamo";
+import { Prestamo, ModalidadPrestamoLocal } from "@/domain/entities/prestamo";
 import { PrestamoFilters } from "@/domain/filters/prestamo-filters";
 import { type GetAllPrestamosReq } from "@/domain/dto/prestamo/request/GetAllPrestamosReq";
 import { type GetAllPrestamosRes } from "@/domain/dto/prestamo/response/GetAllPrestamosRes";
@@ -69,14 +69,9 @@ export class PrestamoApiDataSource implements PrestamoDataSourceI {
                 ? dto.modalidad.value
                 : dto.modalidad;
 
-            const estadoValue = dto.estado instanceof EstadoPrestamo
-                ? dto.estado.value
-                : (dto.estado || EstadoPrestamo.ACTIVO.value);
-
             const payload: Record<string, any> = {
-                solicitud_id: dto.solicitud_id,
-                modalidad: modalidadValue,
-                estado: estadoValue
+                solicitud_id: Number(dto.solicitud_id),
+                modalidad: modalidadValue
             };
 
             if (dto.fechaInicio) payload.fechaInicio = dto.fechaInicio;

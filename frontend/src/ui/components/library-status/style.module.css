@@ -1,0 +1,17 @@
+.loading, .error, .success, .empty {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-width: 0;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow-wrap: anywhere;
+}
+
+.loading, .empty { color: var(--muted); background: var(--surface-muted); }
+.error { color: var(--danger); background: var(--danger-soft); border-color: #f1cbd2; }
+.success { color: var(--success); background: var(--success-soft); border-color: #c6e7d8; }
+.marker { flex: 0 0 8px; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.loading .marker { flex-basis: 15px; width: 15px; height: 15px; border: 2px solid #d6def7; border-top-color: var(--primary); background: none; animation: spin 850ms linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }

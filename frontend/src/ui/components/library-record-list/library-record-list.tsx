@@ -1,0 +1,32 @@
+import { LibraryButton } from "@/ui/components/library-button/library-button";
+import { LibraryDetail } from "@/ui/components/library-detail/library-detail";
+import { type LibraryRecordsView } from "@/ui/routes/use-library-records-viewmodel";
+import styles from "./style.module.css";
+
+export function LibraryRecordList({ records, detail, isSaving }: Pick<LibraryRecordsView, "records" | "detail" | "isSaving">) {
+    return (
+        <div>
+            <div className={styles.header}>
+                <h2>Registros</h2>
+                <span>{records.length}</span>
+            </div>
+            <ul className={styles.list}>
+                {records.map(({ id, label, selected, select }) => (
+                    <li key={id} className={styles.item} data-selected={selected}>
+                        <div className={styles.row}>
+                            <span className={styles.id}>#{id}</span>
+                            <strong className={styles.label}>{label}</strong>
+                            {select && (
+                                <LibraryButton disabled={isSaving} aria-expanded={selected} onClick={select}>
+                                    {selected ? "Cerrar detalle" : "Ver detalle"}
+                                    <span className={styles.chevron} aria-hidden="true" />
+                                </LibraryButton>
+                            )}
+                        </div>
+                        {selected && detail && <LibraryDetail detail={detail} isSaving={isSaving} />}
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}

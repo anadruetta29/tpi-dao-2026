@@ -1,0 +1,21 @@
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    min-height: 42px;
+    padding: 0.55rem 1rem;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 650;
+    text-align: center;
+    transition: background-color 140ms, border-color 140ms;
+}
+
+.primary { color: white; background: var(--primary); }
+.primary:hover:not(:disabled) { background: var(--primary-hover); }
+.secondary { color: var(--ink); background: var(--surface); border-color: var(--line); }
+.secondary:hover:not(:disabled) { background: var(--primary-soft); border-color: #bcc7f1; }
+.danger { color: var(--danger); background: var(--danger-soft); border-color: #f1cbd2; }
+.danger:hover:not(:disabled) { background: #ffe3e8; }

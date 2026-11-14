@@ -75,13 +75,11 @@ export class RemitoApiDataSource implements RemitoDataSourceI {
     public async createRemito(dto: CreateRemitoReq): Promise<CreateRemitoRes> {
         try {
             const payload: Record<string, any> = {
-                ejemplaresIds: dto.ejemplaresIds
+                ejemplar_ids: dto.ejemplaresIds.map(Number)
             };
 
-            if (dto.solicitud_id) payload.solicitud_id = dto.solicitud_id;
-            if (dto.sede_origen_id) payload.sede_origen_id = dto.sede_origen_id;
-            if (dto.sede_destino_id) payload.sede_destino_id = dto.sede_destino_id;
-            if (dto.numero) payload.numero = dto.numero;
+            if (dto.sede_origen_id) payload.sede_origen_id = Number(dto.sede_origen_id);
+            if (dto.sede_destino_id) payload.sede_destino_id = Number(dto.sede_destino_id);
             if (dto.fechaEmision) payload.fechaEmision = dto.fechaEmision;
 
             const response = await this.httpClient.post(
@@ -129,9 +127,7 @@ export class RemitoApiDataSource implements RemitoDataSourceI {
         try {
             const payload: Record<string, any> = {};
             if (dto.fechaRecepcion) payload.fechaRecepcion = dto.fechaRecepcion;
-            if (dto.conIncidencia !== undefined) payload.conIncidencia = dto.conIncidencia;
-            if (dto.observaciones !== undefined) payload.observaciones = dto.observaciones;
-            if (dto.ejemplaresRecibidosIds) payload.ejemplaresRecibidosIds = dto.ejemplaresRecibidosIds;
+            if (dto.conIncidencia !== undefined) payload.con_incidencia = dto.conIncidencia;
 
             const response = await this.httpClient.patch(
                 `/remitos/${dto.id}/recepcion`,

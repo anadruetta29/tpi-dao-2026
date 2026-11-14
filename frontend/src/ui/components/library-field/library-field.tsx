@@ -1,46 +1,54 @@
-import React, { useId } from "react";
+import { useId, type ComponentPropsWithoutRef, type FormEventHandler, type HTMLInputTypeAttribute } from "react";
+import { LibraryChoices, type LibraryChoicesProps } from "@/ui/components/library-choices/library-choices";
+import styles from "./style.module.css";
 
-interface LibraryFieldProps {
+interface CommonFieldProps {
     name: string;
     label: string;
-    type?: React.HTMLInputTypeAttribute;
     defaultValue?: string;
     onChange?: (value: string) => void;
     required?: boolean;
-    options?: { value: string; label: string }[];
 }
 
-export const LibraryField: React.FC<LibraryFieldProps> = ({
-    name,
-    label,
-    type = "text",
-    defaultValue,
-    onChange,
-    required,
-    options
-}) => {
-    const id = useId();
-    const style = { padding: "0.65rem 0.75rem", borderRadius: "6px", border: "1px solid #ccc", fontSize: "0.95rem" };
+interface InputFieldProps extends CommonFieldProps {
+    kind?: never;
+    options?: never;
+    placeholder: string;
+    type?: HTMLInputTypeAttribute;
+    pattern?: string;
+    inputMode?: ComponentPropsWithoutRef<"input">["inputMode"];
+    onInput?: FormEventHandler<HTMLInputElement>;
+    min?: number;
+    max?: number;
+    step?: number | "any";
+    autoComplete?: string;
+}
 
+interface SelectFieldProps extends CommonFieldProps {
+    kind?: never;
+    options: { value: string; label: string }[];
+}
+
+export type LibraryFieldProps = InputFieldProps | SelectFieldProps | (LibraryChoicesProps & { kind: "choices" });
+
+export function LibraryField(field: LibraryFieldProps) {
+    const id = useId();
+    if (field.kind === "choices") return <LibraryChoices {...field} />;
+
+    const { name, label, defaultValue, onChange, required } = field;
     return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem", textAlign: "left" }}>
-            <label htmlFor={id} style={{ fontWeight: 600, fontSize: "0.9rem" }}>{label}</label>
-            {options ? (
-                <select id={id} name={name} defaultValue={defaultValue} onChange={(event) => onChange?.(event.target.value)} required={required} style={style}>
-                    {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+        <div className={styles.field}>
+            <label htmlFor={id} className={styles.label}>{label}</label>
+            {field.options !== undefined ? (
+                <select id={id} name={name} defaultValue={defaultValue} onChange={(event) => onChange?.(event.target.value)} required={required} className={styles.control}>
+                    {field.options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
                 </select>
             ) : (
-                <input
-                    id={id}
-                    name={name}
-                    type={type}
-                    defaultValue={defaultValue}
-                    required={required}
-                    pattern={type === "text" && name.endsWith("Id") ? "[1-9][0-9]*" : undefined}
-                    inputMode={type === "text" && name.endsWith("Id") ? "numeric" : undefined}
-                    style={style}
-                />
+                <input id={id} name={name} type={field.type ?? "text"} defaultValue={defaultValue}
+                    required={required} placeholder={field.placeholder} pattern={field.pattern} inputMode={field.inputMode}
+                    onInput={field.onInput} min={field.min} max={field.max} step={field.step} autoComplete={field.autoComplete}
+                    onChange={(event) => onChange?.(event.target.value)} className={styles.control} />
             )}
         </div>
     );
-};
+}

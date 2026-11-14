@@ -112,7 +112,7 @@ export class LibroApiDataSource implements LibroDataSourceI {
                     añoPublicacion: dto.añoPublicacion,
                     editorial: dto.editorial,
                     edicion: dto.edicion,
-                    ...(dto.autoresIds ? { autoresIds: dto.autoresIds } : {})
+                    ...(dto.autoresIds ? { autor_ids: dto.autoresIds.map(Number) } : {})
                 },
                 dto.session?.accessToken
             );
@@ -137,6 +137,7 @@ export class LibroApiDataSource implements LibroDataSourceI {
             if (dto.añoPublicacion !== undefined) payload.añoPublicacion = dto.añoPublicacion;
             if (dto.editorial !== undefined) payload.editorial = dto.editorial;
             if (dto.edicion !== undefined) payload.edicion = dto.edicion;
+            if (dto.autoresIds !== undefined) payload.autor_ids = dto.autoresIds.map(Number);
 
             const response = await this.httpClient.put(
                 `/libros/${dto.id}`,

@@ -12,7 +12,9 @@ export class Ejemplar extends BaseEntity {
     constructor(
         public id: string,
         public codigo: string = "",
-        public estado: EstadoEjemplar = EstadoEjemplar.DISPONIBLE
+        public estado: EstadoEjemplar = EstadoEjemplar.DISPONIBLE,
+        public libroId: string = "",
+        public sedeId: string = ""
     ) {
         super();
         this.estadoName = this.estado.name;
@@ -38,7 +40,9 @@ export class Ejemplar extends BaseEntity {
         return new Ejemplar(
             obj.id !== undefined && obj.id !== null ? String(obj.id) : "",
             obj.codigo || "",
-            estado
+            estado,
+            String(obj.libroId ?? obj.libro_id ?? ""),
+            String(obj.sedeId ?? obj.sede_id ?? "")
         );
     }
 

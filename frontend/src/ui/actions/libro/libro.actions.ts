@@ -135,6 +135,7 @@ export interface UpdateLibroActionParams {
     añoPublicacion?: number;
     editorial?: string;
     edicion?: string;
+    autoresIds?: string[];
 }
 
 export async function updateLibroAction(
@@ -152,7 +153,8 @@ export async function updateLibroAction(
             titulo: params.titulo,
             añoPublicacion: params.añoPublicacion,
             editorial: params.editorial,
-            edicion: params.edicion
+            edicion: params.edicion,
+            autoresIds: params.autoresIds
         });
 
         return {

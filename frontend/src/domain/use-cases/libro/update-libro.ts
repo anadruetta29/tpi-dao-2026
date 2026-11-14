@@ -9,6 +9,7 @@ export interface UpdateLibroCommand {
     añoPublicacion?: number;
     editorial?: string;
     edicion?: string;
+    autoresIds?: string[];
 }
 
 export interface UpdateLibroResult {
@@ -31,7 +32,8 @@ export class UpdateLibroUseCase {
             titulo: command.titulo,
             añoPublicacion: command.añoPublicacion,
             editorial: command.editorial,
-            edicion: command.edicion
+            edicion: command.edicion,
+            autoresIds: command.autoresIds
         });
 
         return {

@@ -1,0 +1,20 @@
+:root {
+    --canvas: #f5f6fa;
+    --surface: #fff;
+    --surface-muted: #f8f9fc;
+    --ink: #172137;
+    --muted: #56647a;
+    --line: #dfe4ee;
+    --primary: #334cbd;
+    --primary-hover: #253ba0;
+    --primary-soft: #edf0ff;
+    --nav: #182440;
+    --danger: #9c2e40;
+    --danger-soft: #fff1f2;
+    --success: #16624b;
+    --success-soft: #edf9f3;
+    --radius: 14px;
+    --shadow: 0 8px 26px rgb(26 40 77 / 6%);
+    --sans: Inter, "Segoe UI", system-ui, sans-serif;
+    --serif: "Instrument Serif", Georgia, serif;
+}

@@ -1,0 +1,95 @@
+.page {
+    min-height: 100svh;
+    display: grid;
+    grid-template-columns: minmax(330px, 0.9fr) minmax(430px, 1.1fr);
+    background: var(--surface);
+}
+
+.cover {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 640px;
+    overflow: hidden;
+    padding: clamp(2rem, 5vw, 5rem);
+    color: #fff;
+    background: radial-gradient(ellipse at 75% 32%, #344a87, transparent 72%), #182440;
+}
+
+.tagline {
+    position: relative;
+    z-index: 1;
+    max-width: 10ch;
+    font: 400 clamp(3.5rem, 6.7vw, 7rem)/0.93 var(--serif);
+    letter-spacing: -0.055em;
+}
+
+.art {
+    position: absolute;
+    z-index: -1;
+    inset: 12% 0 8%;
+    display: grid;
+    place-items: center;
+}
+
+.orbit {
+    position: absolute;
+    width: min(76%, 470px);
+    aspect-ratio: 1;
+    border: 1px solid #8197d066;
+    border-radius: 100%;
+    box-shadow: 0 0 0 2.8vw #afbeeb0e, 0 0 0 5.6vw #afbeeb09;
+}
+
+.books {
+    position: relative;
+    display: flex;
+    align-items: end;
+    gap: 0.45rem;
+    width: min(64%, 385px);
+    height: min(28vw, 330px);
+    min-height: 170px;
+    transform: translate(4%, -21%) rotate(-10deg);
+}
+
+.books span {
+    position: relative;
+    border-radius: 5px 9px 8px 4px;
+    box-shadow: inset 5px 0 #131b3529, inset -4px 0 #ffffff32, 12px 20px 35px #0b102763;
+}
+
+.books span::before, .books span::after {
+    content: "";
+    position: absolute;
+    inset: 12% 16% auto;
+    height: 9px;
+    border-block: 1px solid currentColor;
+    opacity: 0.55;
+}
+
+.books span::after { top: auto; bottom: 11%; }
+.first { width: 20%; height: 79%; background: #aebde9; color: #263c75; }
+.second { width: 24%; height: 95%; background: #667ed0; color: #eff4ff; }
+.third { width: 16%; height: 69%; background: #e6bd83; color: #554022; }
+.books .fourth { width: 24%; height: 83%; margin-left: 4%; transform: rotate(-15deg); transform-origin: bottom left; background: #d6dff5; color: #344975; }
+
+.body {
+    display: grid;
+    place-items: center;
+    padding: clamp(1.5rem, 6vw, 5rem);
+}
+
+.content { display: grid; gap: 1.25rem; width: min(100%, 395px); }
+.content h1 { font-size: clamp(2rem, 4.5vw, 3rem); line-height: 1.05; letter-spacing: -0.055em; }
+.hint { margin-top: -0.6rem; color: var(--muted); }
+.mobileBrand { display: none; }
+
+@media (max-width: 760px) {
+    .page { grid-template-columns: minmax(0, 1fr); }
+    .cover { display: none; }
+    .body { align-content: start; justify-items: stretch; padding-block: 2rem; }
+    .mobileBrand { display: block; width: min(100%, 395px); justify-self: center; margin-bottom: clamp(2.5rem, 12vh, 7rem); }
+    .content { justify-self: center; }
+}

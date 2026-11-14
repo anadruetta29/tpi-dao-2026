@@ -79,10 +79,8 @@ export async function getRemitoByIdAction(
 export interface CreateRemitoActionParams {
     session?: Session | null;
     ejemplaresIds: string[];
-    solicitud_id?: string | null;
     sede_origen_id?: string | null;
     sede_destino_id?: string | null;
-    numero?: string | null;
     fechaEmision?: string | null;
 }
 
@@ -98,10 +96,8 @@ export async function createRemitoAction(
         const result = await createRemitoUseCase.execute({
             session,
             ejemplaresIds: params.ejemplaresIds,
-            solicitud_id: params.solicitud_id,
             sede_origen_id: params.sede_origen_id,
             sede_destino_id: params.sede_destino_id,
-            numero: params.numero,
             fechaEmision: params.fechaEmision
         });
 
@@ -151,8 +147,6 @@ export interface RegistrarRecepcionRemitoActionParams {
     id: string;
     fechaRecepcion?: string | null;
     conIncidencia?: boolean;
-    observaciones?: string | null;
-    ejemplaresRecibidosIds?: string[];
 }
 
 export async function registrarRecepcionRemitoAction(
@@ -168,9 +162,7 @@ export async function registrarRecepcionRemitoAction(
             session,
             id: params.id,
             fechaRecepcion: params.fechaRecepcion,
-            conIncidencia: params.conIncidencia,
-            observaciones: params.observaciones,
-            ejemplaresRecibidosIds: params.ejemplaresRecibidosIds
+            conIncidencia: params.conIncidencia
         });
 
         return {

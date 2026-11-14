@@ -7,6 +7,7 @@ export const ErrorMessages = {
     SEDE_CREATE_ERROR: "No se pudo registrar la sede.",
     SEDE_UPDATE_ERROR: "No se pudo modificar la sede.",
     SEDE_DELETE_ERROR: "No se pudo dar de baja la sede.",
+    SEDE_HORARIO_INVALIDO: "El cierre debe ser posterior a la apertura.",
     USUARIO_NOT_FOUND: "Usuario no encontrado.",
     USUARIO_CREATE_ERROR: "No se pudo registrar el usuario.",
     USUARIO_UPDATE_ERROR: "No se pudo actualizar el usuario.",
