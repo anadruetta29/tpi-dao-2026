@@ -12,6 +12,10 @@ class PrestamoRepositoryAdapter(BaseRepositoryAdapter[Prestamo, PrestamoModel], 
     def __init__(self, repository: PostgresPrestamoRepository) -> None:
         super().__init__(repository, PrestamoEntityMapper)
 
+    def get_by_id_for_update(self, id: int) -> Optional[Prestamo]:
+        model = self.repository.find_by_id_for_update(id)
+        return self.mapper.to_domain(model) if model is not None else None
+
     def get_all_filtered(
         self,
         socio_id: Optional[int] = None,

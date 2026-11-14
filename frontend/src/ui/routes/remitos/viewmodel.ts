@@ -1,14 +1,31 @@
 import { useCallback } from "react";
 import { type Session } from "@/domain/entities/session";
 import { EstadoEnvio } from "@/domain/entities/estado-envio";
+import { EstadoEjemplar } from "@/domain/entities/ejemplar";
+import { EstadoSede } from "@/domain/entities/sede";
 import { createRemitoAction, getAllRemitosAction, getRemitoByIdAction, getTrazabilidadRemitoAction,
     registrarDespachoRemitoAction, registrarRecepcionRemitoAction } from "@/ui/actions/remito/remito.actions";
-import { allOptions, idListPattern, info, pickData, readIds, useLibraryRecordsViewModel } from "@/ui/routes/use-library-records-viewmodel";
-import { idField, readFields } from "@/ui/forms/handlers/record-fields";
+import { allOptions, info, pickData, useLibraryRecordsViewModel } from "@/ui/routes/use-library-records-viewmodel";
+import { readFields } from "@/ui/forms/handlers/record-fields";
+import { useMultipleSelector, useSelector } from "@/ui/hooks/use-selector";
+import { useSelectorCatalog } from "@/ui/hooks/use-selector-catalog";
 
 const receptionOptions = [{ value: "false", label: "Sin incidencias" }, { value: "true", label: "Con incidencia" }];
 
 export function useViewModel(session: Session) {
+    const catalog = useSelectorCatalog(session, "sedes", "ejemplares");
+    const filterOrigen = useSelector("sedeOrigenId", "Sede de origen", "Buscá por nombre de sede", false);
+    const filterDestino = useSelector("sedeDestinoId", "Sede de destino", "Buscá por nombre de sede", false);
+    const origen = useSelector("sedeOrigenId", "Sede de origen", "Buscá una sede de origen");
+    const destino = useSelector("sedeDestinoId", "Sede de destino", "Buscá una sede de destino");
+    const ejemplares = useMultipleSelector("ejemplaresIds", "Ejemplares", "Buscá por título o código");
+    const sedes = catalog?.sedes && pickData(catalog.sedes, (items) => items.filter(({ estado }) => estado === EstadoSede.ACTIVA));
+    const copies = catalog?.ejemplares && pickData(catalog.ejemplares, (items) => items.filter(({ sedeId, estado }) =>
+        sedeId === origen.selected && estado === EstadoEjemplar.DISPONIBLE));
+    function changeOrigin(id: string) {
+        ejemplares.reset();
+        if (id && destino.selected === id) destino.reset();
+    }
     const load = useCallback(async ({ sedeOrigenId, sedeDestinoId, estado }: { sedeOrigenId: string; sedeDestinoId: string; estado: string }) =>
         pickData(await getAllRemitosAction({ session, sede_origen_id: sedeOrigenId, sede_destino_id: sedeDestinoId, estado }), (data) => data.remitos), [session]);
     const loadDetail = useCallback(async (id: string) => {
@@ -22,17 +39,21 @@ export function useViewModel(session: Session) {
         title: "Remitos", initialFilters: { sedeOrigenId: "", sedeDestinoId: "", estado: "" },
         load, loadDetail,
         filter: { label: "Filtrar", fields: [
-            idField("sedeOrigenId", "ID de sede de origen"), idField("sedeDestinoId", "ID de sede de destino"),
+            filterOrigen.field(catalog?.sedes ?? null), filterDestino.field(catalog?.sedes ?? null),
             { name: "estado", label: "Estado", options: allOptions(EstadoEnvio.toOptions()) }
         ], submit: (field) => readFields(field, "sedeOrigenId", "sedeDestinoId", "estado") },
         getLabel: (remito) => `${remito.numero} · Sede ${remito.sedeOrigenId} → Sede ${remito.sedeDestinoId}`,
         create: {
             label: "Empaquetar y emitir remito",
-            fields: [idField("sedeOrigenId", "ID de sede de origen", true), idField("sedeDestinoId", "ID de sede de destino", true),
-                { name: "ejemplaresIds", placeholder: "Ej. 12, 34", label: "IDs de ejemplares (separados por comas)", pattern: idListPattern, required: true },
+            onOpen: () => { origen.reset(); destino.reset(); ejemplares.reset(); catalog.refresh(); },
+            submitDisabled: !origen.selected || !destino.selected || ejemplares.selected.length === 0,
+            fields: [
+                origen.field(sedes ?? null, undefined, changeOrigin),
+                destino.field(sedes ? pickData(sedes, (items) => items.filter(({ value }) => value !== origen.selected)) : null),
+                ejemplares.field(origen.selected ? copies ?? null : null, origen.selected ? undefined : "Seleccioná primero la sede de origen."),
                 { name: "fechaEmision", placeholder: "Seleccioná la fecha de emisión", label: "Fecha de emisión", type: "date" }],
-            submit: (field) => createRemitoAction({
-                session, ejemplaresIds: readIds(field("ejemplaresIds")), sede_origen_id: field("sedeOrigenId"),
+            submit: (field, values) => createRemitoAction({
+                session, ejemplaresIds: values("ejemplaresIds").filter(Boolean), sede_origen_id: field("sedeOrigenId"),
                 sede_destino_id: field("sedeDestinoId"), fechaEmision: field("fechaEmision") || undefined
             })
         },

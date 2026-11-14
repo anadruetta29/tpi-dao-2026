@@ -1,4 +1,6 @@
 import { PrestamoDataSourceI } from "@/domain/datasources/prestamo";
+import { type CancelarPrestamoReq } from "@/domain/dto/prestamo/request/CancelarPrestamoReq";
+import { type CancelarPrestamoRes } from "@/domain/dto/prestamo/response/CancelarPrestamoRes";
 import { PrestamoRepositoryI } from "@/domain/repositories/prestamo";
 import { type GetAllPrestamosReq } from "@/domain/dto/prestamo/request/GetAllPrestamosReq";
 import { type GetAllPrestamosRes } from "@/domain/dto/prestamo/response/GetAllPrestamosRes";
@@ -25,6 +27,10 @@ export class PrestamoRepository implements PrestamoRepositoryI {
 
     public async createPrestamo(dto: CreatePrestamoReq): Promise<CreatePrestamoRes> {
         return await this.dataSource.createPrestamo(dto);
+    }
+
+    public cancelarPrestamo(dto: CancelarPrestamoReq): Promise<CancelarPrestamoRes> {
+        return this.dataSource.cancelarPrestamo(dto);
     }
 
 }

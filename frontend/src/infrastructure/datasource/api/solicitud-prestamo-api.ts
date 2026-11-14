@@ -4,6 +4,8 @@ import { type SolicitudPrestamoDataSourceI } from "@/domain/datasources/solicitu
 import { SolicitudPrestamo } from "@/domain/entities/solicitud-prestamo";
 import { SolicitudPrestamoFilters } from "@/domain/filters/solicitud-prestamo-filters";
 import { type GetAllSolicitudesPrestamoReq } from "@/domain/dto/solicitud-prestamo/request/GetAllSolicitudesPrestamoReq";
+import { type GetRecepcionistasReq } from "@/domain/dto/solicitud-prestamo/request/GetRecepcionistasReq";
+import { type GetRecepcionistasRes } from "@/domain/dto/solicitud-prestamo/response/GetRecepcionistasRes";
 import { type GetAllSolicitudesPrestamoRes } from "@/domain/dto/solicitud-prestamo/response/GetAllSolicitudesPrestamoRes";
 import { type GetSolicitudPrestamoByIdReq } from "@/domain/dto/solicitud-prestamo/request/GetSolicitudPrestamoByIdReq";
 import { type GetSolicitudPrestamoByIdRes } from "@/domain/dto/solicitud-prestamo/response/GetSolicitudPrestamoByIdRes";
@@ -16,6 +18,16 @@ import { type UpdateSolicitudEstadoRes } from "@/domain/dto/solicitud-prestamo/r
 import { ErrorHandler, ErrorMessages } from "@/domain/messages";
 
 export class SolicitudPrestamoApiDataSource implements SolicitudPrestamoDataSourceI {
+    public async getRecepcionistas({ session }: GetRecepcionistasReq): Promise<GetRecepcionistasRes> {
+        try {
+            const response = await this.httpClient.get<{ recepcionistas: { id: number; nombre: string; apellido: string }[] }>(
+                "/solicitudes-prestamo/recepcionistas", {}, session.accessToken
+            );
+            return { recepcionistas: response.recepcionistas.map((user) => ({ ...user, id: String(user.id) })) };
+        } catch (error) {
+            throw ErrorHandler.handleError(error);
+        }
+    }
 
     private readonly httpClient: HTTPClient;
 
@@ -89,7 +101,7 @@ export class SolicitudPrestamoApiDataSource implements SolicitudPrestamoDataSour
             const response = await this.httpClient.post(
                 "/solicitudes-prestamo/interbibliotecario",
                 {
-                    socio_id: Number(dto.socioId),
+                    recepcionista_id: Number(dto.recepcionistaId),
                     ejemplar_id: Number(dto.ejemplarId),
                     sede_origen_id: Number(dto.sedeOrigenId),
                     sede_destino_id: Number(dto.sedeDestinoId)

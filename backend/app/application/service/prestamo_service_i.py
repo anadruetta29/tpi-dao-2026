@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from app.presentation.dto.prestamo.request.cancelar_prestamo_req import CancelarPrestamoReq
 from app.presentation.dto.prestamo.request import (
     CreatePrestamoReq,
     GetAllPrestamosReq,
@@ -18,4 +19,8 @@ class PrestamoServiceI(ABC):
 
     @abstractmethod
     def create(self, dto: CreatePrestamoReq) -> PrestamoRes:
+        pass
+
+    @abstractmethod
+    def cancelar(self, dto: CancelarPrestamoReq) -> PrestamoRes:
         pass

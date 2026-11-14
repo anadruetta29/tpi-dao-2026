@@ -112,7 +112,7 @@ export async function updateSocioAction(command: UpdateSocioCommand): Promise<Ac
         return {
             success: true,
             data: result.socio,
-            message: SuccessMessages.UPDATE_SOCIO_SUCCESS
+            message: command.habilitar ? SuccessMessages.HABILITAR_SOCIO_SUCCESS : SuccessMessages.UPDATE_SOCIO_SUCCESS
         };
     } catch (error: any) {
         return {

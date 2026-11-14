@@ -1,5 +1,6 @@
 from typing import Generic, List, Optional, TypeVar
 from app.domain.repository.base_repository_i import BaseRepositoryI
+from app.infrastructure.database import flush_or_commit
 from app.infrastructure.postgres.repository.base_postgres_repository import BasePostgresRepository
 
 T = TypeVar("T")
@@ -31,7 +32,7 @@ class BaseRepositoryAdapter(BaseRepositoryI[T], Generic[T, M]):
         for col in existing.__table__.columns:
             if col.name != "id":
                 setattr(existing, col.name, getattr(model, col.name))
-        self.repository.db.commit()
+        flush_or_commit(self.repository.db)
         self.repository.db.refresh(existing)
         return self.mapper.to_domain(existing)
 

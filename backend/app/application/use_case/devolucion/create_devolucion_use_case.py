@@ -1,12 +1,14 @@
+from contextlib import nullcontext
 from dataclasses import dataclass
 from datetime import date
-from typing import Optional
+from typing import Callable, ContextManager, Optional
 from app.application.strategy.devolucion_ejemplar.core.devolucion_ejemplar_strategy_factory import (
     DevolucionEjemplarStrategyFactory,
 )
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.devolucion import Devolucion
 from app.domain.entity.estado_ejemplar import EstadoEjemplar
+from app.domain.entity.prestamo import Prestamo
 from app.domain.entity.rol import Rol
 from app.domain.error.error_handler import ErrorHandler
 from app.domain.error.error_type import ErrorType
@@ -30,6 +32,7 @@ class CreateDevolucionUseCase:
         multa_repository: Optional[MultaRepositoryI] = None,
         socio_repository: Optional[SocioRepositoryI] = None,
         devolucion_strategy_factory: Optional[DevolucionEjemplarStrategyFactory] = None,
+        transaction: Callable[[], ContextManager] = nullcontext,
     ) -> None:
         self.devolucion_repository = devolucion_repository
         self.prestamo_repository = prestamo_repository
@@ -38,6 +41,7 @@ class CreateDevolucionUseCase:
         self.reserva_repository = reserva_repository
         self.multa_repository = multa_repository
         self.socio_repository = socio_repository
+        self.transaction = transaction
         self.devolucion_strategy_factory = (
             devolucion_strategy_factory or DevolucionEjemplarStrategyFactory()
         )
@@ -49,12 +53,18 @@ class CreateDevolucionUseCase:
         fecha: Optional[date]
         observaciones: Optional[str]
         estadoDevuelto: Optional[EstadoEjemplar]
+        anticipada: bool = False
 
     @dataclass(frozen=True)
     class Result:
         devolucion: Devolucion
+        prestamo: Prestamo
 
     def execute(self, command: Command) -> Result:
+        with self.transaction():
+            return self._execute(command)
+
+    def _execute(self, command: Command) -> Result:
         AuthHelper.authenticate(
             command.token,
             self.usuario_repository,
@@ -65,12 +75,14 @@ class CreateDevolucionUseCase:
         if command.prestamo_id is None:
             raise ErrorHandler(ErrorType.MISSING_REQUIRED_FIELDS)
 
-        prestamo = self.prestamo_repository.get_by_id(command.prestamo_id)
+        prestamo = self.prestamo_repository.get_by_id_for_update(command.prestamo_id)
         if prestamo is None:
             raise ErrorHandler(ErrorType.PRESTAMO_NOT_FOUND)
         prestamo.validar_no_devuelto()
 
         fecha_dev = command.fecha or date.today()
+        if command.anticipada:
+            prestamo.validar_cancelacion_anticipada(fecha_dev)
         estado_devuelto = command.estadoDevuelto or EstadoEjemplar.DISPONIBLE
 
         ejemplar = (
@@ -78,6 +90,8 @@ class CreateDevolucionUseCase:
             if prestamo.ejemplar_id is not None
             else None
         )
+        if command.anticipada and (ejemplar is None or ejemplar.id is None):
+            raise ErrorHandler(ErrorType.EJEMPLAR_NOT_FOUND)
         strategy = self.devolucion_strategy_factory.get_strategy(estado_devuelto)
         strategy.procesar_devolucion(
             prestamo=prestamo,
@@ -91,7 +105,9 @@ class CreateDevolucionUseCase:
         )
 
         prestamo.marcar_devuelto(fecha_dev)
-        self.prestamo_repository.update(prestamo.id, prestamo)
+        updated = self.prestamo_repository.update(command.prestamo_id, prestamo)
+        if updated is None:
+            raise ErrorHandler(ErrorType.PRESTAMO_NOT_FOUND)
 
         devolucion = Devolucion(
             fecha=fecha_dev,
@@ -100,4 +116,4 @@ class CreateDevolucionUseCase:
             prestamo_id=prestamo.id,
         )
         saved = self.devolucion_repository.save(devolucion)
-        return CreateDevolucionUseCase.Result(devolucion=saved)
+        return CreateDevolucionUseCase.Result(devolucion=saved, prestamo=updated)

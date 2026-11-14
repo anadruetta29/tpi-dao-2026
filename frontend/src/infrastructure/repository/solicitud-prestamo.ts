@@ -1,6 +1,8 @@
 import { type SolicitudPrestamoDataSourceI } from "@/domain/datasources/solicitud-prestamo";
 import { type SolicitudPrestamoRepositoryI } from "@/domain/repositories/solicitud-prestamo";
 import { type GetAllSolicitudesPrestamoReq } from "@/domain/dto/solicitud-prestamo/request/GetAllSolicitudesPrestamoReq";
+import { type GetRecepcionistasReq } from "@/domain/dto/solicitud-prestamo/request/GetRecepcionistasReq";
+import { type GetRecepcionistasRes } from "@/domain/dto/solicitud-prestamo/response/GetRecepcionistasRes";
 import { type GetAllSolicitudesPrestamoRes } from "@/domain/dto/solicitud-prestamo/response/GetAllSolicitudesPrestamoRes";
 import { type GetSolicitudPrestamoByIdReq } from "@/domain/dto/solicitud-prestamo/request/GetSolicitudPrestamoByIdReq";
 import { type GetSolicitudPrestamoByIdRes } from "@/domain/dto/solicitud-prestamo/response/GetSolicitudPrestamoByIdRes";
@@ -12,6 +14,9 @@ import { type UpdateSolicitudEstadoReq } from "@/domain/dto/solicitud-prestamo/r
 import { type UpdateSolicitudEstadoRes } from "@/domain/dto/solicitud-prestamo/response/UpdateSolicitudEstadoRes";
 
 export class SolicitudPrestamoRepository implements SolicitudPrestamoRepositoryI {
+    public getRecepcionistas(dto: GetRecepcionistasReq): Promise<GetRecepcionistasRes> {
+        return this.dataSource.getRecepcionistas(dto);
+    }
 
     private readonly dataSource: SolicitudPrestamoDataSourceI;
 

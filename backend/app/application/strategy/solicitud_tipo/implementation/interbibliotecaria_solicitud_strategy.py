@@ -36,7 +36,7 @@ class InterbibliotecariaSolicitudStrategy(SolicitudTipoStrategy):
 
     def construir_solicitud(
         self,
-        socio_id: int,
+        socio_id: Optional[int],
         ejemplar_id: int,
         sede_origen_id: int,
         sede_destino_id: int,

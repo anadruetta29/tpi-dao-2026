@@ -9,6 +9,9 @@ class PostgresPrestamoRepository(BasePostgresRepository[PrestamoModel]):
     def __init__(self, db: Session) -> None:
         super().__init__(db, PrestamoModel)
 
+    def find_by_id_for_update(self, id: int) -> Optional[PrestamoModel]:
+        return self.db.query(PrestamoModel).filter(PrestamoModel.id == id).with_for_update().first()
+
     def find_all_filtered(
         self,
         socio_id: Optional[int] = None,

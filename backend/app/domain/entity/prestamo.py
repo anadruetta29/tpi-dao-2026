@@ -42,6 +42,14 @@ class Prestamo:
             return self.fechaVencimiento
         return date.fromisoformat(self.fechaVencimiento)
 
+    def validar_cancelacion_anticipada(self, fecha: date) -> None:
+        inicio = self.fechaInicio
+        if isinstance(inicio, str):
+            inicio = date.fromisoformat(inicio)
+        vencimiento = self._fecha_vencimiento_as_date()
+        if self.estado != EstadoPrestamo.ACTIVO or inicio is None or vencimiento is None or not inicio <= fecha < vencimiento:
+            raise ErrorHandler(ErrorType.PRESTAMO_NO_CANCELABLE)
+
     def esta_vencido(self, fecha_referencia: Optional[date] = None) -> bool:
         vencimiento = self._fecha_vencimiento_as_date()
         if vencimiento is None:

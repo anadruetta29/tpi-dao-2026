@@ -1,4 +1,7 @@
+from typing import Optional
 from app.application.service.solicitud_prestamo_service_i import SolicitudPrestamoServiceI
+from app.application.use_case.solicitud_prestamo.get_recepcionistas_use_case import GetRecepcionistasUseCase
+from app.presentation.dto.solicitud_prestamo.response.recepcionistas_res import GetRecepcionistasRes, RecepcionistaRes
 from app.application.use_case.solicitud_prestamo import (
     CreateSolicitudInterbibliotecariaUseCase,
     CreateSolicitudLocalUseCase,
@@ -28,12 +31,21 @@ class SolicitudPrestamoService(SolicitudPrestamoServiceI):
         create_local_use_case: CreateSolicitudLocalUseCase,
         create_interbibliotecaria_use_case: CreateSolicitudInterbibliotecariaUseCase,
         update_estado_use_case: UpdateSolicitudEstadoUseCase,
+        get_recepcionistas_use_case: GetRecepcionistasUseCase,
     ) -> None:
         self.get_all_use_case = get_all_use_case
         self.get_by_id_use_case = get_by_id_use_case
         self.create_local_use_case = create_local_use_case
         self.create_interbibliotecaria_use_case = create_interbibliotecaria_use_case
         self.update_estado_use_case = update_estado_use_case
+        self.get_recepcionistas_use_case = get_recepcionistas_use_case
+
+    def get_recepcionistas(self, token: Optional[str]) -> GetRecepcionistasRes:
+        result = self.get_recepcionistas_use_case.execute(GetRecepcionistasUseCase.Command(token))
+        return GetRecepcionistasRes(recepcionistas=[
+            RecepcionistaRes(id=user.id, nombre=user.nombre or "", apellido=user.apellido or "")
+            for user in result.recepcionistas if user.id is not None
+        ])
 
     def get_all(self, dto: GetAllSolicitudesPrestamoReq) -> GetAllSolicitudesPrestamoRes:
         result = self.get_all_use_case.execute(
@@ -69,7 +81,7 @@ class SolicitudPrestamoService(SolicitudPrestamoServiceI):
         result = self.create_interbibliotecaria_use_case.execute(
             CreateSolicitudInterbibliotecariaUseCase.Command(
                 token=dto.get_token(),
-                socio_id=dto.get_socio_id(),
+                recepcionista_id=dto.get_recepcionista_id(),
                 ejemplar_id=dto.get_ejemplar_id(),
                 sede_origen_id=dto.get_sede_origen_id(),
                 sede_destino_id=dto.get_sede_destino_id(),

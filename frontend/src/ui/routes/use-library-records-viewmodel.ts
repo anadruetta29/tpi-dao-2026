@@ -13,6 +13,7 @@ export interface FormSpec<T> {
     fields: Field[];
     submit: (field: ReadField, values: ReadFieldValues) => T;
     submitDisabled?: boolean;
+    onOpen?: () => void;
 }
 
 export interface DetailSection {
@@ -25,7 +26,7 @@ interface DetailSpec {
     info: InfoRow[];
     sections?: DetailSection[];
     forms?: FormSpec<Promise<ActionState<unknown>>>[];
-    commands?: { label: string; confirm: string; execute: Query<unknown> }[];
+    commands?: { label: string; confirm: string; execute: Query<unknown>; tone?: "primary" | "danger" }[];
     queries?: { label: string; load: Query<DetailSection[]> }[];
 }
 
@@ -73,7 +74,7 @@ export interface LibraryRecordsView {
         info: InfoRow[];
         sections: DetailSection[];
         forms: FormView[];
-        commands: { label: string; onClick: () => void }[];
+        commands: { label: string; onClick: () => void; tone?: "primary" | "danger" }[];
         queries: { label: string; onClick: () => void }[];
         extraLoading: boolean;
         extraError: string | null;
@@ -96,11 +97,6 @@ export function allOptions(options: { value: string; label: string }[]): { value
     return [{ value: "", label: "Todos" }, ...options];
 }
 
-export function readIds(value: string): string[] {
-    return [...new Set(value.split(",").map((id) => id.trim()).filter(Boolean))];
-}
-
-export const idListPattern = "[1-9][0-9]*( *, *[1-9][0-9]*)*";
 
 export function useLibraryRecordsViewModel<T extends { id: string }, D, F>(
     options: RecordsOptions<T, D, F>
@@ -207,6 +203,7 @@ export function useLibraryRecordsViewModel<T extends { id: string }, D, F>(
         create: isCreating && create ? writeForm(create) : undefined,
         createLabel: create && (isCreating ? "Cancelar" : create.label),
         toggleCreate: () => {
+            if (!isCreating) create?.onOpen?.();
             setIsCreating(!isCreating);
             setSelection(null);
             clearExtra();
@@ -234,8 +231,9 @@ export function useLibraryRecordsViewModel<T extends { id: string }, D, F>(
             info: spec?.info ?? [],
             sections: spec?.sections ?? [],
             forms: spec?.forms?.map(writeForm) ?? [],
-            commands: spec?.commands?.map(({ label, confirm, execute }) => ({
+            commands: spec?.commands?.map(({ label, confirm, execute, tone }) => ({
                 label,
+                tone,
                 onClick: () => { if (window.confirm(confirm)) void save(execute); }
             })) ?? [],
             queries: spec?.queries?.map(({ label, load: loadExtra }) => ({

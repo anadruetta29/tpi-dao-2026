@@ -7,9 +7,11 @@ import { type GetPrestamoByIdReq } from "@/domain/dto/prestamo/request/GetPresta
 import { type GetPrestamoByIdRes } from "@/domain/dto/prestamo/response/GetPrestamoByIdRes";
 import { type CreatePrestamoReq } from "@/domain/dto/prestamo/request/CreatePrestamoReq";
 import { type CreatePrestamoRes } from "@/domain/dto/prestamo/response/CreatePrestamoRes";
+import { type CancelarPrestamoReq } from "@/domain/dto/prestamo/request/CancelarPrestamoReq";
+import { type CancelarPrestamoRes } from "@/domain/dto/prestamo/response/CancelarPrestamoRes";
 import { HTTPClient } from "@/core/adapters/http-client";
 import { CacheTags, withCacheTags } from "@/core/config/cache";
-import { ErrorHandler } from "@/domain/messages";
+import { ErrorHandler, ErrorMessages } from "@/domain/messages";
 
 export class PrestamoApiDataSource implements PrestamoDataSourceI {
 
@@ -59,6 +61,19 @@ export class PrestamoApiDataSource implements PrestamoDataSourceI {
             };
         }
         catch (error: any) {
+            throw ErrorHandler.handleError(error);
+        }
+    }
+
+    public async cancelarPrestamo(dto: CancelarPrestamoReq): Promise<CancelarPrestamoRes> {
+        try {
+            const response = await this.httpClient.patch(
+                `/prestamos/${encodeURIComponent(dto.id)}/cancelar`, {}, dto.session.accessToken
+            );
+            const prestamo = Prestamo.fromObject(response);
+            if (!prestamo?.id) throw new Error(ErrorMessages.PRESTAMO_CANCEL_ERROR);
+            return { prestamo };
+        } catch (error) {
             throw ErrorHandler.handleError(error);
         }
     }

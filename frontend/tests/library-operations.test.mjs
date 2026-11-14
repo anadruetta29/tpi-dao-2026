@@ -77,6 +77,9 @@ test("las operaciones de la biblioteca usan la ruta, filtros y cuerpo de la API"
         await request(socios, "getSocioMultas", byId, "GET", "/socios/5/multas", { response: { multas: [] } });
         await request(socios, "createSocio", socio, "POST", "/socios", { body: socio });
         await request(socios, "updateSocio", { ...byId, ...socio }, "PUT", "/socios/5", { body: socio });
+        const enabled = await request(socios, "updateSocio", { ...byId, habilitar: true }, "PUT", "/socios/5",
+            { body: { habilitar: true }, response: { id: 5, ...socio, estado: "HABILITADO" } });
+        assert.equal(enabled.socio.estado.value, "HABILITADO");
         await request(socios, "deleteSocio", byId, "DELETE", "/socios/5");
 
         const libros = await source("libro", "LibroApiDataSource");
@@ -111,8 +114,12 @@ test("las operaciones de la biblioteca usan la ruta, filtros y cuerpo de la API"
         const local = { socioId: "1", ejemplarId: "2", sedeOrigenId: "3" };
         const localBody = { socio_id: 1, ejemplar_id: 2, sede_origen_id: 3 };
         await request(solicitudes, "createSolicitudLocal", local, "POST", "/solicitudes-prestamo/local", { body: localBody });
-        await request(solicitudes, "createSolicitudInterbibliotecaria", { ...local, sedeDestinoId: "4" }, "POST", "/solicitudes-prestamo/interbibliotecario",
-            { body: { ...localBody, sede_destino_id: 4 } });
+        const { recepcionistas } = await request(solicitudes, "getRecepcionistas", {}, "GET", "/solicitudes-prestamo/recepcionistas",
+            { response: { recepcionistas: [{ id: 7, nombre: "Ana", apellido: "Pérez" }] } });
+        assert.equal(recepcionistas[0].id, "7");
+        await request(solicitudes, "createSolicitudInterbibliotecaria",
+            { recepcionistaId: "7", ejemplarId: "2", sedeOrigenId: "3", sedeDestinoId: "4" }, "POST", "/solicitudes-prestamo/interbibliotecario",
+            { body: { recepcionista_id: 7, ejemplar_id: 2, sede_origen_id: 3, sede_destino_id: 4 } });
         await request(solicitudes, "updateSolicitudEstado", { ...byId, estado: EstadoSolicitud.APROBADA }, "PATCH", "/solicitudes-prestamo/5/estado",
             { body: { estado: "APROBADA" } });
 
@@ -120,6 +127,9 @@ test("las operaciones de la biblioteca usan la ruta, filtros y cuerpo de la API"
         const loanQuery = { socio_id: "1", sede_id: "3", estado: "ACTIVO" };
         await request(prestamos, "getAllPrestamos", loanQuery, "GET", "/prestamos", { query: loanQuery, response: { prestamos: [] } });
         await request(prestamos, "getPrestamoById", byId, "GET", "/prestamos/5");
+        const cancelado = await request(prestamos, "cancelarPrestamo", byId, "PATCH", "/prestamos/5/cancelar",
+            { body: {}, response: { id: 5, estado: "DEVUELTO", fechaDevolucion: "2026-11-14" } });
+        assert.equal(cancelado.prestamo.estado.value, "DEVUELTO");
         await request(prestamos, "createPrestamo", { solicitud_id: "5", modalidad: "DOMICILIO" }, "POST", "/prestamos",
             { body: { solicitud_id: 5, modalidad: "DOMICILIO" } });
 

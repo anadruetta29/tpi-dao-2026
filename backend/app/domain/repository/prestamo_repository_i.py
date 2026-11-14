@@ -7,6 +7,10 @@ from app.domain.repository.base_repository_i import BaseRepositoryI
 
 class PrestamoRepositoryI(BaseRepositoryI[Prestamo]):
     @abstractmethod
+    def get_by_id_for_update(self, id: int) -> Optional[Prestamo]:
+        pass
+
+    @abstractmethod
     def get_all_filtered(
         self,
         socio_id: Optional[int] = None,

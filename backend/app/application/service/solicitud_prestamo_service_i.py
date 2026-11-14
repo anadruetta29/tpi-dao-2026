@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from typing import Optional
+from app.presentation.dto.solicitud_prestamo.response.recepcionistas_res import GetRecepcionistasRes
 from app.presentation.dto.solicitud_prestamo.request import (
     CreateSolicitudInterbibliotecariaReq,
     CreateSolicitudLocalReq,
@@ -13,6 +15,10 @@ from app.presentation.dto.solicitud_prestamo.response import (
 
 
 class SolicitudPrestamoServiceI(ABC):
+    @abstractmethod
+    def get_recepcionistas(self, token: Optional[str]) -> GetRecepcionistasRes:
+        pass
+
     @abstractmethod
     def get_all(self, dto: GetAllSolicitudesPrestamoReq) -> GetAllSolicitudesPrestamoRes:
         pass

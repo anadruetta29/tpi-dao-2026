@@ -5,7 +5,6 @@ import { SedesRoute } from "@/ui/routes/sedes/sedes-route";
 import { SociosRoute } from "@/ui/routes/socios/socios-route";
 import { UsuariosRoute } from "@/ui/routes/usuarios/usuarios-route";
 import { LibrosRoute } from "@/ui/routes/libros/libros-route";
-import { EjemplaresRoute } from "@/ui/routes/ejemplares/ejemplares-route";
 import { AutoresRoute } from "@/ui/routes/autores/autores-route";
 import { SolicitudesPrestamoRoute } from "@/ui/routes/solicitudes-prestamo/solicitudes-prestamo-route";
 import { PrestamosRoute } from "@/ui/routes/prestamos/prestamos-route";
@@ -20,7 +19,6 @@ const modules = [
     { area: "Administración", label: "Usuarios", Component: UsuariosRoute, adminOnly: true },
     { area: "Administración", label: "Socios", Component: SociosRoute },
     { area: "Catálogo", label: "Libros", Component: LibrosRoute },
-    { area: "Catálogo", label: "Ejemplares", Component: EjemplaresRoute },
     { area: "Catálogo", label: "Autores", Component: AutoresRoute },
     { area: "Circulación", label: "Solicitudes de préstamo", Component: SolicitudesPrestamoRoute },
     { area: "Circulación", label: "Préstamos", Component: PrestamosRoute },

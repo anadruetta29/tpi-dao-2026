@@ -12,7 +12,7 @@ class Settings:
 
     JWT_SECRET: str = os.getenv("JWT_SECRET", "super-secret-jwt-key-change-in-prod")
     JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
-    JWT_EXPIRE_MINUTES: int = int(os.getenv("JWT_EXPIRE_MINUTES", "60"))
+    JWT_EXPIRE_MINUTES: int = int(os.getenv("JWT_EXPIRE_MINUTES", "10080"))
 
 
 settings = Settings()

@@ -3,7 +3,7 @@ import { type SolicitudPrestamoRepositoryI } from "@/domain/repositories/solicit
 import { type SolicitudPrestamo } from "@/domain/entities/solicitud-prestamo";
 
 export interface CreateSolicitudInterbibliotecariaCommand {
-    socioId: string;
+    recepcionistaId: string;
     ejemplarId: string;
     sedeOrigenId: string;
     sedeDestinoId: string;
@@ -24,7 +24,7 @@ export class CreateSolicitudInterbibliotecariaUseCase {
 
     public async execute(command: CreateSolicitudInterbibliotecariaCommand): Promise<CreateSolicitudInterbibliotecariaResult> {
         const response = await this.solicitudPrestamoRepository.createSolicitudInterbibliotecaria({
-            socioId: command.socioId,
+            recepcionistaId: command.recepcionistaId,
             ejemplarId: command.ejemplarId,
             sedeOrigenId: command.sedeOrigenId,
             sedeDestinoId: command.sedeDestinoId,

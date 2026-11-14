@@ -1,4 +1,5 @@
 import { type ActionState } from "@/core/types";
+import { GetRecepcionistasUseCase, type GetRecepcionistasCommand, type GetRecepcionistasResult } from "@/domain/use-cases/solicitud-prestamo/get-recepcionistas";
 import { type SolicitudPrestamo } from "@/domain/entities/solicitud-prestamo";
 import { ErrorMessages, SuccessMessages } from "@/domain/messages";
 import { GetAllSolicitudesPrestamoUseCase, type GetAllSolicitudesPrestamoCommand } from "@/domain/use-cases/solicitud-prestamo/get-all-solicitudes-prestamo";
@@ -17,6 +18,15 @@ const getSolicitudPrestamoByIdUseCase = new GetSolicitudPrestamoByIdUseCase(soli
 const createSolicitudLocalUseCase = new CreateSolicitudLocalUseCase(solicitudPrestamoRepository);
 const createSolicitudInterbibliotecariaUseCase = new CreateSolicitudInterbibliotecariaUseCase(solicitudPrestamoRepository);
 const updateSolicitudEstadoUseCase = new UpdateSolicitudEstadoUseCase(solicitudPrestamoRepository);
+const getRecepcionistasUseCase = new GetRecepcionistasUseCase(solicitudPrestamoRepository);
+
+export async function getRecepcionistasAction(command: GetRecepcionistasCommand): Promise<ActionState<GetRecepcionistasResult>> {
+    try {
+        return { success: true, data: await getRecepcionistasUseCase.execute(command) };
+    } catch (error) {
+        return { success: false, error: error instanceof Error ? error.message : "No se pudieron cargar los recepcionistas." };
+    }
+}
 
 export async function getAllSolicitudesPrestamoAction(command: GetAllSolicitudesPrestamoCommand): Promise<ActionState<SolicitudPrestamo[]>> {
     try {

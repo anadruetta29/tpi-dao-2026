@@ -34,6 +34,7 @@ class ErrorType(Enum):
     SOCIO_NOT_FOUND = (404, "SOCIO_NOT_FOUND", "Socio no encontrado.")
     SOCIO_ALREADY_EXISTS = (409, "SOCIO_ALREADY_EXISTS", "Ya existe un socio con ese documento o email.")
     SOCIO_INHABILITADO = (403, "SOCIO_INHABILITADO", "El socio se encuentra inhabilitado.")
+    SOCIO_MULTAS_PENDIENTES = (409, "SOCIO_MULTAS_PENDIENTES", "El socio tiene multas pendientes y todavía no se puede habilitar.")
 
     # Catálogo (Libro, Autor, Ejemplar)
     LIBRO_NOT_FOUND = (404, "LIBRO_NOT_FOUND", "Libro no encontrado.")
@@ -45,9 +46,25 @@ class ErrorType(Enum):
 
     # Solicitudes, Préstamos, Reservas
     SOLICITUD_NOT_FOUND = (404, "SOLICITUD_NOT_FOUND", "Solicitud de préstamo no encontrada.")
+    RECEPCIONISTA_INVALIDO = (400, "RECEPCIONISTA_INVALIDO", "Seleccioná un recepcionista activo.")
     SOLICITUD_NOT_APPROVED = (400, "SOLICITUD_NOT_APPROVED", "La solicitud de préstamo no está aprobada.")
     PRESTAMO_NOT_FOUND = (404, "PRESTAMO_NOT_FOUND", "Préstamo no encontrado.")
     PRESTAMO_ALREADY_RETURNED = (409, "PRESTAMO_ALREADY_RETURNED", "El préstamo ya fue devuelto.")
+    RESERVA_LIBRO_DISPONIBLE = (
+        409, "RESERVA_LIBRO_DISPONIBLE", "Hay ejemplares disponibles para préstamo. La reserva se usa cuando no hay ninguno disponible."
+    )
+    RESERVA_EJEMPLAR_NO_COINCIDE = (
+        400, "RESERVA_EJEMPLAR_NO_COINCIDE", "El ejemplar no corresponde al libro o a la sede seleccionados."
+    )
+    PRESTAMO_NO_CANCELABLE = (
+        409, "PRESTAMO_NO_CANCELABLE", "Solo se puede cancelar un préstamo activo que ya empezó y aún no llegó a su fecha de vencimiento."
+    )
+    PRESTAMO_INICIO_ANTERIOR = (
+        400, "PRESTAMO_INICIO_ANTERIOR", "La fecha de inicio debe ser hoy o posterior."
+    )
+    PRESTAMO_VENCIMIENTO_ANTERIOR = (
+        400, "PRESTAMO_VENCIMIENTO_ANTERIOR", "La fecha de vencimiento no puede ser anterior al inicio."
+    )
     RESERVA_NOT_FOUND = (404, "RESERVA_NOT_FOUND", "Reserva no encontrada.")
 
     # Logística (Remito)

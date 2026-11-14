@@ -1,12 +1,14 @@
 import { LibraryButton } from "@/ui/components/library-button/library-button";
+import { type ReactNode } from "react";
 import { LibraryForm } from "@/ui/components/library-form/library-form";
 import { LibraryStatus } from "@/ui/components/library-status/library-status";
 import { type LibraryRecordsView } from "@/ui/routes/use-library-records-viewmodel";
 import styles from "./style.module.css";
 
-export function LibraryDetail({ detail, isSaving }: {
+export function LibraryDetail({ detail, isSaving, children }: {
     detail: NonNullable<LibraryRecordsView["detail"]>;
     isSaving: boolean;
+    children?: ReactNode;
 }) {
     return (
         <div className={styles.detail} aria-busy={detail.loading}>
@@ -30,8 +32,8 @@ export function LibraryDetail({ detail, isSaving }: {
                     {detail.queries.map(({ label, onClick }) => (
                         <LibraryButton key={label} disabled={isSaving} onClick={onClick}>{label}</LibraryButton>
                     ))}
-                    {detail.commands.map(({ label, onClick }) => (
-                        <LibraryButton key={label} tone="danger" disabled={isSaving} onClick={onClick}>{label}</LibraryButton>
+                    {detail.commands.map(({ label, onClick, tone = "danger" }) => (
+                        <LibraryButton key={label} tone={tone} disabled={isSaving} onClick={onClick}>{label}</LibraryButton>
                     ))}
                 </div>
             )}
@@ -43,6 +45,7 @@ export function LibraryDetail({ detail, isSaving }: {
                     {entries.length ? <ul>{entries.map(({ id, label }) => <li key={id}>{label}</li>)}</ul> : <p>{emptyMessage}</p>}
                 </section>
             ))}
+            {children}
         </div>
     );
 }

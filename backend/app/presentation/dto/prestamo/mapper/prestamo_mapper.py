@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional
 from app.domain.entity.estado_prestamo import EstadoPrestamo
 from app.domain.entity.prestamo import Prestamo
+from app.presentation.dto.prestamo.request.cancelar_prestamo_req import CancelarPrestamoReq
 from app.presentation.dto.prestamo.request import (
     CreatePrestamoReq,
     GetAllPrestamosReq,
@@ -30,6 +31,10 @@ class PrestamoMapper:
     @staticmethod
     def to_create_request(token: Optional[str], payload: Dict[str, Any]) -> CreatePrestamoReq:
         return CreatePrestamoReq.build(token, payload)
+
+    @staticmethod
+    def to_cancelar_request(token: Optional[str], id: int) -> CancelarPrestamoReq:
+        return CancelarPrestamoReq(token=token, id=id)
 
     @staticmethod
     def to_response(prestamo: Prestamo) -> PrestamoRes:

@@ -45,17 +45,18 @@ class DevolucionDisponibleStrategy(DevolucionEjemplarStrategy):
         if reserva_repository is not None and ejemplar.libro_id is not None:
             reservas_activas = reserva_repository.get_all_filtered(
                 libro_id=ejemplar.libro_id,
-                sede_id=ejemplar.sede_id,
                 estado=EstadoReserva.ACTIVA,
             )
-            if reservas_activas:
-                reserva = reservas_activas[0]
-                if reserva.id is not None:
-                    ReservaEstadoStateFactory().get_state(reserva.estado).atender(
-                        reserva
-                    )
-                    reserva.ejemplar_id = ejemplar.id
-                    reserva_repository.update(reserva.id, reserva)
-                    ejemplar.reservar()
+            reserva = next((
+                item for item in reservas_activas
+                if item.id is not None
+                and item.sede_id in (None, ejemplar.sede_id)
+                and item.ejemplar_id in (None, ejemplar.id)
+            ), None)
+            if reserva is not None:
+                ReservaEstadoStateFactory().get_state(reserva.estado).atender(reserva)
+                reserva.ejemplar_id = ejemplar.id
+                reserva_repository.update(reserva.id, reserva)
+                ejemplar.reservar()
 
         ejemplar_repository.update(ejemplar.id, ejemplar)

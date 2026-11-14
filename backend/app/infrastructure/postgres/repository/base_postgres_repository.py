@@ -1,5 +1,6 @@
 from typing import Generic, List, Optional, Type, TypeVar
 from sqlalchemy.orm import Session
+from app.infrastructure.database import flush_or_commit
 
 M = TypeVar("M")
 
@@ -17,7 +18,7 @@ class BasePostgresRepository(Generic[M]):
 
     def save(self, model: M) -> M:
         self.db.add(model)
-        self.db.commit()
+        flush_or_commit(self.db)
         self.db.refresh(model)
         return model
 

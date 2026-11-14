@@ -65,6 +65,18 @@ class CreatePrestamoUseCase:
         if command.solicitud_id is None:
             raise ErrorHandler(ErrorType.MISSING_REQUIRED_FIELDS)
 
+        hoy = date.today()
+        fecha_inicio = command.fechaInicio or hoy
+        if fecha_inicio < hoy:
+            raise ErrorHandler(ErrorType.PRESTAMO_INICIO_ANTERIOR)
+
+        modalidad = command.modalidad or ModalidadPrestamoLocal.DOMICILIO
+        fecha_vencimiento = command.fechaVencimiento or (
+            self.vencimiento_strategy_factory.get_strategy(modalidad).calcular_vencimiento(fecha_inicio)
+        )
+        if fecha_vencimiento < fecha_inicio:
+            raise ErrorHandler(ErrorType.PRESTAMO_VENCIMIENTO_ANTERIOR)
+
         solicitud = self.solicitud_repository.get_by_id(command.solicitud_id)
         if solicitud is None:
             raise ErrorHandler(ErrorType.SOLICITUD_NOT_FOUND)
@@ -83,14 +95,6 @@ class CreatePrestamoUseCase:
         if ejemplar is None:
             raise ErrorHandler(ErrorType.EJEMPLAR_NOT_FOUND)
         self.ejemplar_state_factory.get_state(ejemplar.estado).prestar(ejemplar)
-
-        fecha_inicio = command.fechaInicio or date.today()
-        modalidad = command.modalidad or ModalidadPrestamoLocal.DOMICILIO
-        fecha_vencimiento = command.fechaVencimiento or (
-            self.vencimiento_strategy_factory.get_strategy(modalidad).calcular_vencimiento(
-                fecha_inicio
-            )
-        )
 
         self.ejemplar_repository.update(ejemplar.id, ejemplar)
 

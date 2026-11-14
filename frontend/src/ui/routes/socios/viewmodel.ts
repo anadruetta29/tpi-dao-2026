@@ -48,7 +48,11 @@ export function useViewModel(session: Session) {
             commands: socio.estadoEntity === EstadoSocio.HABILITADO ? [{
                 label: "Dar de baja", confirm: `¿Querés inhabilitar a ${socio.nombre} ${socio.apellido}?`,
                 execute: () => deleteSocioAction({ id: socio.id, session })
-            }] : [],
+            }] : [{
+                label: "Volver a habilitar", confirm: `¿Querés volver a habilitar a ${socio.nombre} ${socio.apellido}?`,
+                tone: "primary",
+                execute: () => updateSocioAction({ id: socio.id, session, habilitar: true })
+            }],
             queries: [{
                 label: "Historial de préstamos",
                 load: async () => pickData(await getSocioPrestamosAction({ id: socio.id, session }), (prestamos) => [{

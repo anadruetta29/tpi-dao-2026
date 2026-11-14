@@ -11,6 +11,7 @@ class UpdateSocioReq:
         documento: Optional[str] = None,
         email: Optional[str] = None,
         telefono: Optional[str] = None,
+        habilitar: bool = False,
     ) -> None:
         self.token = token
         self.id = id
@@ -19,6 +20,7 @@ class UpdateSocioReq:
         self.documento = documento
         self.email = email
         self.telefono = telefono
+        self.habilitar = habilitar
 
     @staticmethod
     def build(token: Optional[str], id: int, payload: Dict[str, Any]) -> "UpdateSocioReq":
@@ -31,6 +33,7 @@ class UpdateSocioReq:
             documento=str(payload["documento"]).strip() if payload.get("documento") is not None else None,
             email=str(payload["email"]).strip() if payload.get("email") is not None else None,
             telefono=str(payload["telefono"]).strip() if payload.get("telefono") is not None else None,
+            habilitar=payload.get("habilitar") is True,
         )
 
     def get_token(self) -> Optional[str]:
@@ -53,3 +56,6 @@ class UpdateSocioReq:
 
     def get_telefono(self) -> Optional[str]:
         return self.telefono
+
+    def get_habilitar(self) -> bool:
+        return self.habilitar

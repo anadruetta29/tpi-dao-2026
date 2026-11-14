@@ -7,6 +7,7 @@ from app.core.bean.dependencies import get_solicitud_prestamo_service
 from app.domain.entity.estado_solicitud import EstadoSolicitud
 from app.domain.entity.tipo_prestamo import TipoPrestamo
 from app.presentation.dto.solicitud_prestamo.mapper import SolicitudPrestamoMapper
+from app.presentation.dto.solicitud_prestamo.response.recepcionistas_res import GetRecepcionistasRes
 from app.presentation.dto.solicitud_prestamo.response import (
     GetAllSolicitudesPrestamoRes,
     SolicitudPrestamoRes,
@@ -31,6 +32,14 @@ class SolicitudPrestamoController:
         request = SolicitudPrestamoMapper.to_get_all_request(token, tipo, estado, sede_id)
         response = service.get_all(request)
         return JSONResponse(status_code=200, content=response.model_dump())
+
+    @staticmethod
+    @router.get("/recepcionistas", response_model=GetRecepcionistasRes)
+    def get_recepcionistas(
+        token: Optional[str] = Header(default=None, alias="Authorization"),
+        service: SolicitudPrestamoServiceI = Depends(get_solicitud_prestamo_service),
+    ) -> GetRecepcionistasRes:
+        return service.get_recepcionistas(token)
 
     @staticmethod
     @router.get("/{id}", response_model=SolicitudPrestamoRes)

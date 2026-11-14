@@ -4,11 +4,12 @@ import { type Socio } from "@/domain/entities/socio";
 
 export interface UpdateSocioCommand {
     id: string;
-    nombre: string;
-    apellido: string;
-    documento: string;
-    email: string;
-    telefono: string;
+    nombre?: string;
+    apellido?: string;
+    documento?: string;
+    email?: string;
+    telefono?: string;
+    habilitar?: true;
     session: Session;
 }
 
@@ -32,6 +33,7 @@ export class UpdateSocioUseCase {
             documento: command.documento,
             email: command.email,
             telefono: command.telefono,
+            habilitar: command.habilitar,
             session: command.session
         });
 

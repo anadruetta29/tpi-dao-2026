@@ -95,6 +95,7 @@ class SocioService(SocioServiceI):
                 documento=dto.get_documento(),
                 email=dto.get_email(),
                 telefono=dto.get_telefono(),
+                habilitar=dto.get_habilitar(),
             )
         )
         return SocioMapper.to_response(result.socio)

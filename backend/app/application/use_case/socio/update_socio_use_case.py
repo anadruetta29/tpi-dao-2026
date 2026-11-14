@@ -5,6 +5,7 @@ from app.domain.entity.rol import Rol
 from app.domain.entity.socio import Socio
 from app.domain.error.error_handler import ErrorHandler
 from app.domain.error.error_type import ErrorType
+from app.domain.repository.multa_repository_i import MultaRepositoryI
 from app.domain.repository.socio_repository_i import SocioRepositoryI
 from app.domain.repository.usuario_repository_i import UsuarioRepositoryI
 
@@ -14,19 +15,22 @@ class UpdateSocioUseCase:
         self,
         socio_repository: SocioRepositoryI,
         usuario_repository: UsuarioRepositoryI,
+        multa_repository: MultaRepositoryI,
     ) -> None:
         self.socio_repository = socio_repository
         self.usuario_repository = usuario_repository
+        self.multa_repository = multa_repository
 
     @dataclass(frozen=True)
     class Command:
         token: Optional[str]
         id: Optional[int]
-        nombre: Optional[str]
-        apellido: Optional[str]
-        documento: Optional[str]
-        email: Optional[str]
-        telefono: Optional[str]
+        nombre: Optional[str] = None
+        apellido: Optional[str] = None
+        documento: Optional[str] = None
+        email: Optional[str] = None
+        telefono: Optional[str] = None
+        habilitar: bool = False
 
     @dataclass(frozen=True)
     class Result:
@@ -47,6 +51,9 @@ class UpdateSocioUseCase:
         if socio is None:
             raise ErrorHandler(ErrorType.SOCIO_NOT_FOUND)
 
+        if command.habilitar and self.multa_repository.has_pending_by_socio(command.id):
+            raise ErrorHandler(ErrorType.SOCIO_MULTAS_PENDIENTES)
+
         if command.documento is not None:
             existing_doc = self.socio_repository.get_by_documento(command.documento)
             if existing_doc is not None and existing_doc.id != command.id:
@@ -63,6 +70,8 @@ class UpdateSocioUseCase:
             email=command.email,
             telefono=command.telefono,
         )
+        if command.habilitar:
+            socio.habilitar()
 
         updated = self.socio_repository.update(command.id, socio)
         if updated is None:

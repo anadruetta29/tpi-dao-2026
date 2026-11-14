@@ -7,6 +7,7 @@ import { ErrorMessages, SuccessMessages } from "@/domain/messages";
 import { GetAllPrestamosUseCase } from "@/domain/use-cases/prestamo/get-all-prestamos";
 import { GetPrestamoByIdUseCase } from "@/domain/use-cases/prestamo/get-prestamo-by-id";
 import { CreatePrestamoUseCase } from "@/domain/use-cases/prestamo/create-prestamo";
+import { CancelarPrestamoUseCase, type CancelarPrestamoCommand } from "@/domain/use-cases/prestamo/cancelar-prestamo";
 import { PrestamoApiDataSource } from "@/infrastructure/datasource/api/prestamo-api";
 import { AuthStorageDataSource } from "@/infrastructure/datasource/storage/auth-storage";
 import { PrestamoRepository } from "@/infrastructure/repository/prestamo";
@@ -18,6 +19,16 @@ const prestamoRepository = new PrestamoRepository(prestamoApiDataSource);
 const getAllPrestamosUseCase = new GetAllPrestamosUseCase(prestamoRepository);
 const getPrestamoByIdUseCase = new GetPrestamoByIdUseCase(prestamoRepository);
 const createPrestamoUseCase = new CreatePrestamoUseCase(prestamoRepository);
+const cancelarPrestamoUseCase = new CancelarPrestamoUseCase(prestamoRepository);
+
+export async function cancelarPrestamoAction(command: CancelarPrestamoCommand): Promise<ActionState<Prestamo>> {
+    try {
+        const { prestamo } = await cancelarPrestamoUseCase.execute(command);
+        return { success: true, data: prestamo, message: SuccessMessages.PRESTAMO_CANCELADO };
+    } catch (error) {
+        return { success: false, error: error instanceof Error ? error.message : ErrorMessages.PRESTAMO_CANCEL_ERROR };
+    }
+}
 
 function resolveSession(customSession?: Session | null): Session | null {
     return customSession ?? authStorageDataSource.getSession();

@@ -5,6 +5,5 @@ export interface CreateReservaReq {
     libroId?: string;
     ejemplarId?: string;
     sedeId?: string;
-    fecha?: string;
     session: Session;
 }

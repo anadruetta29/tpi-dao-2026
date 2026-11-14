@@ -66,8 +66,7 @@ export class ReservaApiDataSource implements ReservaDataSourceI {
                     socio_id: Number(dto.socioId),
                     libro_id: dto.libroId ? Number(dto.libroId) : undefined,
                     ejemplar_id: dto.ejemplarId ? Number(dto.ejemplarId) : undefined,
-                    sede_id: dto.sedeId ? Number(dto.sedeId) : undefined,
-                    fecha: dto.fecha
+                    sede_id: dto.sedeId ? Number(dto.sedeId) : undefined
                 },
                 dto.session.accessToken
             );

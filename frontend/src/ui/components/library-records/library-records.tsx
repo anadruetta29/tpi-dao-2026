@@ -1,15 +1,21 @@
 import { LibraryButton } from "@/ui/components/library-button/library-button";
+import { type ReactNode } from "react";
 import { LibraryForm } from "@/ui/components/library-form/library-form";
 import { LibraryRecordList } from "@/ui/components/library-record-list/library-record-list";
 import { LibraryStatus } from "@/ui/components/library-status/library-status";
 import { type LibraryRecordsView } from "@/ui/routes/use-library-records-viewmodel";
 import styles from "./style.module.css";
 
-export function LibraryRecords({ view }: { view: LibraryRecordsView }) {
+export function LibraryRecords({ view, renderDetailContent, headingLevel = 1 }: {
+    view: LibraryRecordsView;
+    renderDetailContent?: (id: string) => ReactNode;
+    headingLevel?: 1 | 2;
+}) {
+    const Heading = headingLevel === 1 ? "h1" : "h2";
     return (
         <section aria-label={view.title} className={styles.module}>
             <header className={styles.heading}>
-                <h1>{view.title}</h1>
+                <Heading>{view.title}</Heading>
                 {view.createLabel && (
                     <LibraryButton tone={view.create ? "secondary" : "primary"} aria-expanded={Boolean(view.create)}
                         disabled={view.isSaving} onClick={view.toggleCreate}>
@@ -41,7 +47,8 @@ export function LibraryRecords({ view }: { view: LibraryRecordsView }) {
                 ) : view.records.length === 0 ? (
                     <div className={styles.status}><LibraryStatus kind="empty">No hay resultados.</LibraryStatus></div>
                 ) : (
-                    <LibraryRecordList records={view.records} detail={view.detail} isSaving={view.isSaving} />
+                    <LibraryRecordList records={view.records} detail={view.detail} isSaving={view.isSaving}
+                        renderDetailContent={renderDetailContent} />
                 )}
             </div>
         </section>

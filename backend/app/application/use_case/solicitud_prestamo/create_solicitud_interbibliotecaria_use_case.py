@@ -14,7 +14,6 @@ from app.domain.error.error_handler import ErrorHandler
 from app.domain.error.error_type import ErrorType
 from app.domain.repository.ejemplar_repository_i import EjemplarRepositoryI
 from app.domain.repository.sede_repository_i import SedeRepositoryI
-from app.domain.repository.socio_repository_i import SocioRepositoryI
 from app.domain.repository.solicitud_prestamo_repository_i import SolicitudPrestamoRepositoryI
 from app.domain.repository.usuario_repository_i import UsuarioRepositoryI
 
@@ -23,7 +22,6 @@ class CreateSolicitudInterbibliotecariaUseCase:
     def __init__(
         self,
         solicitud_repository: SolicitudPrestamoRepositoryI,
-        socio_repository: SocioRepositoryI,
         ejemplar_repository: EjemplarRepositoryI,
         sede_repository: SedeRepositoryI,
         usuario_repository: UsuarioRepositoryI,
@@ -31,7 +29,6 @@ class CreateSolicitudInterbibliotecariaUseCase:
         ejemplar_state_factory: Optional[EjemplarEstadoStateFactory] = None,
     ) -> None:
         self.solicitud_repository = solicitud_repository
-        self.socio_repository = socio_repository
         self.ejemplar_repository = ejemplar_repository
         self.sede_repository = sede_repository
         self.usuario_repository = usuario_repository
@@ -41,7 +38,7 @@ class CreateSolicitudInterbibliotecariaUseCase:
     @dataclass(frozen=True)
     class Command:
         token: Optional[str]
-        socio_id: Optional[int]
+        recepcionista_id: Optional[int]
         ejemplar_id: Optional[int]
         sede_origen_id: Optional[int]
         sede_destino_id: Optional[int]
@@ -51,7 +48,7 @@ class CreateSolicitudInterbibliotecariaUseCase:
         solicitud: SolicitudPrestamo
 
     def execute(self, command: Command) -> Result:
-        user = AuthHelper.authenticate(
+        AuthHelper.authenticate(
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
@@ -59,17 +56,16 @@ class CreateSolicitudInterbibliotecariaUseCase:
             Rol.RECEPCIONISTA,
         )
         if (
-            command.socio_id is None
+            command.recepcionista_id is None
             or command.ejemplar_id is None
             or command.sede_origen_id is None
             or command.sede_destino_id is None
         ):
             raise ErrorHandler(ErrorType.MISSING_REQUIRED_FIELDS)
 
-        socio = self.socio_repository.get_by_id(command.socio_id)
-        if socio is None:
-            raise ErrorHandler(ErrorType.SOCIO_NOT_FOUND)
-        socio.validar_habilitado()
+        recepcionista = self.usuario_repository.get_by_id(command.recepcionista_id)
+        if recepcionista is None or not recepcionista.activo or recepcionista.role != Rol.RECEPCIONISTA:
+            raise ErrorHandler(ErrorType.RECEPCIONISTA_INVALIDO)
 
         strategy = self.solicitud_tipo_factory.get_strategy(TipoPrestamo.INTERBIBLIOTECARIO)
         sede_destino_id = strategy.validar_sedes(
@@ -85,11 +81,11 @@ class CreateSolicitudInterbibliotecariaUseCase:
         )
 
         solicitud = strategy.construir_solicitud(
-            socio_id=command.socio_id,
+            socio_id=None,
             ejemplar_id=command.ejemplar_id,
             sede_origen_id=command.sede_origen_id,
             sede_destino_id=sede_destino_id,
-            responsable_origen_id=user.id,
+            responsable_origen_id=command.recepcionista_id,
         )
         saved = self.solicitud_repository.save(solicitud)
         return CreateSolicitudInterbibliotecariaUseCase.Result(solicitud=saved)

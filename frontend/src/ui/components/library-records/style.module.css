@@ -1,6 +1,7 @@
 .module { display: grid; gap: 1.25rem; min-width: 0; }
 .heading { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.85rem 1.25rem; }
 .heading h1 { font-size: clamp(1.82rem, 3.5vw, 2.75rem); font-weight: 740; letter-spacing: -0.055em; line-height: 1.1; }
+.heading h2 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.025em; }
 .plus { font-size: 1.24rem; line-height: 1; font-weight: 500; }
 .editor, .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
 .editor { padding: clamp(1rem, 2.2vw, 1.5rem); border-top: 3px solid var(--primary); }

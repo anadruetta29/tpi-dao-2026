@@ -54,7 +54,6 @@ class ReservaService(ReservaServiceI):
                 libro_id=dto.get_libro_id(),
                 sede_id=dto.get_sede_id(),
                 ejemplar_id=dto.get_ejemplar_id(),
-                fecha=dto.get_fecha(),
             )
         )
         return ReservaMapper.to_response(result.reserva)

@@ -132,7 +132,8 @@ export class SocioApiDataSource implements SocioDataSourceI {
                     apellido: dto.apellido,
                     documento: dto.documento,
                     email: dto.email,
-                    telefono: dto.telefono
+                    telefono: dto.telefono,
+                    habilitar: dto.habilitar
                 },
                 dto.session.accessToken
             );

@@ -5,6 +5,7 @@ from app.application.strategy.ejemplar_estado.core.ejemplar_estado_state_factory
     EjemplarEstadoStateFactory,
 )
 from app.core.helper.auth_helper import AuthHelper
+from app.domain.entity.estado_ejemplar import EstadoEjemplar
 from app.domain.entity.estado_reserva import EstadoReserva
 from app.domain.entity.reserva import Reserva
 from app.domain.entity.rol import Rol
@@ -44,7 +45,6 @@ class CreateReservaUseCase:
         libro_id: Optional[int]
         sede_id: Optional[int]
         ejemplar_id: Optional[int]
-        fecha: Optional[date]
 
     @dataclass(frozen=True)
     class Result:
@@ -66,28 +66,40 @@ class CreateReservaUseCase:
             raise ErrorHandler(ErrorType.SOCIO_NOT_FOUND)
         socio.validar_habilitado()
 
-        if command.libro_id is not None and self.libro_repository.get_by_id(command.libro_id) is None:
-            raise ErrorHandler(ErrorType.LIBRO_NOT_FOUND)
-
         if command.sede_id is not None:
             sede = self.sede_repository.get_by_id(command.sede_id)
             if sede is None:
                 raise ErrorHandler(ErrorType.SEDE_NOT_FOUND)
             sede.validar_activa()
 
+        libro_id = command.libro_id
         if command.ejemplar_id is not None:
             ejemplar = self.ejemplar_repository.get_by_id(command.ejemplar_id)
             if ejemplar is None:
                 raise ErrorHandler(ErrorType.EJEMPLAR_NOT_FOUND)
+            if (libro_id is not None and libro_id != ejemplar.libro_id) or (
+                command.sede_id is not None and command.sede_id != ejemplar.sede_id
+            ):
+                raise ErrorHandler(ErrorType.RESERVA_EJEMPLAR_NO_COINCIDE)
+            libro_id = ejemplar.libro_id
+            if ejemplar.estado == EstadoEjemplar.DISPONIBLE:
+                raise ErrorHandler(ErrorType.RESERVA_LIBRO_DISPONIBLE)
             self.ejemplar_state_factory.get_state(ejemplar.estado).validar_reserva(
                 ejemplar
             )
 
+        if libro_id is None or self.libro_repository.get_by_id(libro_id) is None:
+            raise ErrorHandler(ErrorType.LIBRO_NOT_FOUND)
+        if self.ejemplar_repository.get_all_filtered(
+            libro_id=libro_id, sede_id=command.sede_id, estado=EstadoEjemplar.DISPONIBLE
+        ):
+            raise ErrorHandler(ErrorType.RESERVA_LIBRO_DISPONIBLE)
+
         reserva = Reserva(
-            fecha=command.fecha or date.today(),
+            fecha=date.today(),
             estado=EstadoReserva.ACTIVA,
             socio_id=command.socio_id,
-            libro_id=command.libro_id,
+            libro_id=libro_id,
             sede_id=command.sede_id,
             ejemplar_id=command.ejemplar_id,
         )

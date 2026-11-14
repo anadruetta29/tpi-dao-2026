@@ -1,4 +1,6 @@
 import { type GetAllSolicitudesPrestamoReq } from "@/domain/dto/solicitud-prestamo/request/GetAllSolicitudesPrestamoReq";
+import { type GetRecepcionistasReq } from "@/domain/dto/solicitud-prestamo/request/GetRecepcionistasReq";
+import { type GetRecepcionistasRes } from "@/domain/dto/solicitud-prestamo/response/GetRecepcionistasRes";
 import { type GetAllSolicitudesPrestamoRes } from "@/domain/dto/solicitud-prestamo/response/GetAllSolicitudesPrestamoRes";
 import { type GetSolicitudPrestamoByIdReq } from "@/domain/dto/solicitud-prestamo/request/GetSolicitudPrestamoByIdReq";
 import { type GetSolicitudPrestamoByIdRes } from "@/domain/dto/solicitud-prestamo/response/GetSolicitudPrestamoByIdRes";
@@ -15,4 +17,5 @@ export abstract class SolicitudPrestamoRepositoryI {
     abstract createSolicitudLocal(dto: CreateSolicitudLocalReq): Promise<CreateSolicitudLocalRes>;
     abstract createSolicitudInterbibliotecaria(dto: CreateSolicitudInterbibliotecariaReq): Promise<CreateSolicitudInterbibliotecariaRes>;
     abstract updateSolicitudEstado(dto: UpdateSolicitudEstadoReq): Promise<UpdateSolicitudEstadoRes>;
+    abstract getRecepcionistas(dto: GetRecepcionistasReq): Promise<GetRecepcionistasRes>;
 }

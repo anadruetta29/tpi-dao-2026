@@ -1,9 +1,14 @@
 import { LibraryButton } from "@/ui/components/library-button/library-button";
+import { type ReactNode } from "react";
 import { LibraryDetail } from "@/ui/components/library-detail/library-detail";
 import { type LibraryRecordsView } from "@/ui/routes/use-library-records-viewmodel";
 import styles from "./style.module.css";
 
-export function LibraryRecordList({ records, detail, isSaving }: Pick<LibraryRecordsView, "records" | "detail" | "isSaving">) {
+export function LibraryRecordList({ records, detail, isSaving, renderDetailContent }:
+    Pick<LibraryRecordsView, "records" | "detail" | "isSaving"> & {
+        renderDetailContent?: (id: string) => ReactNode;
+    }
+) {
     return (
         <div>
             <div className={styles.header}>
@@ -23,7 +28,11 @@ export function LibraryRecordList({ records, detail, isSaving }: Pick<LibraryRec
                                 </LibraryButton>
                             )}
                         </div>
-                        {selected && detail && <LibraryDetail detail={detail} isSaving={isSaving} />}
+                        {selected && detail && (
+                            <LibraryDetail detail={detail} isSaving={isSaving}>
+                                {!detail.loading && !detail.error && renderDetailContent?.(id)}
+                            </LibraryDetail>
+                        )}
                     </li>
                 ))}
             </ul>

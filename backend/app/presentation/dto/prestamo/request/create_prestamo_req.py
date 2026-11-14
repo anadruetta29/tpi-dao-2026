@@ -33,7 +33,7 @@ class CreatePrestamoReq:
             token=token,
             solicitud_id=int(payload["solicitud_id"]) if payload.get("solicitud_id") is not None else None,
             modalidad=modalidad,
-            fechaInicio=date.fromisoformat(str(raw_inicio)) if raw_inicio else date.today(),
+            fechaInicio=date.fromisoformat(str(raw_inicio)) if raw_inicio else None,
             fechaVencimiento=date.fromisoformat(str(raw_venc)) if raw_venc else None,
         )
 

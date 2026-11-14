@@ -1,5 +1,6 @@
 import { useId, type ComponentPropsWithoutRef, type FormEventHandler, type HTMLInputTypeAttribute } from "react";
 import { LibraryChoices, type LibraryChoicesProps } from "@/ui/components/library-choices/library-choices";
+import { LibrarySearchSelect, type LibrarySearchSelectProps } from "@/ui/components/library-search-select/library-search-select";
 import styles from "./style.module.css";
 
 interface CommonFieldProps {
@@ -18,8 +19,8 @@ interface InputFieldProps extends CommonFieldProps {
     pattern?: string;
     inputMode?: ComponentPropsWithoutRef<"input">["inputMode"];
     onInput?: FormEventHandler<HTMLInputElement>;
-    min?: number;
-    max?: number;
+    min?: number | string;
+    max?: number | string;
     step?: number | "any";
     autoComplete?: string;
 }
@@ -29,11 +30,14 @@ interface SelectFieldProps extends CommonFieldProps {
     options: { value: string; label: string }[];
 }
 
-export type LibraryFieldProps = InputFieldProps | SelectFieldProps | (LibraryChoicesProps & { kind: "choices" });
+export type LibraryFieldProps = InputFieldProps | SelectFieldProps
+    | (LibraryChoicesProps & { kind: "choices" })
+    | (LibrarySearchSelectProps & { kind: "search-select" });
 
 export function LibraryField(field: LibraryFieldProps) {
     const id = useId();
     if (field.kind === "choices") return <LibraryChoices {...field} />;
+    if (field.kind === "search-select") return <LibrarySearchSelect {...field} />;
 
     const { name, label, defaultValue, onChange, required } = field;
     return (

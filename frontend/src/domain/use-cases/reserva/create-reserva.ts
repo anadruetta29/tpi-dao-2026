@@ -7,7 +7,6 @@ export interface CreateReservaCommand {
     libroId?: string;
     ejemplarId?: string;
     sedeId?: string;
-    fecha?: string;
     session: Session;
 }
 
@@ -29,7 +28,6 @@ export class CreateReservaUseCase {
             libroId: command.libroId,
             ejemplarId: command.ejemplarId,
             sedeId: command.sedeId,
-            fecha: command.fecha,
             session: command.session
         });
 

@@ -3,7 +3,8 @@ import { type Session } from "@/domain/entities/session";
 import { EstadoSolicitud, TipoPrestamo } from "@/domain/entities/solicitud-prestamo";
 import { createSolicitudInterbibliotecariaAction, createSolicitudLocalAction, getAllSolicitudesPrestamoAction, getSolicitudPrestamoByIdAction, updateSolicitudEstadoAction } from "@/ui/actions/solicitud-prestamo/solicitud-prestamo.actions";
 import { allOptions, info, useLibraryRecordsViewModel } from "@/ui/routes/use-library-records-viewmodel";
-import { idField, readFields } from "@/ui/forms/handlers/record-fields";
+import { readFields } from "@/ui/forms/handlers/record-fields";
+import { useSelectoresViewModel } from "./selectores-viewmodel";
 
 function nextStates(estado: EstadoSolicitud) {
     if (estado === EstadoSolicitud.PENDIENTE) {
@@ -14,6 +15,8 @@ function nextStates(estado: EstadoSolicitud) {
 
 export function useViewModel(session: Session) {
     const [tipo, setTipo] = useState(TipoPrestamo.LOCAL);
+    const selectors = useSelectoresViewModel(session);
+    const esInterbibliotecaria = tipo === TipoPrestamo.INTERBIBLIOTECARIO;
     const load = useCallback(({ tipo, estado, sedeId }: { tipo: string; estado: string; sedeId: string }) => getAllSolicitudesPrestamoAction({
         session, sedeId,
         tipo: tipo ? TipoPrestamo.fromString(tipo) : undefined,
@@ -27,31 +30,42 @@ export function useViewModel(session: Session) {
         filter: { label: "Filtrar", fields: [
             { name: "tipo", label: "Tipo", options: allOptions(TipoPrestamo.toOptions()) },
             { name: "estado", label: "Estado", options: allOptions(EstadoSolicitud.toOptions()) },
-            idField("sedeId", "ID de sede")
+            selectors.sedeFilter
         ], submit: (field) => readFields(field, "tipo", "estado", "sedeId") },
         getLabel: (solicitud) => `${solicitud.numero} · ${solicitud.tipoName} · ${solicitud.estadoName}`,
         create: {
             label: "Registrar solicitud",
+            submitDisabled: !selectors.canSubmit || (esInterbibliotecaria
+                ? !selectors.hasDestination || !selectors.hasRecepcionista
+                : !selectors.hasSocio),
+            onOpen: () => {
+                setTipo(TipoPrestamo.LOCAL);
+                selectors.open();
+            },
             fields: [
                 { name: "tipo", label: "Tipo de solicitud", defaultValue: tipo.value, options: TipoPrestamo.toOptions(),
                     onChange: (value) => setTipo(TipoPrestamo.fromString(value)) },
-                idField("socioId", "ID de socio", true), idField("ejemplarId", "ID de ejemplar", true),
-                idField("sedeOrigenId", "ID de sede de origen", true),
-                ...(tipo === TipoPrestamo.INTERBIBLIOTECARIO ? [idField("sedeDestinoId", "ID de sede de destino", true)] : [])
+                esInterbibliotecaria ? selectors.recepcionistaField : selectors.socioField,
+                ...selectors.fields,
+                ...(esInterbibliotecaria ? [selectors.destinationField] : [])
             ],
             submit: (field) => {
-                const command = { session, ...readFields(field, "socioId", "ejemplarId", "sedeOrigenId") };
-                return tipo === TipoPrestamo.LOCAL
-                    ? createSolicitudLocalAction(command)
-                    : createSolicitudInterbibliotecariaAction({ ...command, sedeDestinoId: field("sedeDestinoId") });
+                const command = { session, ...readFields(field, "ejemplarId", "sedeOrigenId") };
+                return esInterbibliotecaria
+                    ? createSolicitudInterbibliotecariaAction({ ...command, ...readFields(field, "recepcionistaId", "sedeDestinoId") })
+                    : createSolicitudLocalAction({ ...command, socioId: field("socioId") });
             }
         },
         describe: (solicitud) => {
             const options = nextStates(solicitud.estadoEntity).map((estado) => estado.toOption());
             return {
                 info: [info("Número", solicitud.numero), info("Tipo", solicitud.tipoName), info("Estado", solicitud.estadoName),
-                    info("Socio", solicitud.socioId), info("Ejemplar", solicitud.ejemplarId), info("Sede de origen", solicitud.sedeOrigenId),
-                    info("Sede de destino", solicitud.sedeDestinoId), info("Responsable de origen", solicitud.responsableOrigenId),
+                    ...(solicitud.socioId ? [info("Socio", selectors.socios.get(solicitud.socioId) ?? solicitud.socioId)] : []),
+                    info("Ejemplar", selectors.copyNames.get(solicitud.ejemplarId) ?? solicitud.ejemplarId),
+                    info("Sede de origen", selectors.sedeNames.get(solicitud.sedeOrigenId) ?? solicitud.sedeOrigenId),
+                    info("Sede de destino", selectors.sedeNames.get(solicitud.sedeDestinoId) ?? solicitud.sedeDestinoId),
+                    info(solicitud.tipo === TipoPrestamo.INTERBIBLIOTECARIO && !solicitud.socioId ? "Recepcionista" : "Responsable de origen",
+                        selectors.recepcionistas.get(solicitud.responsableOrigenId) ?? solicitud.responsableOrigenId),
                     info("Responsable de destino", solicitud.responsableDestinoId)],
                 forms: options.length ? [{
                     label: "Actualizar estado", fields: [{ name: "estado", label: "Nuevo estado", options }],

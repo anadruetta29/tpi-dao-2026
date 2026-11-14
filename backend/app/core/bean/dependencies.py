@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 
 from app.application.strategy import (
     CalculoMultaStrategyFactory,
-    DevolucionEjemplarStrategyFactory,
     EjemplarEstadoStateFactory,
     MultaEstadoStateFactory,
     RemitoEstadoStateFactory,
@@ -72,6 +71,7 @@ from app.application.use_case.prestamo import (
     GetAllPrestamosUseCase,
     GetPrestamoByIdUseCase,
 )
+from app.application.use_case.prestamo.cancelar_prestamo_use_case import CancelarPrestamoUseCase
 from app.application.use_case.remito import (
     CreateRemitoUseCase,
     DespachoRemitoUseCase,
@@ -130,7 +130,8 @@ from app.domain.repository import (
     SolicitudPrestamoRepositoryI,
     UsuarioRepositoryI,
 )
-from app.infrastructure.database import get_db
+from app.infrastructure.database import atomic_write, get_db
+from app.application.use_case.solicitud_prestamo.get_recepcionistas_use_case import GetRecepcionistasUseCase
 from app.infrastructure.postgres.repository import (
     PostgresAutorRepository,
     PostgresDevolucionRepository,
@@ -266,7 +267,7 @@ def get_socio_service(
         get_prestamos_use_case=GetSocioPrestamosUseCase(socio_repo, prestamo_repo, usuario_repo),
         get_multas_use_case=GetSocioMultasUseCase(socio_repo, multa_repo, usuario_repo),
         create_use_case=CreateSocioUseCase(socio_repo, usuario_repo),
-        update_use_case=UpdateSocioUseCase(socio_repo, usuario_repo),
+        update_use_case=UpdateSocioUseCase(socio_repo, usuario_repo, multa_repo),
         delete_use_case=DeleteSocioUseCase(socio_repo, usuario_repo),
     )
 
@@ -323,6 +324,7 @@ def get_solicitud_prestamo_service(
     solicitud_state_factory = SolicitudEstadoStateFactory()
     ejemplar_state_factory = EjemplarEstadoStateFactory()
     return SolicitudPrestamoService(
+        get_recepcionistas_use_case=GetRecepcionistasUseCase(usuario_repo),
         get_all_use_case=GetAllSolicitudesPrestamoUseCase(solicitud_repo, usuario_repo),
         get_by_id_use_case=GetSolicitudPrestamoByIdUseCase(solicitud_repo, usuario_repo),
         create_local_use_case=CreateSolicitudLocalUseCase(
@@ -336,7 +338,6 @@ def get_solicitud_prestamo_service(
         ),
         create_interbibliotecaria_use_case=CreateSolicitudInterbibliotecariaUseCase(
             solicitud_repo,
-            socio_repo,
             ejemplar_repo,
             sede_repo,
             usuario_repo,
@@ -349,16 +350,34 @@ def get_solicitud_prestamo_service(
     )
 
 
+def get_create_devolucion_use_case(
+    db: Session = Depends(get_db),
+    devolucion_repo: DevolucionRepositoryI = Depends(get_devolucion_repository),
+    prestamo_repo: PrestamoRepositoryI = Depends(get_prestamo_repository),
+    ejemplar_repo: EjemplarRepositoryI = Depends(get_ejemplar_repository),
+    usuario_repo: UsuarioRepositoryI = Depends(get_usuario_repository),
+    reserva_repo: ReservaRepositoryI = Depends(get_reserva_repository),
+    multa_repo: MultaRepositoryI = Depends(get_multa_repository),
+    socio_repo: SocioRepositoryI = Depends(get_socio_repository),
+) -> CreateDevolucionUseCase:
+    return CreateDevolucionUseCase(
+        devolucion_repo, prestamo_repo, ejemplar_repo, usuario_repo, reserva_repo, multa_repo, socio_repo,
+        transaction=lambda: atomic_write(db),
+    )
+
+
 def get_prestamo_service(
     prestamo_repo: PrestamoRepositoryI = Depends(get_prestamo_repository),
     solicitud_repo: SolicitudPrestamoRepositoryI = Depends(get_solicitud_prestamo_repository),
     socio_repo: SocioRepositoryI = Depends(get_socio_repository),
     ejemplar_repo: EjemplarRepositoryI = Depends(get_ejemplar_repository),
     usuario_repo: UsuarioRepositoryI = Depends(get_usuario_repository),
+    devolver: CreateDevolucionUseCase = Depends(get_create_devolucion_use_case),
 ) -> PrestamoServiceI:
     return PrestamoService(
         get_all_use_case=GetAllPrestamosUseCase(prestamo_repo, usuario_repo),
         get_by_id_use_case=GetPrestamoByIdUseCase(prestamo_repo, usuario_repo),
+        cancelar_use_case=CancelarPrestamoUseCase(devolver),
         create_use_case=CreatePrestamoUseCase(
             prestamo_repo,
             solicitud_repo,
@@ -432,26 +451,13 @@ def get_remito_service(
 
 def get_devolucion_service(
     devolucion_repo: DevolucionRepositoryI = Depends(get_devolucion_repository),
-    prestamo_repo: PrestamoRepositoryI = Depends(get_prestamo_repository),
-    ejemplar_repo: EjemplarRepositoryI = Depends(get_ejemplar_repository),
     usuario_repo: UsuarioRepositoryI = Depends(get_usuario_repository),
-    reserva_repo: ReservaRepositoryI = Depends(get_reserva_repository),
-    multa_repo: MultaRepositoryI = Depends(get_multa_repository),
-    socio_repo: SocioRepositoryI = Depends(get_socio_repository),
+    devolver: CreateDevolucionUseCase = Depends(get_create_devolucion_use_case),
 ) -> DevolucionServiceI:
     return DevolucionService(
         get_all_use_case=GetAllDevolucionesUseCase(devolucion_repo, usuario_repo),
         get_by_id_use_case=GetDevolucionByIdUseCase(devolucion_repo, usuario_repo),
-        create_use_case=CreateDevolucionUseCase(
-            devolucion_repo,
-            prestamo_repo,
-            ejemplar_repo,
-            usuario_repo,
-            reserva_repo,
-            multa_repo,
-            socio_repo,
-            DevolucionEjemplarStrategyFactory(),
-        ),
+        create_use_case=devolver,
     )
 
 

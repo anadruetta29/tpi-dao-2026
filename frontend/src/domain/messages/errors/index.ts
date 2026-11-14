@@ -1,4 +1,5 @@
 export const ErrorMessages = {
+    PRESTAMO_CANCEL_ERROR: "No se pudo cancelar el préstamo.",
     AUTH_INVALID_CREDENTIALS: "Credenciales inválidas. Verificá tu correo y contraseña.",
     AUTH_UNAUTHORIZED: "No tenés autorización para realizar esta acción.",
     AUTH_SESSION_EXPIRED: "Tu sesión ha expirado. Por favor, iniciá sesión nuevamente.",
