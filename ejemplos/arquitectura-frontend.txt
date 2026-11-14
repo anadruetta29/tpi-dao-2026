@@ -1,0 +1,1604 @@
+ejemplo de otro dominio:
+F:.
+│   .env.template
+│   .gitattributes
+│   .gitignore
+│   Dockerfile
+│   eslint.config.js
+│   global.d.ts
+│   index.html
+│   nginx.conf
+│   package-lock.json
+│   package.json
+│   README.md
+│   tsconfig.app.json
+│   tsconfig.json
+│   tsconfig.node.json
+│   vite.config.ts
+│
+├───public
+│   │   vite.svg
+│   │
+│   └───assets
+│       ├───features
+│       │       approve.svg
+│       │       archive.svg
+│       │       auditory.svg
+│       │       calendar.svg
+│       │       colors.svg
+│       │       concretes.svg
+│       │       create.svg
+│       │       create_from.svg
+│       │       edit.svg
+│       │       export.svg
+│       │       molds.svg
+│       │       packaging.svg
+│       │       priority.svg
+│       │       production-orders.svg
+│       │       products.svg
+│       │       purchase-orders.svg
+│       │       see.svg
+│       │       state.svg
+│       │       suppliers.svg
+│       │       supplies.svg
+│       │       tools.svg
+│       │       transfer-orders.svg
+│       │
+│       ├───ico
+│       │       favicon.ico
+│       │
+│       ├───images
+│       │       login_image.webp
+│       │
+│       └───svg
+│               arrow-down.svg
+│               burguer.svg
+│               check.svg
+│               cross.svg
+│               logout.svg
+│               plus.svg
+│               trash.svg
+│               user.svg
+│               user_alternative.svg
+│
+└───src
+    │   main.tsx
+    │
+    ├───core
+    │   │   index.ts
+    │   │
+    │   ├───adapters
+    │   │       env.ts
+    │   │       http-client.ts
+    │   │
+    │   ├───provider
+    │   │       RepositoryProvider.tsx
+    │   │       SessionProvider.tsx
+    │   │
+    │   ├───security
+    │   │       policies.ts
+    │   │
+    │   ├───utils
+    │   │       date-handler.ts
+    │   │       export-handler.ts
+    │   │       numbers-handler.ts
+    │   │       object-handler.ts
+    │   │       validator.ts
+    │   │
+    │   └───values
+    │           const.ts
+    │           translations.ts
+    │
+    ├───domain
+    │   │   index.ts
+    │   │
+    │   ├───datasource
+    │   │       approval.ts
+    │   │       archive.ts
+    │   │       calendar.ts
+    │   │       color.ts
+    │   │       concrete.ts
+    │   │       dashboard.ts
+    │   │       export.ts
+    │   │       location.ts
+    │   │       measure.ts
+    │   │       mold.ts
+    │   │       packaging.ts
+    │   │       product-stock.ts
+    │   │       product-transfer-order.ts
+    │   │       product.ts
+    │   │       production-order.ts
+    │   │       production.ts
+    │   │       purchase-order.ts
+    │   │       quality.ts
+    │   │       role.ts
+    │   │       session.ts
+    │   │       shift.ts
+    │   │       status.ts
+    │   │       supplier.ts
+    │   │       supply-stock.ts
+    │   │       supply-transfer-order.ts
+    │   │       supply.ts
+    │   │       user.ts
+    │   │
+    │   ├───dto
+    │   │   ├───approval
+    │   │   │   ├───request
+    │   │   │   │       ApproveRequestReq.ts
+    │   │   │   │       GetPendingApprovalsReq.ts
+    │   │   │   │       RejectRequestReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           ApproveRequestRes.ts
+    │   │   │           GetPendingApprovalsRes.ts
+    │   │   │           RejectRequestRes.ts
+    │   │   │
+    │   │   ├───archive
+    │   │   │   ├───request
+    │   │   │   │       DownloadArchiveReq.ts
+    │   │   │   │       GetAllArchiveLogReq.ts
+    │   │   │   │       GetEligibleSemestersReq.ts
+    │   │   │   │       PrepareArchiveReq.ts
+    │   │   │   │       PurgeArchiveReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           DownloadArchiveRes.ts
+    │   │   │           GetAllArchiveLogRes.ts
+    │   │   │           GetEligibleSemestersRes.ts
+    │   │   │           PrepareArchiveRes.ts
+    │   │   │           PurgeArchiveRes.ts
+    │   │   │
+    │   │   ├───calendar
+    │   │   │   ├───request
+    │   │   │   │       CreateCalendarReq.ts
+    │   │   │   │       GetAllCalendarsReq.ts
+    │   │   │   │       GetCalendarByYearReq.ts
+    │   │   │   │       UpdateCalendarDaysReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           CreateCalendarRes.ts
+    │   │   │           GetAllCalendarsRes.ts
+    │   │   │           GetCalendarByYearRes.ts
+    │   │   │
+    │   │   ├───color
+    │   │   │   ├───request
+    │   │   │   │       CreateColorReq.ts
+    │   │   │   │       DeleteColorReq.ts
+    │   │   │   │       GetAllColorReq.ts
+    │   │   │   │       GetColorByIdReq.ts
+    │   │   │   │       UpdateColorReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           CreateColorRes.ts
+    │   │   │           GetAllColorRes.ts
+    │   │   │           GetColorByIdRes.ts
+    │   │   │           UpdateColorRes.ts
+    │   │   │
+    │   │   ├───concrete
+    │   │   │   ├───request
+    │   │   │   │       CreateConcreteReq.ts
+    │   │   │   │       GetAllConcreteReq.ts
+    │   │   │   │       GetConcreteByIdReq.ts
+    │   │   │   │       UpdateConcreteReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           CreateConcreteRes.ts
+    │   │   │           GetAllConcreteRes.ts
+    │   │   │           GetConcreteByIdRes.ts
+    │   │   │           UpdateConcreteRes.ts
+    │   │   │
+    │   │   ├───dashboard
+    │   │   │   │   index.ts
+    │   │   │   │
+    │   │   │   ├───request
+    │   │   │   │       GetDashboardReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           GetDashboardRes.ts
+    │   │   │
+    │   │   ├───export
+    │   │   │   ├───request
+    │   │   │   │       ManualExportReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           ManualExportRes.ts
+    │   │   │
+    │   │   ├───location
+    │   │   │   ├───request
+    │   │   │   │       CreateLocationReq.ts
+    │   │   │   │       GetAllLocationReq.ts
+    │   │   │   │       GetAllLocationTypesReq.ts
+    │   │   │   │       GetLocationByIdReq.ts
+    │   │   │   │       UpdateLocationReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           GetAllLocationRes.ts
+    │   │   │           GetAllLocationTypesRes.ts
+    │   │   │           GetLocationByIdRes.ts
+    │   │   │
+    │   │   ├───measure
+    │   │   │   ├───request
+    │   │   │   │       GetAllMeasureReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           GetAllMeasureRes.ts
+    │   │   │
+    │   │   ├───mold
+    │   │   │   ├───request
+    │   │   │   │       AddMoldEventReq.ts
+    │   │   │   │       CreateMoldFamilyReq.ts
+    │   │   │   │       CreateMoldReq.ts
+    │   │   │   │       GetAllMoldEventTypeReq.ts
+    │   │   │   │       GetAllMoldFamilyReq.ts
+    │   │   │   │       GetAllMoldReq.ts
+    │   │   │   │       GetAllMoldStatusReq.ts
+    │   │   │   │       GetMoldByIdReq.ts
+    │   │   │   │       GetMoldFamilyByIdReq.ts
+    │   │   │   │       UpdateMoldFamilyReq.ts
+    │   │   │   │       UpdateMoldReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           AddMoldEventRes.ts
+    │   │   │           CreateMoldFamilyRes.ts
+    │   │   │           GetAllMoldEventTypeRes.ts
+    │   │   │           GetAllMoldFamilyRes.ts
+    │   │   │           GetAllMoldRes.ts
+    │   │   │           GetAllMoldStatusRes.ts
+    │   │   │           GetMoldByIdRes.ts
+    │   │   │           GetMoldFamilyByIdRes.ts
+    │   │   │           UpdateMoldFamilyRes.ts
+    │   │   │
+    │   │   ├───packaging
+    │   │   │   ├───request
+    │   │   │   │       CreatePackagingReq.ts
+    │   │   │   │       DeletePackagingReq.ts
+    │   │   │   │       GetAllPackagingReq.ts
+    │   │   │   │       GetPackagingByIdReq.ts
+    │   │   │   │       UpdatePackagingReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           CreatePackagingRes.ts
+    │   │   │           GetAllPackagingRes.ts
+    │   │   │           GetPackagingByIdRes.ts
+    │   │   │           UpdatePackagingRes.ts
+    │   │   │
+    │   │   ├───product
+    │   │   │   ├───request
+    │   │   │   │       CreateProductReq.ts
+    │   │   │   │       GetAllProductCategoryReq.ts
+    │   │   │   │       GetAllProductReq.ts
+    │   │   │   │       GetAllProductTypeReq.ts
+    │   │   │   │       GetProductByIdReq.ts
+    │   │   │   │       UpdateProductReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           GetAllProductCategoryRes.ts
+    │   │   │           GetAllProductRes.ts
+    │   │   │           GetAllProductTypeRes.ts
+    │   │   │           GetProductByIdRes.ts
+    │   │   │
+    │   │   ├───product-stock
+    │   │   │   ├───request
+    │   │   │   │       CreateProductStockReq.ts
+    │   │   │   │       GetAllProductStockReq.ts
+    │   │   │   │       GetProductStockByIdReq.ts
+    │   │   │   │       GetProductStockEventsReq.ts
+    │   │   │   │       UpdateProductStockReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           GetAllProductStockRes.ts
+    │   │   │           GetProductStockByIdRes.ts
+    │   │   │           GetProductStockEventsRes.ts
+    │   │   │
+    │   │   ├───product-transfer-order
+    │   │   │   ├───request
+    │   │   │   │       CancelProductTransferOrderReq.ts
+    │   │   │   │       CreateProductTransferOrderReq.ts
+    │   │   │   │       GetAllProductTransferOrderReq.ts
+    │   │   │   │       GetAllProductTransferOrderStateReq.ts
+    │   │   │   │       GetProductTransferOrderByIdReq.ts
+    │   │   │   │       UpdateProductTransferOrderReq.ts
+    │   │   │   │       UpdateProductTransferOrderStateReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           CreateProductTransferOrderRes.ts
+    │   │   │           GetAllProductTransferOrderRes.ts
+    │   │   │           GetAllProductTransferOrderStateRes.ts
+    │   │   │           GetProductTransferOrderByIdRes.ts
+    │   │   │           UpdateProductTransferOrderRes.ts
+    │   │   │           UpdateProductTransferOrderStateRes.ts
+    │   │   │
+    │   │   ├───production
+    │   │   │   ├───request
+    │   │   │   │       GetAllPoyatosProductionsReq.ts
+    │   │   │   │       GetForProductionOrderReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           GetAllPoyatosProductionsRes.ts
+    │   │   │           GetForProductionOrderRes.ts
+    │   │   │
+    │   │   ├───production-order
+    │   │   │   ├───request
+    │   │   │   │       AddProductionOrderEventReq.ts
+    │   │   │   │       AssignPriorityToProductionOrdersReq.ts
+    │   │   │   │       CalculateEstimatedEndDateReq.ts
+    │   │   │   │       CalculateMaximumTraysReq.ts
+    │   │   │   │       CancelProductionOrderReq.ts
+    │   │   │   │       ConcileProductionOrderReq.ts
+    │   │   │   │       CreateProductionOrderReq.ts
+    │   │   │   │       DeleteProductionOrderReq.ts
+    │   │   │   │       GetAllProductionOrderEventTypeReq.ts
+    │   │   │   │       GetAllProductionOrderReq.ts
+    │   │   │   │       GetAllProductionOrderStateReq.ts
+    │   │   │   │       GetProductionOrderByIdReq.ts
+    │   │   │   │       UpdateProductionOrderReq.ts
+    │   │   │   │       UpdateProductionOrderStateReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           AddProductionOrderEventRes.ts
+    │   │   │           CalculateEstimatedEndDateRes.ts
+    │   │   │           CalculateMaximumTraysRes.ts
+    │   │   │           GetAllProductionOrderEventTypeRes.ts
+    │   │   │           GetAllProductionOrderRes.ts
+    │   │   │           GetAllProductionOrderStateRes.ts
+    │   │   │           GetProductionOrderByIdRes.ts
+    │   │   │
+    │   │   ├───purchase-order
+    │   │   │   ├───request
+    │   │   │   │       CancelPurchaseOrderReq.ts
+    │   │   │   │       CreatePurchaseOrderReq.ts
+    │   │   │   │       GetAllPurchaseOrderReq.ts
+    │   │   │   │       GetAllPurchaseOrderStateReq.ts
+    │   │   │   │       GetPurchaseOrderByIdReq.ts
+    │   │   │   │       ReceivePurchaseOrderReq.ts
+    │   │   │   │       UpdatePurchaseOrderMetadataReq.ts
+    │   │   │   │       UpdatePurchaseOrderReq.ts
+    │   │   │   │       UpdatePurchaseOrderStateReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           CreatePurchaseOrderRes.ts
+    │   │   │           GetAllPurchaseOrderRes.ts
+    │   │   │           GetAllPurchaseOrderStateRes.ts
+    │   │   │           GetPurchaseOrderByIdRes.ts
+    │   │   │           UpdatePurchaseOrderRes.ts
+    │   │   │           UpdatePurchaseOrderStateRes.ts
+    │   │   │
+    │   │   ├───quality
+    │   │   │   ├───request
+    │   │   │   │       GetAllQualityReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           GetAllQualityRes.ts
+    │   │   │
+    │   │   ├───role
+    │   │   │   ├───request
+    │   │   │   │       GetAllRoleReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           GetAllRoleRes.ts
+    │   │   │
+    │   │   ├───session
+    │   │   │   ├───request
+    │   │   │   │       SaveSessionReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           GetSessionRes.ts
+    │   │   │
+    │   │   ├───shift
+    │   │   │   ├───request
+    │   │   │   │       GetAllShiftReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           GetAllShiftRes.ts
+    │   │   │
+    │   │   ├───status
+    │   │   │   ├───request
+    │   │   │   │       GetAllStatusReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           GetAllStatusRes.ts
+    │   │   │
+    │   │   ├───supplier
+    │   │   │   ├───request
+    │   │   │   │       CreateSupplierReq.ts
+    │   │   │   │       GetAllSupplierReq.ts
+    │   │   │   │       GetSupplierByIdReq.ts
+    │   │   │   │       UpdateSupplierReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           GetAllSupplierRes.ts
+    │   │   │           GetSupplierByIdRes.ts
+    │   │   │
+    │   │   ├───supply
+    │   │   │   ├───request
+    │   │   │   │       CreateSupplyReq.ts
+    │   │   │   │       GetAllSupplyCategoryReq.ts
+    │   │   │   │       GetAllSupplyClassificationReq.ts
+    │   │   │   │       GetAllSupplyReq.ts
+    │   │   │   │       GetSupplyByIdReq.ts
+    │   │   │   │       UpdateSupplyReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           CreateSupplyRes.ts
+    │   │   │           GetAllSupplyCategoryRes.ts
+    │   │   │           GetAllSupplyClassificationRes.ts
+    │   │   │           GetAllSupplyRes.ts
+    │   │   │           GetSupplyByIdRes.ts
+    │   │   │           UpdateSupplyRes.ts
+    │   │   │
+    │   │   ├───supply-stock
+    │   │   │   ├───request
+    │   │   │   │       CreateSupplyStockReq.ts
+    │   │   │   │       GetAllSupplyStockReq.ts
+    │   │   │   │       GetSupplyStockByIdReq.ts
+    │   │   │   │       GetSupplyStockEventsReq.ts
+    │   │   │   │       UpdateSupplyStockReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           CreateSupplyStockRes.ts
+    │   │   │           GetAllSupplyStockRes.ts
+    │   │   │           GetSupplyStockByIdRes.ts
+    │   │   │           GetSupplyStockEventsRes.ts
+    │   │   │           UpdateSupplyStockRes.ts
+    │   │   │
+    │   │   ├───supply-transfer-order
+    │   │   │   ├───request
+    │   │   │   │       CancelSupplyTransferOrderReq.ts
+    │   │   │   │       CreateSupplyTransferOrderReq.ts
+    │   │   │   │       GetAllSupplyTransferOrderReq.ts
+    │   │   │   │       GetAllSupplyTransferOrderStateReq.ts
+    │   │   │   │       GetSupplyTransferOrderByIdReq.ts
+    │   │   │   │       UpdateSupplyTransferOrderReq.ts
+    │   │   │   │       UpdateSupplyTransferOrderStateReq.ts
+    │   │   │   │
+    │   │   │   └───response
+    │   │   │           CreateSupplyTransferOrderRes.ts
+    │   │   │           GetAllSupplyTransferOrderRes.ts
+    │   │   │           GetAllSupplyTransferOrderStateRes.ts
+    │   │   │           GetSupplyTransferOrderByIdRes.ts
+    │   │   │           UpdateSupplyTransferOrderRes.ts
+    │   │   │           UpdateSupplyTransferOrderStateRes.ts
+    │   │   │
+    │   │   └───user
+    │   │       ├───request
+    │   │       │       AuthUserReq.ts
+    │   │       │       CreateUserReq.ts
+    │   │       │       GetAllUserReq.ts
+    │   │       │       GetUserByIdReq.ts
+    │   │       │       LoginUserReq.ts
+    │   │       │       UpdateUserReq.ts
+    │   │       │
+    │   │       └───response
+    │   │               AuthUserRes.ts
+    │   │               GetAllUserRes.ts
+    │   │               GetUserByIdRes.ts
+    │   │               LoginUserRes.ts
+    │   │
+    │   ├───entity
+    │   │   │   approval-request.ts
+    │   │   │   approval-status.ts
+    │   │   │   approval-type.ts
+    │   │   │   archive-log.ts
+    │   │   │   archive-status.ts
+    │   │   │   archive-type.ts
+    │   │   │   calendar-day.ts
+    │   │   │   calendar.ts
+    │   │   │   color-formula.ts
+    │   │   │   color.ts
+    │   │   │   concrete-formula.ts
+    │   │   │   concrete.ts
+    │   │   │   day-type.ts
+    │   │   │   document-type.ts
+    │   │   │   eligible-semester.ts
+    │   │   │   export-type.ts
+    │   │   │   location-type.ts
+    │   │   │   location.ts
+    │   │   │   measure.ts
+    │   │   │   mold-event-type.ts
+    │   │   │   mold-event.ts
+    │   │   │   mold-family.ts
+    │   │   │   mold-maintenance-type.ts
+    │   │   │   mold-maintenance.ts
+    │   │   │   mold-status.ts
+    │   │   │   mold.ts
+    │   │   │   packaging-formula.ts
+    │   │   │   packaging.ts
+    │   │   │   product-category.ts
+    │   │   │   product-stock-event-type.ts
+    │   │   │   product-stock-event.ts
+    │   │   │   product-stock.ts
+    │   │   │   product-transfer-order-item.ts
+    │   │   │   product-transfer-order-state.ts
+    │   │   │   product-transfer-order.ts
+    │   │   │   product-type.ts
+    │   │   │   product.ts
+    │   │   │   production-order-event-type.ts
+    │   │   │   production-order-event.ts
+    │   │   │   production-order-state.ts
+    │   │   │   production-order.ts
+    │   │   │   production.ts
+    │   │   │   purchase-order-event-type.ts
+    │   │   │   purchase-order-event.ts
+    │   │   │   purchase-order-item.ts
+    │   │   │   purchase-order-state.ts
+    │   │   │   purchase-order.ts
+    │   │   │   quality.ts
+    │   │   │   received-item.ts
+    │   │   │   role.ts
+    │   │   │   session.ts
+    │   │   │   shift.ts
+    │   │   │   status.ts
+    │   │   │   supplier.ts
+    │   │   │   supply-category.ts
+    │   │   │   supply-classification.ts
+    │   │   │   supply-stock-event-type.ts
+    │   │   │   supply-stock-event.ts
+    │   │   │   supply-stock.ts
+    │   │   │   supply-transfer-order-item.ts
+    │   │   │   supply-transfer-order-state.ts
+    │   │   │   supply-transfer-order.ts
+    │   │   │   supply.ts
+    │   │   │   token.ts
+    │   │   │   tray-report-period.ts
+    │   │   │   user.ts
+    │   │   │
+    │   │   └───dashboard
+    │   │       │   admin-dashboard.ts
+    │   │       │   manager-dashboard.ts
+    │   │       │   operator-dashboard.ts
+    │   │       │
+    │   │       └───components
+    │   │               mold-alert.ts
+    │   │               production-order-summary.ts
+    │   │               purchase-order-summary.ts
+    │   │               stock-alert.ts
+    │   │               tray-report-item.ts
+    │   │
+    │   ├───errors
+    │   │       error-handler.ts
+    │   │       error-messages.ts
+    │   │
+    │   ├───interfaces
+    │   │       maximum-trays-info.ts
+    │   │       production-values.ts
+    │   │
+    │   ├───repository
+    │   │       approval.ts
+    │   │       archive.ts
+    │   │       calendar.ts
+    │   │       color.ts
+    │   │       concrete.ts
+    │   │       dashboard.ts
+    │   │       export.ts
+    │   │       location.ts
+    │   │       measure.ts
+    │   │       mold.ts
+    │   │       packaging.ts
+    │   │       product-stock.ts
+    │   │       product-transfer-order.ts
+    │   │       product.ts
+    │   │       production-order.ts
+    │   │       production-state.ts
+    │   │       production.ts
+    │   │       purchase-order.ts
+    │   │       quality.ts
+    │   │       role.ts
+    │   │       session.ts
+    │   │       shift.ts
+    │   │       status.ts
+    │   │       supplier.ts
+    │   │       supply-stock.ts
+    │   │       supply-transfer-order.ts
+    │   │       supply.ts
+    │   │       user.ts
+    │   │
+    │   ├───structure
+    │   │       PageStructure.ts
+    │   │       SliceStructure.ts
+    │   │
+    │   ├───success
+    │   │       success-messages.ts
+    │   │
+    │   └───values
+    │           actions.ts
+    │           calendar-constants.ts
+    │           domain-const.ts
+    │           pagination.ts
+    │
+    ├───infrastructure
+    │   │   index.ts
+    │   │
+    │   ├───datasource
+    │   │       approval-api.ts
+    │   │       archive-api.ts
+    │   │       calendar-api.ts
+    │   │       color-api.ts
+    │   │       concrete-api.ts
+    │   │       dashboard-api.ts
+    │   │       export-api.ts
+    │   │       location-api.ts
+    │   │       measure-api.ts
+    │   │       mold-api.ts
+    │   │       packaging-api.ts
+    │   │       product-api.ts
+    │   │       product-stock-api.ts
+    │   │       product-transfer-order-api.ts
+    │   │       production-api.ts
+    │   │       production-order-api.ts
+    │   │       purchase-order-api.ts
+    │   │       quality-api.ts
+    │   │       role-api.ts
+    │   │       session-ls.ts
+    │   │       shift-api.ts
+    │   │       status-api.ts
+    │   │       supplier-api.ts
+    │   │       supply-api.ts
+    │   │       supply-stock-api.ts
+    │   │       supply-transfer-order-api.ts
+    │   │       user-api.ts
+    │   │
+    │   └───repository
+    │           approval.ts
+    │           archive.ts
+    │           calendar.ts
+    │           color.ts
+    │           concrete.ts
+    │           dashboard.ts
+    │           export.ts
+    │           location.ts
+    │           measure.ts
+    │           mold.ts
+    │           packaging.ts
+    │           product-stock.ts
+    │           product-transfer-order.ts
+    │           product.ts
+    │           production-order.ts
+    │           production.ts
+    │           purchase-order.ts
+    │           quality.ts
+    │           role.ts
+    │           session.ts
+    │           shift.ts
+    │           status.ts
+    │           supplier.ts
+    │           supply-stock.ts
+    │           supply-transfer-order.ts
+    │           supply.ts
+    │           user.ts
+    │
+    └───ui
+        ├───components
+        │   ├───action-pill
+        │   │       action-pill.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───admin-dashboard
+        │   │       admin-dashboard.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───approval-request-info
+        │   │       approval-request-info.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───approval-request-updater-detail
+        │   │       approval-request-updater-detail.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───big-title
+        │   │       big-title.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───breadcrumbs
+        │   │       breadcrumbs.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───calendar-day-form
+        │   │       calendar-day-form.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───calendar-form
+        │   │       calendar-form.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───card-container
+        │   │       card-container.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───chip
+        │   │       chip.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───collapsible-dashboard
+        │   │       collapsible-dashboard.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───color-filter
+        │   │       color-filter.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───color-form
+        │   │       color-form.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───concrete-filter
+        │   │       concrete-filter.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───concrete-form
+        │   │       concrete-form.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───current-mold-detail
+        │   │       current-mold-detail.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───current-product-stock-detail
+        │   │       current-product-stock-detail.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───current-product-transfer-order-detail
+        │   │       current-product-transfer-order-detail.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───current-production-order-detail
+        │   │       current-production-order-detail.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───current-purchase-order-detail
+        │   │       current-purchase-order-detail.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───current-supply-stock-detail
+        │   │       current-supply-stock-detail.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───current-supply-transfer-order-detail
+        │   │       current-supply-transfer-order-detail.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───dashboard-layout
+        │   │       dashboard-layout.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───destructive-button
+        │   │       destructive-button.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───event-history
+        │   │       event-history.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───event-item
+        │   │       event-item.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───feature-button
+        │   │       feature-button.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───feature-section
+        │   │       feature-section.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───form-section-title
+        │   │       form-section-title.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───header
+        │   │       header.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───icon-button
+        │   │       icon-button.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───input-label
+        │   │       input-label.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───loading
+        │   │       loading.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───location-filter
+        │   │       location-filter.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───location-form
+        │   │       location-form.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───login-form
+        │   │       login-form.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───main-button
+        │   │       main-button.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───manager-dashboard
+        │   │       manager-dashboard.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───metric-card
+        │   │       metric-card.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───modal
+        │   │       modal.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───mold-alert-card
+        │   │       mold-alert-card.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───mold-events-updater-form
+        │   │       mold-events-updater-form.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───mold-family-form
+        │   │       mold-family-form.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───mold-filter
+        │   │       mold-filter.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───mold-form
+        │   │       mold-form.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───mold-maintenance-warning
+        │   │       mold-maintenance-warning.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───mold-maintenances-table
+        │   │       mold-maintenances-table.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───molds-history
+        │   │       molds-history.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───multi-select-label
+        │   │       multi-select-label.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───navbar
+        │   │       navbar.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───operator-dashboard
+        │   │       operator-dashboard.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───order-summary-card
+        │   │       order-summary-card.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───packaging-filter
+        │   │       packaging-filter.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───packaging-form
+        │   │       packaging-form.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───poyatos-production-filter
+        │   │       poyatos-production-filter.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───product-filter
+        │   │       product-filter.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───product-form
+        │   │       product-form.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───product-stock-filter
+        │   │       product-stock-filter.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───product-stock-form
+        │   │       product-stock-form.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───product-transfer-item-list
+        │   │       product-transfer-item-list.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───product-transfer-order-filter
+        │   │       product-transfer-order-filter.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───product-transfer-order-form
+        │   │       product-transfer-order-form.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───product-transfer-order-progress-updater
+        │   │       product-transfer-order-progress-updater.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───product-transfer-order-state-stepper
+        │   │       product-transfer-order-state-stepper.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───product-transfer-order-updater-detail
+        │   │       product-transfer-order-updater-detail.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───production-order-conciliator-detail
+        │   │       production-order-conciliator-detail.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───production-order-events-updater-form
+        │   │       production-order-events-updater-form.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───production-order-filter
+        │   │       production-order-filter.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───production-order-form
+        │   │       production-order-form.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───production-order-progress-updater
+        │   │       production-order-progress-updater.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───production-order-updater-detail
+        │   │       production-order-updater-detail.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───production-panel-actions
+        │   │       production-panel-actions.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───production-row
+        │   │       production-row.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───production-state-stepper
+        │   │       production-state-stepper.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───production-stopped-warning
+        │   │       production-stopped-warning.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───purchase-item-list
+        │   │       purchase-item-list.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───purchase-order-filter
+        │   │       purchase-order-filter.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───purchase-order-form
+        │   │       purchase-order-form.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───purchase-order-invoices
+        │   │       purchase-order-invoices.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───purchase-order-metadata-form
+        │   │       purchase-order-metadata-form.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───purchase-order-progress-updater
+        │   │       purchase-order-progress-updater.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───purchase-order-receive-form
+        │   │       purchase-order-receive-form.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───purchase-order-state-stepper
+        │   │       purchase-order-state-stepper.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───purchase-order-updater-detail
+        │   │       purchase-order-updater-detail.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───purchase-summary-card
+        │   │       purchase-summary-card.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───secondary-button
+        │   │       secondary-button.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───section-title
+        │   │       section-title.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───select-label
+        │   │       select-label.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───selectable-table
+        │   │       selectable-table.module.css
+        │   │       selectable-table.tsx
+        │   │
+        │   ├───sortable-table
+        │   │       sortable-row.tsx
+        │   │       sortable-table.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───stock-alert-card
+        │   │       stock-alert-card.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───stock-summary-card
+        │   │       stock-summary-card.tsx
+        │   │       style.module.css
+        │   │
+        │   ├───supplier-filter
+        │   │       style.module.css
+        │   │       supplier-filter.tsx
+        │   │
+        │   ├───supplier-form
+        │   │       style.module.css
+        │   │       supplier-form.tsx
+        │   │
+        │   ├───supply-filter
+        │   │       style.module.css
+        │   │       supply-filter.tsx
+        │   │
+        │   ├───supply-form
+        │   │       style.module.css
+        │   │       supply-form.tsx
+        │   │
+        │   ├───supply-stock-filter
+        │   │       style.module.css
+        │   │       supply-stock-filter.tsx
+        │   │
+        │   ├───supply-stock-form
+        │   │       style.module.css
+        │   │       supply-stock-form.tsx
+        │   │
+        │   ├───supply-transfer-item-list
+        │   │       style.module.css
+        │   │       supply-transfer-item-list.tsx
+        │   │
+        │   ├───supply-transfer-order-filter
+        │   │       style.module.css
+        │   │       supply-transfer-order-filter.tsx
+        │   │
+        │   ├───supply-transfer-order-form
+        │   │       style.module.css
+        │   │       supply-transfer-order-form.tsx
+        │   │
+        │   ├───supply-transfer-order-progress-updater
+        │   │       style.module.css
+        │   │       supply-transfer-order-progress-updater.tsx
+        │   │
+        │   ├───supply-transfer-order-state-stepper
+        │   │       style.module.css
+        │   │       supply-transfer-order-state-stepper.tsx
+        │   │
+        │   ├───supply-transfer-order-updater-detail
+        │   │       style.module.css
+        │   │       supply-transfer-order-updater-detail.tsx
+        │   │
+        │   ├───table
+        │   │       style.module.css
+        │   │       table.tsx
+        │   │
+        │   ├───textarea-label
+        │   │       style.module.css
+        │   │       textarea-label.tsx
+        │   │
+        │   ├───tool-bar
+        │   │       style.module.css
+        │   │       tool-bar.tsx
+        │   │
+        │   ├───tool-bar-button
+        │   │       style.module.css
+        │   │       tool-bar-button.tsx
+        │   │
+        │   ├───tray-reports
+        │   │       style.module.css
+        │   │       tray-reports.tsx
+        │   │
+        │   ├───user-filter
+        │   │       style.module.css
+        │   │       user-filter.tsx
+        │   │
+        │   ├───user-form
+        │   │       style.module.css
+        │   │       user-form.tsx
+        │   │
+        │   ├───visual-diff
+        │   │       style.module.css
+        │   │       visual-diff.tsx
+        │   │
+        │   └───warning-card-container
+        │           style.module.css
+        │           warning-card-container.tsx
+        │
+        ├───forms
+        │   ├───handlers
+        │   │       color-filter-handler.tsx
+        │   │       color-form-handler.tsx
+        │   │       concrete-filter-handler.tsx
+        │   │       concrete-form-handler.tsx
+        │   │       location-filter-handler.tsx
+        │   │       location-form-handler.tsx
+        │   │       login-form-handler.tsx
+        │   │       mold-events-form-handler.tsx
+        │   │       mold-family-handler.tsx
+        │   │       mold-filter-handler.tsx
+        │   │       mold-form-handler.tsx
+        │   │       packaging-filter-handler.tsx
+        │   │       packaging-form-handler.tsx
+        │   │       poyatos-production-filter-handler.tsx
+        │   │       product-filter-handler.tsx
+        │   │       product-form-handler.tsx
+        │   │       product-stock-filter-handler.tsx
+        │   │       product-stock-form-handler.tsx
+        │   │       product-transfer-order-filter-handler.tsx
+        │   │       product-transfer-order-form-handler.tsx
+        │   │       production-order-events-form-handler.tsx
+        │   │       production-order-filter-handler.tsx
+        │   │       production-order-form-handler.tsx
+        │   │       purchase-order-filter-handler.tsx
+        │   │       purchase-order-form-handler.tsx
+        │   │       purchase-order-metadata-form-handler.tsx
+        │   │       purchase-order-receive-form-handler.tsx
+        │   │       supplier-filter-handler.tsx
+        │   │       supplier-form-handler.tsx
+        │   │       supply-filter-handler.tsx
+        │   │       supply-form-handler.tsx
+        │   │       supply-stock-filter-handler.tsx
+        │   │       supply-stock-form-handler.tsx
+        │   │       supply-transfer-order-filter-handler.tsx
+        │   │       supply-transfer-order-form-handler.tsx
+        │   │       user-filter-handler.tsx
+        │   │       user-form-handler.tsx
+        │   │
+        │   └───interfaces
+        │           color-filter-form.ts
+        │           color-form.ts
+        │           concrete-filter-form.ts
+        │           concrete-form.ts
+        │           location-filter-form.ts
+        │           location-form.ts
+        │           login-form.ts
+        │           mold-events-form.ts
+        │           mold-family-form.ts
+        │           mold-filter-form.ts
+        │           mold-form.ts
+        │           packaging-filter-form.ts
+        │           packaging-form.ts
+        │           poyatos-production-filter-form.ts
+        │           product-filter-form.ts
+        │           product-form.ts
+        │           product-stock-filter-form.ts
+        │           product-stock-form.ts
+        │           product-transfer-order-filter-form.ts
+        │           product-transfer-order-form.ts
+        │           production-order-events-form.ts
+        │           production-order-filter-form.ts
+        │           production-order-form.ts
+        │           purchase-order-filter-form.ts
+        │           purchase-order-form.ts
+        │           purchase-order-metadata-form.ts
+        │           purchase-order-receive-form.ts
+        │           supplier-filter-form.ts
+        │           supplier-form.ts
+        │           supply-filter-form.ts
+        │           supply-form.ts
+        │           supply-stock-filter-form.ts
+        │           supply-stock-form.ts
+        │           supply-transfer-order-filter-form.ts
+        │           supply-transfer-order-form.ts
+        │           user-filter-form.ts
+        │           user-form.ts
+        │
+        ├───hooks
+        │       useButtonCooldown.tsx
+        │       useDebounce.ts
+        │       usePolicy.tsx
+        │       useScrollLoading.tsx
+        │       useSession.tsx
+        │
+        ├───layout
+        │       layout.tsx
+        │       style.module.css
+        │
+        ├───routes
+        │   │   routes-manager.tsx
+        │   │
+        │   ├───approvals
+        │   │       approvals-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───approvals-detail
+        │   │       approvals-detail-route.tsx
+        │   │       style.module.css
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───approvals-list
+        │   │       approvals-list-route.tsx
+        │   │       style.module.css
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───archive-explorer
+        │   │       archive-explorer-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───calendar
+        │   │       calendar-route.tsx
+        │   │       style.module.css
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───colors
+        │   │       colors-route.tsx
+        │   │       style.module.css
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───colors-create
+        │   │       colors-create-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───colors-create-from
+        │   │       colors-create-from-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───colors-edit
+        │   │       colors-edit-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───colors-list
+        │   │       colors-list-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───concretes
+        │   │       concretes-route.tsx
+        │   │       style.module.css
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───concretes-create
+        │   │       concretes-create-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───concretes-create-from
+        │   │       concretes-create-from-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───concretes-edit
+        │   │       concretes-edit-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───concretes-list
+        │   │       concretes-list-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───formula
+        │   │       formula-route.tsx
+        │   │       style.module.css
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───home
+        │   │       home-route.tsx
+        │   │       style.module.css
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───locations
+        │   │       locations-route.tsx
+        │   │       style.module.css
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───locations-create
+        │   │       locations-create-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───locations-edit
+        │   │       locations-edit-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───locations-list
+        │   │       locations-list-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───login
+        │   │       login-route.tsx
+        │   │       style.module.css
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───mold-families-create
+        │   │       mold-families-create-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───mold-families-edit
+        │   │       mold-families-edit-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───mold-families-list
+        │   │       mold-families-list-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───molds
+        │   │       molds-route.tsx
+        │   │       style.module.css
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───molds-create
+        │   │       molds-create-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───molds-create-from
+        │   │       molds-create-from-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───molds-edit
+        │   │       molds-edit-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───molds-list
+        │   │       molds-list-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───molds-update
+        │   │       molds-update-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───packagings
+        │   │       packagings-route.tsx
+        │   │       style.module.css
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───packagings-create
+        │   │       packagings-create-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───packagings-create-from
+        │   │       packagings-create-from-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───packagings-edit
+        │   │       packagings-edit-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───packagings-list
+        │   │       packagings-list-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───poyatos-productions-list
+        │   │       poyatos-productions-list-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───product-stocks
+        │   │       product-stocks-route.tsx
+        │   │       style.module.css
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───product-stocks-auditory
+        │   │       product-stocks-auditory-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───product-stocks-create
+        │   │       product-stocks-create-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───product-stocks-edit
+        │   │       product-stocks-edit-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───product-stocks-list
+        │   │       product-stocks-list-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───product-transfer-orders
+        │   │       product-transfer-orders-route.tsx
+        │   │       style.module.css
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───product-transfer-orders-create
+        │   │       product-transfer-orders-create-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───product-transfer-orders-edit
+        │   │       product-transfer-orders-edit-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───product-transfer-orders-list
+        │   │       product-transfer-orders-list-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───product-transfer-orders-update
+        │   │       product-transfer-orders-update-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───production
+        │   │       production-route.tsx
+        │   │       style.module.css
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───production-orders
+        │   │       production-orders-route.tsx
+        │   │       style.module.css
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───production-orders-concile-production
+        │   │       production-orders-concile-production-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───production-orders-create
+        │   │       production-orders-create-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───production-orders-edit
+        │   │       production-orders-edit-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───production-orders-list
+        │   │       production-orders-list-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───production-orders-prioritize
+        │   │       production-orders-prioritize-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───production-orders-update
+        │   │       production-orders-update-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───products
+        │   │       products-route.tsx
+        │   │       style.module.css
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───products-create
+        │   │       products-create-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───products-create-from
+        │   │       products-create-from-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───products-edit
+        │   │       products-edit-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───products-list
+        │   │       products-list-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───purchase-orders
+        │   │       purchase-orders-route.tsx
+        │   │       style.module.css
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───purchase-orders-create
+        │   │       purchase-orders-create-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───purchase-orders-edit
+        │   │       purchase-orders-edit-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───purchase-orders-list
+        │   │       purchase-orders-list-route.tsx
+        │   │       style.module.css
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───purchase-orders-update
+        │   │       purchase-orders-update-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───stock
+        │   │       stock-route.tsx
+        │   │       style.module.css
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───suppliers
+        │   │       style.module.css
+        │   │       suppliers-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───suppliers-create
+        │   │       suppliers-create-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───suppliers-edit
+        │   │       suppliers-edit-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───suppliers-list
+        │   │       suppliers-list-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───supplies
+        │   │       style.module.css
+        │   │       supplies-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───supplies-create
+        │   │       supplies-create-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───supplies-create-from
+        │   │       supplies-create-from-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───supplies-edit
+        │   │       supplies-edit-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───supplies-list
+        │   │       supplies-list-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───supply-stocks
+        │   │       style.module.css
+        │   │       supply-stocks-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───supply-stocks-auditory
+        │   │       supply-stocks-auditory-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───supply-stocks-create
+        │   │       supply-stocks-create-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───supply-stocks-edit
+        │   │       supply-stocks-edit-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───supply-stocks-list
+        │   │       supply-stocks-list-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───supply-transfer-orders
+        │   │       style.module.css
+        │   │       supply-transfer-orders-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───supply-transfer-orders-create
+        │   │       supply-transfer-orders-create-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───supply-transfer-orders-edit
+        │   │       supply-transfer-orders-edit-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───supply-transfer-orders-list
+        │   │       supply-transfer-orders-list-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───supply-transfer-orders-update
+        │   │       supply-transfer-orders-update-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───supplying
+        │   │       style.module.css
+        │   │       supplying-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───users
+        │   │       style.module.css
+        │   │       users-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───users-create
+        │   │       users-create-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   ├───users-edit
+        │   │       users-edit-route.tsx
+        │   │       viewmodel.tsx
+        │   │
+        │   └───users-list
+        │           users-list-route.tsx
+        │           viewmodel.tsx
+        │
+        └───styles
+                global.css
+                var.css
