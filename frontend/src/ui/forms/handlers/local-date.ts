@@ -3,3 +3,9 @@ export function localDateISO(now = new Date()) {
     const day = String(now.getDate()).padStart(2, "0");
     return `${now.getFullYear()}-${month}-${day}`;
 }
+
+export function localDatePlusDaysISO(days: number, now = new Date()) {
+    const target = new Date(now);
+    target.setDate(target.getDate() + days);
+    return localDateISO(target);
+}

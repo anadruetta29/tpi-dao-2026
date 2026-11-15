@@ -104,7 +104,12 @@ export function useViewModel(session: Session) {
 
     {/* ===== variables ===== */ }
 
-    const getUsuarioLabel = (user: Usuario) => `${user.nombre} ${user.apellido} · ${user.roleName}`;
+    const getUsuarioLabel = (user: Usuario) => `${user.nombre} ${user.apellido}`;
+
+    const getUsuarioMeta = (user: Usuario) => {
+        const sede = user.role === Rol.RECEPCIONISTA ? sedes.find(({ value }) => value === user.sedeId)?.label : undefined;
+        return [user.roleName, sede, user.email].filter(Boolean).join(" · ");
+    };
 
     const filterFields: Field[] = [
         { name: "role", label: "Rol", options: allOptions(Rol.toOptions()) },
@@ -122,6 +127,7 @@ export function useViewModel(session: Session) {
             submit: handleFilterSubmit
         },
         getLabel: getUsuarioLabel,
+        getMeta: getUsuarioMeta,
         create: {
             label: "Registrar usuario",
             fields: userFields(sedes),

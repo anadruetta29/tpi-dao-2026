@@ -148,8 +148,10 @@ export function useViewModel(session: Session) {
 
     {/* ===== variables ===== */ }
 
-    const getSocioLabel = (socio: Socio) => {
-        return `${socio.nombre} ${socio.apellido} · ${socio.documento} · ${socio.estadoName}`;
+    const getSocioLabel = (socio: Socio) => `${socio.nombre} ${socio.apellido}`;
+
+    const getSocioMeta = (socio: Socio) => {
+        return [socio.documento ? `DNI ${socio.documento}` : "", socio.estadoName].filter(Boolean).join(" · ");
     };
 
     const filterFields: Field[] = [
@@ -169,6 +171,7 @@ export function useViewModel(session: Session) {
             submit: handleFilterSubmit
         },
         getLabel: getSocioLabel,
+        getMeta: getSocioMeta,
         create: {
             label: "Registrar socio",
             fields: socioFields(),

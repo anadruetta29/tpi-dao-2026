@@ -4,9 +4,12 @@ import { type GetEjemplarByIdReq } from "../dto/ejemplar/request/GetEjemplarById
 import { type GetEjemplarByIdRes } from "../dto/ejemplar/response/GetEjemplarByIdRes";
 import { type CreateEjemplarReq } from "../dto/ejemplar/request/CreateEjemplarReq";
 import { type CreateEjemplarRes } from "../dto/ejemplar/response/CreateEjemplarRes";
+import { type UpdateEjemplarEstadoReq } from "../dto/ejemplar/request/UpdateEjemplarEstadoReq";
+import { type UpdateEjemplarEstadoRes } from "../dto/ejemplar/response/UpdateEjemplarEstadoRes";
 
 export abstract class EjemplarDataSourceI {
     abstract getAllEjemplares(dto: GetAllEjemplaresReq): Promise<GetAllEjemplaresRes>;
     abstract getEjemplarById(dto: GetEjemplarByIdReq): Promise<GetEjemplarByIdRes>;
     abstract createEjemplar(dto: CreateEjemplarReq): Promise<CreateEjemplarRes>;
+    abstract updateEjemplarEstado(dto: UpdateEjemplarEstadoReq): Promise<UpdateEjemplarEstadoRes>;
 }

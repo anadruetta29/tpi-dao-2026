@@ -26,7 +26,9 @@
 .item:last-child, .item:last-child .row { border-radius: 0 0 var(--radius) var(--radius); }
 .item[data-selected="true"] .row { border-radius: 0; }
 .id { color: var(--muted); font-size: 0.78rem; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.summary { display: grid; gap: 0.15rem; min-width: 0; }
 .label { font-size: 0.94rem; font-weight: 650; overflow-wrap: anywhere; }
+.meta { color: var(--muted); font-size: 0.82rem; overflow-wrap: anywhere; }
 .chevron { width: 6px; height: 6px; margin: 0 0.2rem 0.22rem 0; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); }
 .item[data-selected="true"] .chevron { margin-block: 0.22rem 0; transform: rotate(225deg); }
 

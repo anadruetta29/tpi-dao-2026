@@ -161,7 +161,12 @@ export function useViewModel(session: Session) {
         return field;
     };
 
-    const getLibroLabel = (libro: Libro) => `${libro.titulo} · ${libro.editorial}`;
+    const getLibroLabel = (libro: Libro) => libro.titulo;
+
+    const getLibroMeta = (libro: Libro) => {
+        const autores = libro.autoresIds.map((id) => authorNames.get(id)).filter(Boolean).join(", ");
+        return [autores, libro.editorial].filter(Boolean).join(" · ");
+    };
 
     const filterFields: Field[] = [
         { name: "titulo", placeholder: "Ej. El Aleph", label: "Título" },
@@ -180,6 +185,7 @@ export function useViewModel(session: Session) {
             submit: handleFilterSubmit
         },
         getLabel: getLibroLabel,
+        getMeta: getLibroMeta,
         create: {
             label: "Registrar libro",
             onOpen: authorSelector.reset,

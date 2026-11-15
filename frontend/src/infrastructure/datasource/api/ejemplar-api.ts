@@ -7,6 +7,8 @@ import { type GetEjemplarByIdReq } from "../../../domain/dto/ejemplar/request/Ge
 import { type GetEjemplarByIdRes } from "../../../domain/dto/ejemplar/response/GetEjemplarByIdRes";
 import { type CreateEjemplarReq } from "../../../domain/dto/ejemplar/request/CreateEjemplarReq";
 import { type CreateEjemplarRes } from "../../../domain/dto/ejemplar/response/CreateEjemplarRes";
+import { type UpdateEjemplarEstadoReq } from "../../../domain/dto/ejemplar/request/UpdateEjemplarEstadoReq";
+import { type UpdateEjemplarEstadoRes } from "../../../domain/dto/ejemplar/response/UpdateEjemplarEstadoRes";
 import { HTTPClient } from "../../../core/adapters/http-client";
 import { CacheTags, withCacheTags } from "../../../core/config/cache";
 import { ErrorHandler } from "@/domain/messages";
@@ -80,6 +82,23 @@ export class EjemplarApiDataSource implements EjemplarDataSourceI {
             return {
                 id: String(response?.id || response?.ejemplar?.id || ejemplar?.id || ""),
                 ejemplar
+            };
+        }
+        catch (error: any) {
+            throw ErrorHandler.handleError(error);
+        }
+    }
+
+    public async updateEjemplarEstado(dto: UpdateEjemplarEstadoReq): Promise<UpdateEjemplarEstadoRes> {
+        try {
+            const response = await this.httpClient.patch(
+                `/ejemplares/${dto.id}/estado`,
+                { estado: dto.estado.value },
+                dto.session?.accessToken
+            );
+
+            return {
+                ejemplar: Ejemplar.fromObject(response?.ejemplar || response)!
             };
         }
         catch (error: any) {

@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.devolucion import Devolucion
+from app.domain.entity.estado_ejemplar import EstadoEjemplar
 from app.domain.entity.rol import Rol
 from app.domain.repository.devolucion_repository_i import DevolucionRepositoryI
 from app.domain.repository.usuario_repository_i import UsuarioRepositoryI
@@ -19,6 +20,8 @@ class GetAllDevolucionesUseCase:
     @dataclass(frozen=True)
     class Command:
         token: Optional[str]
+        prestamo_id: Optional[int] = None
+        estado_devuelto: Optional[EstadoEjemplar] = None
 
     @dataclass(frozen=True)
     class Result:
@@ -36,4 +39,8 @@ class GetAllDevolucionesUseCase:
             self.devolucion_repository.get_all_by_sede(sede_id) if sede_id is not None
             else self.devolucion_repository.get_all()
         )
+        if command.prestamo_id is not None:
+            devoluciones = [d for d in devoluciones if d.prestamo_id == command.prestamo_id]
+        if command.estado_devuelto is not None:
+            devoluciones = [d for d in devoluciones if d.estadoDevuelto == command.estado_devuelto]
         return GetAllDevolucionesUseCase.Result(devoluciones=devoluciones)

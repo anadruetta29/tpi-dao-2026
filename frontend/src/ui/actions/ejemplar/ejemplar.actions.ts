@@ -6,6 +6,7 @@ import { ErrorMessages, SuccessMessages } from "@/domain/messages";
 import { GetAllEjemplaresUseCase } from "@/domain/use-cases/ejemplar/get-all-ejemplares";
 import { GetEjemplarByIdUseCase } from "@/domain/use-cases/ejemplar/get-ejemplar-by-id";
 import { CreateEjemplarUseCase } from "@/domain/use-cases/ejemplar/create-ejemplar";
+import { UpdateEjemplarEstadoUseCase } from "@/domain/use-cases/ejemplar/update-ejemplar-estado";
 import { EjemplarApiDataSource } from "@/infrastructure/datasource/api/ejemplar-api";
 import { AuthStorageDataSource } from "@/infrastructure/datasource/storage/auth-storage";
 import { EjemplarRepository } from "@/infrastructure/repository/ejemplar";
@@ -17,6 +18,7 @@ const ejemplarRepository = new EjemplarRepository(ejemplarApiDataSource);
 const getAllEjemplaresUseCase = new GetAllEjemplaresUseCase(ejemplarRepository);
 const getEjemplarByIdUseCase = new GetEjemplarByIdUseCase(ejemplarRepository);
 const createEjemplarUseCase = new CreateEjemplarUseCase(ejemplarRepository);
+const updateEjemplarEstadoUseCase = new UpdateEjemplarEstadoUseCase(ejemplarRepository);
 
 function resolveSession(customSession?: Session | null): Session | null {
     return customSession ?? authStorageDataSource.getSession();
@@ -98,5 +100,36 @@ export async function createEjemplarAction(
         };
     } catch (error: any) {
         return { success: false, error: error?.message || ErrorMessages.EJEMPLAR_CREATE_ERROR };
+    }
+}
+
+export interface UpdateEjemplarEstadoActionParams {
+    session?: Session | null;
+    id: string;
+    estado: EstadoEjemplar;
+}
+
+export async function updateEjemplarEstadoAction(
+    params: UpdateEjemplarEstadoActionParams
+): Promise<ActionState<{ ejemplar: Ejemplar }>> {
+    try {
+        const session = resolveSession(params.session);
+        if (!session?.accessToken) {
+            return { success: false, error: ErrorMessages.AUTH_UNAUTHORIZED };
+        }
+
+        const result = await updateEjemplarEstadoUseCase.execute({
+            session,
+            id: params.id,
+            estado: params.estado
+        });
+
+        return {
+            success: true,
+            data: result,
+            message: "Estado del ejemplar actualizado correctamente."
+        };
+    } catch (error: any) {
+        return { success: false, error: error?.message || ErrorMessages.UNEXPECTED_ERROR };
     }
 }

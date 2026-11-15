@@ -3,12 +3,14 @@ from app.application.use_case.ejemplar import (
     CreateEjemplarUseCase,
     GetAllEjemplaresUseCase,
     GetEjemplarByIdUseCase,
+    UpdateEjemplarEstadoUseCase,
 )
 from app.presentation.dto.ejemplar.mapper import EjemplarMapper
 from app.presentation.dto.ejemplar.request import (
     CreateEjemplarReq,
     GetAllEjemplaresReq,
     GetEjemplarByIdReq,
+    UpdateEjemplarEstadoReq,
 )
 from app.presentation.dto.ejemplar.response import EjemplarRes, GetAllEjemplaresRes
 
@@ -19,10 +21,12 @@ class EjemplarService(EjemplarServiceI):
         get_all_use_case: GetAllEjemplaresUseCase,
         get_by_id_use_case: GetEjemplarByIdUseCase,
         create_use_case: CreateEjemplarUseCase,
+        update_estado_use_case: UpdateEjemplarEstadoUseCase,
     ) -> None:
         self.get_all_use_case = get_all_use_case
         self.get_by_id_use_case = get_by_id_use_case
         self.create_use_case = create_use_case
+        self.update_estado_use_case = update_estado_use_case
 
     def get_all(self, dto: GetAllEjemplaresReq) -> GetAllEjemplaresRes:
         result = self.get_all_use_case.execute(
@@ -48,6 +52,16 @@ class EjemplarService(EjemplarServiceI):
                 codigo=dto.get_codigo(),
                 libro_id=dto.get_libro_id(),
                 sede_id=dto.get_sede_id(),
+            )
+        )
+        return EjemplarMapper.to_response(result.ejemplar)
+
+    def update_estado(self, dto: UpdateEjemplarEstadoReq) -> EjemplarRes:
+        result = self.update_estado_use_case.execute(
+            UpdateEjemplarEstadoUseCase.Command(
+                token=dto.get_token(),
+                id=dto.get_id(),
+                estado=dto.get_estado(),
             )
         )
         return EjemplarMapper.to_response(result.ejemplar)

@@ -16,11 +16,14 @@ export function LibraryRecordList({ records, detail, isSaving, renderDetailConte
                 <span>{records.length}</span>
             </div>
             <ul className={styles.list}>
-                {records.map(({ id, label, selected, select }) => (
+                {records.map(({ id, label, meta, selected, select }) => (
                     <li key={id} className={styles.item} data-selected={selected}>
                         <div className={styles.row}>
                             <span className={styles.id}>#{id}</span>
-                            <strong className={styles.label}>{label}</strong>
+                            <div className={styles.summary}>
+                                <strong className={styles.label}>{label}</strong>
+                                {meta && <span className={styles.meta}>{meta}</span>}
+                            </div>
                             {select && (
                                 <LibraryButton disabled={isSaving} aria-expanded={selected} onClick={select}>
                                     {selected ? "Cerrar detalle" : "Ver detalle"}

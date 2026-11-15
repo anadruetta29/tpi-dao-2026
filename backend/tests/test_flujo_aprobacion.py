@@ -11,7 +11,10 @@ from app.domain.entity.ejemplar import Ejemplar
 from app.domain.entity.estado_ejemplar import EstadoEjemplar
 from app.domain.entity.estado_envio import EstadoEnvio
 from app.domain.entity.estado_prestamo import EstadoPrestamo
+from app.domain.entity.estado_reserva import EstadoReserva
 from app.domain.entity.estado_solicitud import EstadoSolicitud
+from app.domain.entity.remito import Remito
+from app.domain.entity.reserva import Reserva
 from app.domain.entity.rol import Rol
 from app.domain.entity.solicitud_prestamo import SolicitudPrestamo
 from app.domain.entity.tipo_prestamo import TipoPrestamo
@@ -111,3 +114,43 @@ class FlujoAprobacionTest(unittest.TestCase):
             (EstadoEnvio.ACEPTADO, 11), (EstadoEnvio.EMPACADO, 11),
             (EstadoEnvio.EN_TRANSITO, 11), (EstadoEnvio.CON_INCIDENCIA, 12), (EstadoEnvio.RECIBIDO, 12),
         ])
+
+    def test_recepcion_remito_sin_socio_asigna_reserva_pendiente(self):
+        reservas, avisos, usuarios = Mock(), Mock(), Mock()
+        ejemplar = Ejemplar(id=2, libro_id=9, sede_id=3, estado=EstadoEjemplar.EN_TRANSITO)
+        self.ejemplares.get_by_id_for_update.return_value = ejemplar
+        remito = Remito(
+            id=5,
+            sede_origen_id=3,
+            sede_destino_id=4,
+            solicitud_id=None,
+            ejemplar_ids=[2],
+        )
+        self.remitos.get_by_id_for_update.return_value = remito
+        self.historial.get_latest_by_remito_id.return_value = None
+        from app.domain.entity.historial_estado_remito import HistorialEstadoRemito
+        self.historial.get_latest_by_remito_id.return_value = HistorialEstadoRemito(
+            id=1, estado=EstadoEnvio.EN_TRANSITO, remito_id=5, fechaInicio=date.today()
+        )
+        reserva = Reserva(
+            id=20, socio_id=7, libro_id=9, sede_id=4, estado=EstadoReserva.ACTIVA, fecha=date.today()
+        )
+        reservas.get_pendientes_for_update.return_value = [reserva]
+        reservas.update.side_effect = lambda id, r: r
+        recibir = RecepcionRemitoUseCase(
+            self.remitos, self.historial, self.ejemplares, usuarios,
+            solicitud_repository=self.solicitudes,
+            crear_prestamo=Mock(),
+            reserva_repository=reservas,
+            aviso_repository=avisos,
+        )
+        self.auth.return_value = Usuario(id=12, role=Rol.RECEPCIONISTA, sede_id=4)
+
+        recibir.execute(recibir.Command("token", 5, date.today()))
+
+        self.assertEqual(ejemplar.sede_id, 4)
+        self.assertEqual(ejemplar.estado, EstadoEjemplar.RESERVADO)
+        self.assertEqual(reserva.estado, EstadoReserva.LISTA_PARA_RETIRO)
+        self.assertEqual(reserva.ejemplar_id, 2)
+        reservas.update.assert_called_once_with(20, reserva)
+        avisos.crear_si_nuevo.assert_called_once()

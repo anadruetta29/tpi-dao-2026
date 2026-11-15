@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { type Session } from "@/domain/entities/session";
 import { ModalidadPrestamoLocal } from "@/domain/entities/modalidad-prestamo-local";
 import { Rol } from "@/domain/entities/rol";
-import { localDateISO } from "@/ui/forms/handlers/local-date";
+import { localDateISO, localDatePlusDaysISO } from "@/ui/forms/handlers/local-date";
 import { EstadoSolicitud, TipoPrestamo, type SolicitudPrestamo } from "@/domain/entities/solicitud-prestamo";
 import {
     createSolicitudInterbibliotecariaAction,
@@ -102,7 +102,7 @@ export function useViewModel(
             || (aprobacionPendiente && !local && session.user.sedeId === solicitud.sedeDestinoId));
         const camposAprobacion: Field[] = local ? [
             { name: "modalidad", label: "Modalidad", options: ModalidadPrestamoLocal.toOptions() },
-            { name: "fechaVencimiento", placeholder: "Seleccioná la fecha de vencimiento", label: "Fecha de vencimiento", type: "date", min: localDateISO() }
+            { name: "fechaVencimiento", placeholder: "Seleccioná la fecha de vencimiento", label: "Fecha de vencimiento", type: "date", defaultValue: localDatePlusDaysISO(7), min: localDateISO() }
         ] : [];
         return {
             info: [
@@ -137,7 +137,15 @@ export function useViewModel(
     {/* ===== variables ===== */ }
 
     const getSolicitudLabel = (solicitud: SolicitudPrestamo) => {
-        return `${solicitud.numero} · ${solicitud.tipoName} · ${solicitud.estadoName}`;
+        const destinatario = solicitud.socioId
+            ? (selectors.socios.get(solicitud.socioId) ?? `Socio #${solicitud.socioId}`)
+            : `${selectors.sedeNames.get(solicitud.sedeOrigenId) ?? `Sede #${solicitud.sedeOrigenId}`} → ${selectors.sedeNames.get(solicitud.sedeDestinoId) ?? `Sede #${solicitud.sedeDestinoId}`}`;
+        return `${solicitud.numero} · ${destinatario}`;
+    };
+
+    const getSolicitudMeta = (solicitud: SolicitudPrestamo) => {
+        const copias = solicitud.ejemplaresIds.map((id) => selectors.copyNames.get(id) ?? `#${id}`).join(", ");
+        return [solicitud.tipoName, solicitud.estadoName, copias || undefined].filter(Boolean).join(" · ");
     };
 
     const filterFields: Field[] = [
@@ -165,6 +173,7 @@ export function useViewModel(
 
     return useLibraryRecordsViewModel({
         initialRecordId,
+        newestFirst: true,
         initiallyOpen: Boolean(solicitudInicial),
         title: "Solicitudes de préstamo",
         initialFilters: { tipo: "", estado: "", sedeId: "" },
@@ -176,6 +185,7 @@ export function useViewModel(
             submit: handleFilterSubmit
         },
         getLabel: getSolicitudLabel,
+        getMeta: getSolicitudMeta,
         create: {
             label: "Registrar solicitud",
             submitDisabled,

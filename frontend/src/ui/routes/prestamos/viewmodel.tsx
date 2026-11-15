@@ -2,7 +2,9 @@ import { useCallback } from "react";
 import { Rol } from "@/domain/entities/rol";
 import { localDateISO } from "@/ui/forms/handlers/local-date";
 import { type Session } from "@/domain/entities/session";
+import { EstadoEjemplar } from "@/domain/entities/devolucion";
 import { EstadoPrestamo, ModalidadPrestamoLocal, type Prestamo } from "@/domain/entities/prestamo";
+import { createDevolucionAction } from "@/ui/actions/devolucion/devolucion.actions";
 import { cancelarPrestamoAction, getAllPrestamosAction, getPrestamoByIdAction, renovarPrestamoAction } from "@/ui/actions/prestamo/prestamo.actions";
 import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
@@ -14,7 +16,7 @@ function dateKey(value?: string | Date | null) {
     return value instanceof Date ? value.toISOString().slice(0, 10) : value?.slice(0, 10) ?? "";
 }
 
-export function useViewModel(session: Session, initialRecordId?: string) {
+export function useViewModel(session: Session, initialRecordId?: string, onDevolver?: (prestamoId: string) => void) {
     const today = localDateISO();
     const isRecepcionista = session.user?.role === Rol.RECEPCIONISTA;
 
@@ -57,17 +59,28 @@ export function useViewModel(session: Session, initialRecordId?: string) {
         return cancelarPrestamoAction({ id: prestamo.id, session });
     };
 
+    const handleDevolverPrestamo = (prestamo: Prestamo) => {
+        return createDevolucionAction({
+            session,
+            prestamoId: prestamo.id,
+            fecha: today,
+            estadoDevuelto: EstadoEjemplar.DISPONIBLE
+        });
+    };
+
     const describePrestamo = (prestamo: Prestamo) => {
         const mismaSede = session.user?.roleEntity !== Rol.RECEPCIONISTA || session.user.sedeId === prestamo.sedeId;
         const activo = prestamo.estadoEntity === EstadoPrestamo.ACTIVO;
+        const abierto = activo || prestamo.estadoEntity === EstadoPrestamo.VENCIDO;
         const vencimiento = dateKey(prestamo.fechaVencimiento);
+        const pendientes = prestamo.ejemplaresIds.filter((id) => !prestamo.ejemplaresDevueltosIds.includes(id));
         return {
             info: [
                 info("Solicitud", prestamo.solicitudId),
                 info("Socio", socioNames.get(prestamo.socioId) ?? prestamo.socioId),
                 info("Ejemplares", joinEjemplares(prestamo.ejemplaresIds)),
                 info("Devueltos", joinEjemplares(prestamo.ejemplaresDevueltosIds)),
-                info("Pendientes", joinEjemplares(prestamo.ejemplaresIds.filter((id) => !prestamo.ejemplaresDevueltosIds.includes(id)))),
+                info("Pendientes", joinEjemplares(pendientes)),
                 info("Sede", sedeNames.get(prestamo.sedeId) ?? prestamo.sedeId),
                 info("Estado", prestamo.estadoName),
                 info("Modalidad", prestamo.modalidadName),
@@ -88,15 +101,37 @@ export function useViewModel(session: Session, initialRecordId?: string) {
                         label: "Cancelar anticipadamente",
                         confirm: "Confirmá que recibiste en buen estado todos los ejemplares pendientes. El préstamo se cerrará y se registrarán sus devoluciones.",
                         execute: () => handleCancelPrestamo(prestamo)
+                    }] : []),
+                ...(mismaSede && abierto && pendientes.length === 1 && (!vencimiento || today >= vencimiento) ? [{
+                        label: "Registrar devolución",
+                        confirm: "Confirmá que recibiste el ejemplar pendiente en buen estado.",
+                        execute: () => handleDevolverPrestamo(prestamo)
                     }] : [])
-            ]
+            ],
+            actions: mismaSede && abierto && pendientes.length > 1 && onDevolver ? [{
+                label: "Registrar devolución",
+                onClick: () => onDevolver(prestamo.id)
+            }] : undefined
         };
     };
 
     {/* ===== variables ===== */ }
 
     const getPrestamoLabel = (prestamo: Prestamo) => {
-        return `Préstamo #${prestamo.id} · ${prestamo.modalidadName} · ${prestamo.estadoName}`;
+        const socioNombre = socioNames.get(prestamo.socioId) ?? `Socio #${prestamo.socioId}`;
+        const copias = joinEjemplares(prestamo.ejemplaresIds);
+        return copias ? `${socioNombre} · ${copias}` : `${socioNombre} · Préstamo #${prestamo.id}`;
+    };
+
+    const getPrestamoMeta = (prestamo: Prestamo) => {
+        const sedeNombre = sedeNames.get(prestamo.sedeId) ?? (prestamo.sedeId ? `Sede #${prestamo.sedeId}` : "");
+        const vencimiento = dateKey(prestamo.fechaVencimiento);
+        return [
+            prestamo.estadoName,
+            prestamo.modalidadName,
+            sedeNombre,
+            vencimiento ? `Vence ${vencimiento}` : undefined
+        ].filter(Boolean).join(" · ");
     };
 
     const filterFields: Field[] = [
@@ -107,6 +142,7 @@ export function useViewModel(session: Session, initialRecordId?: string) {
 
     return useLibraryRecordsViewModel({
         initialRecordId,
+        newestFirst: true,
         title: "Préstamos",
         initialFilters: { socioId: "", sedeId: "", estado: "" },
         load: fetchPrestamos,
@@ -117,6 +153,7 @@ export function useViewModel(session: Session, initialRecordId?: string) {
             submit: handleFilterSubmit
         },
         getLabel: getPrestamoLabel,
+        getMeta: getPrestamoMeta,
         describe: describePrestamo
     });
 }

@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Optional
 from app.domain.entity.devolucion import Devolucion
+from app.domain.entity.estado_ejemplar import EstadoEjemplar
 from app.presentation.dto.devolucion.request import (
     CreateDevolucionReq,
     GetAllDevolucionesReq,
@@ -10,8 +11,12 @@ from app.presentation.dto.devolucion.response import DevolucionRes, GetAllDevolu
 
 class DevolucionMapper:
     @staticmethod
-    def to_get_all_request(token: Optional[str]) -> GetAllDevolucionesReq:
-        return GetAllDevolucionesReq.build(token)
+    def to_get_all_request(
+        token: Optional[str],
+        prestamo_id: Optional[int] = None,
+        estado_devuelto: Optional[EstadoEjemplar] = None,
+    ) -> GetAllDevolucionesReq:
+        return GetAllDevolucionesReq.build(token, prestamo_id, estado_devuelto)
 
     @staticmethod
     def to_get_all_response(devoluciones: List[Devolucion]) -> GetAllDevolucionesRes:

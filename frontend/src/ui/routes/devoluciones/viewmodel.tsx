@@ -7,7 +7,8 @@ import { EstadoPrestamo } from "@/domain/entities/prestamo";
 import { createDevolucionAction, getAllDevolucionesAction, getDevolucionByIdAction } from "@/ui/actions/devolucion/devolucion.actions";
 import { useSelector } from "@/ui/hooks/use-selector";
 import { useSelectorCatalog } from "@/ui/hooks/use-selector-catalog";
-import { info, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
+import { allOptions, info, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
+import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
 
 const estados = [
@@ -27,8 +28,12 @@ export function useViewModel(session: Session, prestamoInicialId?: string) {
 
     {/* ===== Fetch data ===== */ }
 
-    const fetchDevoluciones = useCallback(async () => {
-        return getAllDevolucionesAction({ session });
+    const fetchDevoluciones = useCallback(async ({ prestamoId, estadoDevuelto }: { prestamoId: string; estadoDevuelto: string }) => {
+        return getAllDevolucionesAction({
+            session,
+            prestamoId: prestamoId.trim() || undefined,
+            estadoDevuelto: estadoDevuelto || undefined
+        });
     }, [session]);
 
     const fetchDevolucionDetail = useCallback(async (id: string) => {
@@ -44,6 +49,10 @@ export function useViewModel(session: Session, prestamoInicialId?: string) {
     };
 
     {/* ===== handlers functions ===== */ }
+
+    const handleFilterSubmit = (field: ReadField) => {
+        return readFields(field, "prestamoId", "estadoDevuelto");
+    };
 
     const handleCreateDevolucion = async (field: ReadField) => {
         const result = await createDevolucionAction({
@@ -92,8 +101,19 @@ export function useViewModel(session: Session, prestamoInicialId?: string) {
         ?? { value: id, label: `Ejemplar #${id}` });
 
     const getDevolucionLabel = (devolucion: Devolucion) => {
-        return `Préstamo ${devolucion.prestamoId} · ${devolucion.estadoDevueltoName}`;
+        const copia = devolucion.ejemplarId ? (ejemplarNames.get(devolucion.ejemplarId) ?? `Ejemplar #${devolucion.ejemplarId}`) : undefined;
+        return [copia ?? `Préstamo #${devolucion.prestamoId}`, devolucion.estadoDevueltoName].filter(Boolean).join(" · ");
     };
+
+    const getDevolucionMeta = (devolucion: Devolucion) => {
+        const fecha = devolucion.fecha ? String(devolucion.fecha).slice(0, 10) : undefined;
+        return [`Préstamo #${devolucion.prestamoId}`, fecha, devolucion.observaciones || undefined].filter(Boolean).join(" · ");
+    };
+
+    const filterFields: Field[] = [
+        { name: "prestamoId", label: "Préstamo #", placeholder: "Ej. 12", type: "number" },
+        { name: "estadoDevuelto", label: "Estado devuelto", options: allOptions(estados) }
+    ];
 
     const createFields: Field[] = [
         prestamo.field(availablePrestamos ?? null, undefined, ejemplar.reset),
@@ -106,11 +126,18 @@ export function useViewModel(session: Session, prestamoInicialId?: string) {
 
     return useLibraryRecordsViewModel({
         title: "Devoluciones",
+        newestFirst: true,
         initiallyOpen: Boolean(prestamoInicialId),
-        initialFilters: null,
+        initialFilters: { prestamoId: "", estadoDevuelto: "" },
         load: fetchDevoluciones,
         loadDetail: fetchDevolucionDetail,
+        filter: {
+            label: "Filtrar devoluciones",
+            fields: filterFields,
+            submit: handleFilterSubmit
+        },
         getLabel: getDevolucionLabel,
+        getMeta: getDevolucionMeta,
         create: {
             label: "Registrar devolución",
             onOpen: onOpenCreate,

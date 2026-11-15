@@ -25,6 +25,7 @@ class ReservaRepositoryAdapter(BaseRepositoryAdapter[Reserva, ReservaModel], Res
         socio_id: Optional[int] = None,
         sede_id: Optional[int] = None,
         estado: Optional[EstadoReserva] = None,
+        ejemplar_id: Optional[int] = None,
     ) -> List[Reserva]:
         return ReservaEntityMapper.to_domain_list(
             self.repository.find_all_filtered(
@@ -32,5 +33,6 @@ class ReservaRepositoryAdapter(BaseRepositoryAdapter[Reserva, ReservaModel], Res
                 socio_id=socio_id,
                 sede_id=sede_id,
                 estado=estado,
+                ejemplar_id=ejemplar_id,
             )
         )

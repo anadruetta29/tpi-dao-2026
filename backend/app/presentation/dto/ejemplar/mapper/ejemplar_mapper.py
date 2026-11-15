@@ -5,6 +5,7 @@ from app.presentation.dto.ejemplar.request import (
     CreateEjemplarReq,
     GetAllEjemplaresReq,
     GetEjemplarByIdReq,
+    UpdateEjemplarEstadoReq,
 )
 from app.presentation.dto.ejemplar.response import EjemplarRes, GetAllEjemplaresRes
 
@@ -30,6 +31,12 @@ class EjemplarMapper:
     @staticmethod
     def to_create_request(token: Optional[str], payload: Dict[str, Any]) -> CreateEjemplarReq:
         return CreateEjemplarReq.build(token, payload)
+
+    @staticmethod
+    def to_update_estado_request(
+        token: Optional[str], id: int, payload: Dict[str, Any]
+    ) -> UpdateEjemplarEstadoReq:
+        return UpdateEjemplarEstadoReq.build(token, id, payload)
 
     @staticmethod
     def to_response(ejemplar: Ejemplar) -> EjemplarRes:

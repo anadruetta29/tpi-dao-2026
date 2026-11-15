@@ -6,6 +6,7 @@ from app.application.strategy.remito_estado.core.remito_estado_state_factory imp
     RemitoEstadoStateFactory,
 )
 from app.application.use_case.prestamo.create_prestamo_use_case import CreatePrestamoUseCase
+from app.application.use_case.reserva.asignar_reserva_use_case import asignar_reserva
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.estado_envio import EstadoEnvio
 from app.domain.entity.historial_estado_remito import HistorialEstadoRemito
@@ -13,9 +14,11 @@ from app.domain.entity.remito import Remito
 from app.domain.entity.rol import Rol
 from app.domain.error.error_handler import ErrorHandler
 from app.domain.error.error_type import ErrorType
+from app.domain.repository.aviso_repository_i import AvisoRepositoryI
 from app.domain.repository.ejemplar_repository_i import EjemplarRepositoryI
 from app.domain.repository.historial_estado_remito_repository_i import HistorialEstadoRemitoRepositoryI
 from app.domain.repository.remito_repository_i import RemitoRepositoryI
+from app.domain.repository.reserva_repository_i import ReservaRepositoryI
 from app.domain.repository.solicitud_prestamo_repository_i import SolicitudPrestamoRepositoryI
 from app.domain.repository.usuario_repository_i import UsuarioRepositoryI
 
@@ -31,6 +34,8 @@ class RecepcionRemitoUseCase:
         *,
         solicitud_repository: SolicitudPrestamoRepositoryI,
         crear_prestamo: CreatePrestamoUseCase,
+        reserva_repository: Optional[ReservaRepositoryI] = None,
+        aviso_repository: Optional[AvisoRepositoryI] = None,
         transaction: Callable[[], ContextManager] = nullcontext,
     ) -> None:
         self.remito_repository = remito_repository
@@ -39,6 +44,8 @@ class RecepcionRemitoUseCase:
         self.usuario_repository = usuario_repository
         self.solicitud_repository = solicitud_repository
         self.crear_prestamo = crear_prestamo
+        self.reserva_repository = reserva_repository
+        self.aviso_repository = aviso_repository
         self.transaction = transaction
         self.remito_state_factory = remito_state_factory or RemitoEstadoStateFactory()
 
@@ -105,6 +112,14 @@ class RecepcionRemitoUseCase:
                     raise ErrorHandler(ErrorType.EJEMPLAR_NOT_FOUND)
                 ejemplar.recibir_en_sede(updated_remito.sede_destino_id)
                 self.ejemplar_repository.update(ej_id, ejemplar)
+                if (solicitud is None or solicitud.socio_id is None) and self.reserva_repository is not None:
+                    if asignar_reserva(
+                        ejemplar,
+                        self.reserva_repository,
+                        fecha_recepcion,
+                        aviso_repository=self.aviso_repository,
+                    ) is not None:
+                        self.ejemplar_repository.update(ej_id, ejemplar)
             if solicitud is not None:
                 self.crear_prestamo.efectivizar(solicitud)
                 solicitud.responsable_destino_id = user.id

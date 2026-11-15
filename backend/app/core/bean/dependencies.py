@@ -48,6 +48,7 @@ from app.application.use_case.ejemplar import (
     CreateEjemplarUseCase,
     GetAllEjemplaresUseCase,
     GetEjemplarByIdUseCase,
+    UpdateEjemplarEstadoUseCase,
 )
 from app.application.use_case.libro import (
     CreateLibroUseCase,
@@ -319,16 +320,31 @@ def get_libro_service(
     )
 
 
+def get_aviso_repository(db: Session = Depends(get_db)) -> AvisoRepositoryI:
+    return AvisoRepositoryAdapter(PostgresAvisoRepository(db))
+
+
 def get_ejemplar_service(
+    db: Session = Depends(get_db),
     ejemplar_repo: EjemplarRepositoryI = Depends(get_ejemplar_repository),
     libro_repo: LibroRepositoryI = Depends(get_libro_repository),
     sede_repo: SedeRepositoryI = Depends(get_sede_repository),
     usuario_repo: UsuarioRepositoryI = Depends(get_usuario_repository),
+    reserva_repo: ReservaRepositoryI = Depends(get_reserva_repository),
+    aviso_repo: AvisoRepositoryI = Depends(get_aviso_repository),
 ) -> EjemplarServiceI:
     return EjemplarService(
         get_all_use_case=GetAllEjemplaresUseCase(ejemplar_repo, usuario_repo),
         get_by_id_use_case=GetEjemplarByIdUseCase(ejemplar_repo, usuario_repo),
         create_use_case=CreateEjemplarUseCase(ejemplar_repo, libro_repo, sede_repo, usuario_repo),
+        update_estado_use_case=UpdateEjemplarEstadoUseCase(
+            ejemplar_repo,
+            usuario_repo,
+            EjemplarEstadoStateFactory(),
+            reserva_repo,
+            aviso_repo,
+            transaction=lambda: atomic_write(db),
+        ),
     )
 
 
@@ -403,10 +419,6 @@ def get_solicitud_prestamo_service(
             transaction=lambda: atomic_write(db),
         ),
     )
-
-
-def get_aviso_repository(db: Session = Depends(get_db)) -> AvisoRepositoryI:
-    return AvisoRepositoryAdapter(PostgresAvisoRepository(db))
 
 
 def get_create_devolucion_use_case(
@@ -511,6 +523,8 @@ def get_remito_service(
     solicitud_repo: SolicitudPrestamoRepositoryI = Depends(get_solicitud_prestamo_repository),
     ejemplar_repo: EjemplarRepositoryI = Depends(get_ejemplar_repository),
     usuario_repo: UsuarioRepositoryI = Depends(get_usuario_repository),
+    reserva_repo: ReservaRepositoryI = Depends(get_reserva_repository),
+    aviso_repo: AvisoRepositoryI = Depends(get_aviso_repository),
     crear_remito: CreateRemitoUseCase = Depends(get_create_remito_use_case),
     crear_prestamo: CreatePrestamoUseCase = Depends(get_create_prestamo_use_case),
 ) -> RemitoServiceI:
@@ -527,6 +541,8 @@ def get_remito_service(
             remito_repo, historial_repo, ejemplar_repo, usuario_repo, remito_state_factory,
             solicitud_repository=solicitud_repo,
             crear_prestamo=crear_prestamo,
+            reserva_repository=reserva_repo,
+            aviso_repository=aviso_repo,
             transaction=lambda: atomic_write(db),
         ),
         trazabilidad_use_case=GetRemitoTrazabilidadUseCase(

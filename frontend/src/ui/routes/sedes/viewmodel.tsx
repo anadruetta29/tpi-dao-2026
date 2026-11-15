@@ -104,7 +104,9 @@ export function useViewModel(session: Session) {
 
     const canWrite = user?.roleEntity === Rol.ADMIN;
 
-    const getSedeLabel = (sede: Sede) => `${sede.nombre} · ${sede.estadoName}`;
+    const getSedeLabel = (sede: Sede) => sede.nombre;
+
+    const getSedeMeta = (sede: Sede) => [sede.horarioAtencion, sede.estadoName].filter(Boolean).join(" · ");
 
     const filterFields: Field[] = [
         { name: "estado", label: "Estado", options: allOptions(EstadoSede.toOptions()) }
@@ -121,6 +123,7 @@ export function useViewModel(session: Session) {
         load: fetchSedes,
         loadDetail: fetchSedeDetail,
         getLabel: getSedeLabel,
+        getMeta: getSedeMeta,
         create: canWrite ? {
             label: "Registrar sede",
             fields: sedeFields(),

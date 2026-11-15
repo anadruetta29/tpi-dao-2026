@@ -89,7 +89,13 @@ export function useViewModel(session: Session) {
     ) : null;
 
     const getMultaLabel = (multa: Multa) => {
-        return `${multa.motivoName} · ${multa.estadoName} · $${multa.monto}`;
+        const socioNombre = socioNames.get(multa.socioId) ?? `Socio #${multa.socioId}`;
+        return `${socioNombre} · $${multa.monto}`;
+    };
+
+    const getMultaMeta = (multa: Multa) => {
+        const emision = multa.fechaEmision ? String(multa.fechaEmision).slice(0, 10) : undefined;
+        return [multa.estadoName, multa.motivoName, `Préstamo #${multa.prestamoId}`, emision].filter(Boolean).join(" · ");
     };
 
     const filterFields: Field[] = [
@@ -106,6 +112,7 @@ export function useViewModel(session: Session) {
 
     return useLibraryRecordsViewModel({
         title: "Multas",
+        newestFirst: true,
         initialFilters: { socioId: "", estado: "" },
         load: fetchMultas,
         loadDetail: fetchMultaDetail,
@@ -115,6 +122,7 @@ export function useViewModel(session: Session) {
             submit: handleFilterSubmit
         },
         getLabel: getMultaLabel,
+        getMeta: getMultaMeta,
         create: {
             label: "Registrar multa",
             onOpen: onOpenCreate,

@@ -4,6 +4,8 @@ import { type Devolucion } from "@/domain/entities/devolucion";
 
 export interface GetAllDevolucionesCommand {
     session: Session;
+    prestamoId?: string;
+    estadoDevuelto?: string;
 }
 
 export interface GetAllDevolucionesResult {
@@ -20,7 +22,9 @@ export class GetAllDevolucionesUseCase {
 
     public async execute(command: GetAllDevolucionesCommand): Promise<GetAllDevolucionesResult> {
         const response = await this.devolucionRepository.getAllDevoluciones({
-            session: command.session
+            session: command.session,
+            prestamoId: command.prestamoId,
+            estadoDevuelto: command.estadoDevuelto
         });
 
         return { devoluciones: response.devoluciones };

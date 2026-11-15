@@ -3,7 +3,7 @@ import { type ActionState } from "@/core/types";
 import { EstadoEjemplar, type Ejemplar } from "@/domain/entities/ejemplar";
 import { EstadoSede, type Sede } from "@/domain/entities/sede";
 import { type Session } from "@/domain/entities/session";
-import { createEjemplarAction, getAllEjemplaresAction, getEjemplarByIdAction } from "@/ui/actions/ejemplar/ejemplar.actions";
+import { createEjemplarAction, getAllEjemplaresAction, getEjemplarByIdAction, updateEjemplarEstadoAction } from "@/ui/actions/ejemplar/ejemplar.actions";
 import { getLibroDisponibilidadAction } from "@/ui/actions/libro/libro.actions";
 import { getAllSedesAction } from "@/ui/actions/sede/sede.actions";
 import { readFields } from "@/ui/forms/handlers/record-fields";
@@ -77,13 +77,51 @@ export function useEjemplaresViewModel(session: Session, libroId: string) {
         return result;
     };
 
-    const describeEjemplar = (ejemplar: Ejemplar) => ({
-        info: [
-            info("Código", ejemplar.codigo),
-            info("Sede", sedeNames.get(ejemplar.sedeId)),
-            info("Estado", ejemplar.estadoName)
-        ]
-    });
+    const describeEjemplar = (ejemplar: Ejemplar) => {
+        const enRevision =
+            ejemplar.estadoEntity === EstadoEjemplar.DANADO ||
+            ejemplar.estadoEntity === EstadoEjemplar.EN_REVISION;
+        const puedeGestionarSede = !session.user?.sedeId || session.user.sedeId === ejemplar.sedeId;
+
+        return {
+            info: [
+                info("Código", ejemplar.codigo),
+                info("Sede", sedeNames.get(ejemplar.sedeId)),
+                info("Estado", ejemplar.estadoName)
+            ],
+            commands: enRevision && puedeGestionarSede
+                ? [
+                    {
+                        label: "Marcar disponible",
+                        confirm: "¿Rehabilitar este ejemplar y marcarlo como disponible?",
+                        execute: async () => {
+                            const result = await updateEjemplarEstadoAction({
+                                session,
+                                id: ejemplar.id,
+                                estado: EstadoEjemplar.DISPONIBLE
+                            });
+                            if (result.success) refreshDisponibilidad();
+                            return result;
+                        }
+                    },
+                    {
+                        label: "Dar de baja (Destruido)",
+                        tone: "danger" as const,
+                        confirm: "¿Dar de baja definitivamente este ejemplar como destruido?",
+                        execute: async () => {
+                            const result = await updateEjemplarEstadoAction({
+                                session,
+                                id: ejemplar.id,
+                                estado: EstadoEjemplar.DESTRUIDO
+                            });
+                            if (result.success) refreshDisponibilidad();
+                            return result;
+                        }
+                    }
+                ]
+                : undefined
+        };
+    };
 
     {/* ===== variables ===== */ }
 
@@ -98,8 +136,10 @@ export function useEjemplaresViewModel(session: Session, libroId: string) {
 
     const activeSedeOptions = sedeOptions.filter(({ isActive }) => isActive);
 
-    const getEjemplarLabel = (ejemplar: Ejemplar) => {
-        return `${ejemplar.codigo} · ${ejemplar.estadoName} · ${sedeNames.get(ejemplar.sedeId) ?? "Sede no disponible"}`;
+    const getEjemplarLabel = (ejemplar: Ejemplar) => ejemplar.codigo;
+
+    const getEjemplarMeta = (ejemplar: Ejemplar) => {
+        return [ejemplar.estadoName, sedeNames.get(ejemplar.sedeId) ?? "Sede no disponible"].filter(Boolean).join(" · ");
     };
 
     const filterFields: Field[] = [
@@ -129,6 +169,7 @@ export function useEjemplaresViewModel(session: Session, libroId: string) {
             submit: handleFilterSubmit
         },
         getLabel: getEjemplarLabel,
+        getMeta: getEjemplarMeta,
         create: {
             label: "Registrar ejemplar",
             fields: createFields,

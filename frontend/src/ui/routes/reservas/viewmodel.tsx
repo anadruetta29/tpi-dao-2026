@@ -23,9 +23,8 @@ export function useViewModel(session: Session, initialRecordId?: string) {
     const filterSede = useSelector("sedeId", "Sede", "Buscá por nombre de sede", false);
 
     const socio = useSelector("socioId", "Socio", "Buscá por nombre o documento");
-    const libro = useSelector("libroId", "Libro", "Buscá por título", false);
+    const libro = useSelector("libroId", "Libro", "Buscá por título");
     const sede = useSelector("sedeId", "Sede", "Buscá por nombre de sede", false);
-    const ejemplar = useSelector("ejemplarId", "Ejemplar", "Buscá por título o código", false);
 
     {/* ===== Fetch data ===== */ }
 
@@ -48,13 +47,11 @@ export function useViewModel(session: Session, initialRecordId?: string) {
         socio.reset();
         libro.reset();
         sede.reset();
-        ejemplar.reset();
         catalog.refresh();
     };
 
     const onChangeSede = () => {
         libro.reset();
-        ejemplar.reset();
     };
 
     {/* ===== handlers functions ===== */ }
@@ -64,14 +61,11 @@ export function useViewModel(session: Session, initialRecordId?: string) {
     };
 
     const handleCreateReserva = async (field: ReadField) => {
-        const libroId = field("libroId") || undefined;
-        const ejemplarId = field("ejemplarId") || undefined;
         return createReservaAction({
             session,
             socioId: field("socioId"),
-            libroId,
-            ejemplarId,
-            sedeId: field("sedeId") || undefined
+            libroId: field("libroId"),
+            sedeId: isRecepcionista ? undefined : (field("sedeId") || undefined)
         });
     };
 
@@ -124,7 +118,9 @@ export function useViewModel(session: Session, initialRecordId?: string) {
 
     const stock = catalog.ejemplares ?? null;
 
-    const copiasEnSede = (stock?.data ?? []).filter((copy) => !sede.selected || copy.sedeId === sede.selected);
+    const sedeEfectiva = isRecepcionista ? (session.user?.sedeId ?? "") : sede.selected;
+
+    const copiasEnSede = (stock?.data ?? []).filter((copy) => !sedeEfectiva || copy.sedeId === sedeEfectiva);
 
     const librosDisponibles = new Set(
         copiasEnSede
@@ -136,23 +132,26 @@ export function useViewModel(session: Session, initialRecordId?: string) {
         ? pickData(catalog.libros, (items) => items.filter(({ value }) => !librosDisponibles.has(value)))
         : stock ? { success: false, error: stock.error || "No se pudo comprobar la disponibilidad de los libros." } : null;
 
-    const ejemplares = stock ? pickData(stock, () =>
-        copiasEnSede.filter((copy) =>
-            (copy.estado === EstadoEjemplar.PRESTADO || copy.estado === EstadoEjemplar.EN_TRANSITO)
-            && !librosDisponibles.has(copy.libroId)
-            && (!libro.selected || copy.libroId === libro.selected)
-        )
-    ) : null;
-
     const libroValido = Boolean(
         librosReservables && "data" in librosReservables && librosReservables.data?.some(({ value }) => value === libro.selected)
     );
 
-    const ejemplarValido = Boolean(
-        ejemplares?.data?.some(({ value }) => value === ejemplar.selected)
-    );
+    const socioNames = new Map((catalog.socios?.data ?? []).map(({ value, label }) => [value, label]));
+    const libroNames = new Map((catalog.libros?.data ?? []).map(({ value, label }) => [value, label]));
+    const sedeNames = new Map((catalog.sedes?.data ?? []).map(({ value, label }) => [value, label]));
 
-    const getReservaLabel = (reserva: Reserva) => `Reserva · ${reserva.estadoName}`;
+    const getReservaLabel = (reserva: Reserva) => {
+        const socioNombre = socioNames.get(reserva.socioId) ?? `Socio #${reserva.socioId}`;
+        const libroTitulo = libroNames.get(reserva.libroId) ?? `Libro #${reserva.libroId}`;
+        return `${socioNombre} · ${libroTitulo}`;
+    };
+
+    const getReservaMeta = (reserva: Reserva) => {
+        const sedeNombre = reserva.sedeId ? (sedeNames.get(reserva.sedeId) ?? `Sede #${reserva.sedeId}`) : undefined;
+        const fecha = reserva.fecha ? String(reserva.fecha).slice(0, 10) : undefined;
+        const retiro = reserva.fechaLimiteRetiro ? `Retiro hasta ${String(reserva.fechaLimiteRetiro).slice(0, 10)}` : undefined;
+        return [reserva.estadoName, sedeNombre, retiro ?? fecha].filter(Boolean).join(" · ");
+    };
 
     const filterFields: Field[] = [
         filterLibro.field(catalog?.libros ?? null),
@@ -163,17 +162,15 @@ export function useViewModel(session: Session, initialRecordId?: string) {
 
     const createFields: Field[] = [
         socio.field(socios ?? null),
-        sede.field(sedes ?? null, undefined, onChangeSede),
-        libro.field(librosReservables, "Comprobando disponibilidad...", ejemplar.reset),
-        ejemplar.field(ejemplares)
+        ...(isRecepcionista ? [] : [sede.field(sedes ?? null, undefined, onChangeSede)]),
+        libro.field(librosReservables, "Comprobando disponibilidad...")
     ];
 
-    const submitDisabled = !socio.selected
-        || !(libro.selected ? libroValido : ejemplarValido)
-        || Boolean(ejemplar.selected && !ejemplarValido);
+    const submitDisabled = !socio.selected || !libroValido;
 
     return useLibraryRecordsViewModel({
         initialRecordId,
+        newestFirst: true,
         title: "Reservas",
         initialFilters: { libroId: "", socioId: "", sedeId: "", estado: "" },
         load: fetchReservas,
@@ -184,6 +181,7 @@ export function useViewModel(session: Session, initialRecordId?: string) {
             submit: handleFilterSubmit
         },
         getLabel: getReservaLabel,
+        getMeta: getReservaMeta,
         create: {
             label: "Registrar reserva",
             onOpen: onOpenCreate,

@@ -79,6 +79,7 @@ export function useViewModel(session: Session, onOpen?: (destino: DestinoBandeja
 
     return useLibraryRecordsViewModel({
         title: "Avisos",
+        newestFirst: true,
         initialFilters: { tipo: "", lectura: "" },
         load: fetchAvisos,
         filter: {

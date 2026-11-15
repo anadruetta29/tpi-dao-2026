@@ -22,5 +22,6 @@ class ReservaRepositoryI(BaseRepositoryI[Reserva]):
         socio_id: Optional[int] = None,
         sede_id: Optional[int] = None,
         estado: Optional[EstadoReserva] = None,
+        ejemplar_id: Optional[int] = None,
     ) -> List[Reserva]:
         pass

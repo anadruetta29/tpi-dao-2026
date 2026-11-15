@@ -1,9 +1,10 @@
 import logging
 from typing import Any, Dict, Optional
-from fastapi import APIRouter, Body, Depends, Header
+from fastapi import APIRouter, Body, Depends, Header, Query
 from fastapi.responses import JSONResponse
 from app.application.service.devolucion_service_i import DevolucionServiceI
 from app.core.bean.dependencies import get_devolucion_service
+from app.domain.entity.estado_ejemplar import EstadoEjemplar
 from app.presentation.dto.devolucion.mapper import DevolucionMapper
 from app.presentation.dto.devolucion.response import DevolucionRes, GetAllDevolucionesRes
 
@@ -17,10 +18,12 @@ class DevolucionController:
     @router.get("", response_model=GetAllDevolucionesRes)
     def get_all(
         token: Optional[str] = Header(default=None, alias="Authorization"),
+        prestamo_id: Optional[int] = Query(default=None),
+        estado_devuelto: Optional[EstadoEjemplar] = Query(default=None),
         service: DevolucionServiceI = Depends(get_devolucion_service),
     ) -> JSONResponse:
         logger.info("GET /devoluciones called")
-        request = DevolucionMapper.to_get_all_request(token)
+        request = DevolucionMapper.to_get_all_request(token, prestamo_id, estado_devuelto)
         response = service.get_all(request)
         return JSONResponse(status_code=200, content=response.model_dump(mode="json"))
 

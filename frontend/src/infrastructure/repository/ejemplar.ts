@@ -6,6 +6,8 @@ import { type GetEjemplarByIdReq } from "@/domain/dto/ejemplar/request/GetEjempl
 import { type GetEjemplarByIdRes } from "@/domain/dto/ejemplar/response/GetEjemplarByIdRes";
 import { type CreateEjemplarReq } from "@/domain/dto/ejemplar/request/CreateEjemplarReq";
 import { type CreateEjemplarRes } from "@/domain/dto/ejemplar/response/CreateEjemplarRes";
+import { type UpdateEjemplarEstadoReq } from "@/domain/dto/ejemplar/request/UpdateEjemplarEstadoReq";
+import { type UpdateEjemplarEstadoRes } from "@/domain/dto/ejemplar/response/UpdateEjemplarEstadoRes";
 
 export class EjemplarRepository implements EjemplarRepositoryI {
 
@@ -25,6 +27,10 @@ export class EjemplarRepository implements EjemplarRepositoryI {
 
     public async createEjemplar(dto: CreateEjemplarReq): Promise<CreateEjemplarRes> {
         return await this.dataSource.createEjemplar(dto);
+    }
+
+    public async updateEjemplarEstado(dto: UpdateEjemplarEstadoReq): Promise<UpdateEjemplarEstadoRes> {
+        return await this.dataSource.updateEjemplarEstado(dto);
     }
 
 }

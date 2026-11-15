@@ -195,12 +195,16 @@ export function useViewModel(session: Session, initialRecordId?: string) {
     const sedeLabel = (id: string) => sedeNames.get(id) ?? (id ? `Sede ${id}` : "Sin asignar");
 
     const getRemitoLabel = (remito: Remito) => {
+        return `${remito.numero} · ${sedeLabel(remito.sedeOrigenId)} → ${sedeLabel(remito.sedeDestinoId)}`;
+    };
+
+    const getRemitoMeta = (remito: Remito) => {
+        const emision = remito.fechaEmision ? `Emisión ${String(remito.fechaEmision).slice(0, 10)}` : undefined;
         return [
-            remito.numero,
-            `${sedeLabel(remito.sedeOrigenId)} → ${sedeLabel(remito.sedeDestinoId)}`,
             remito.estadoActual?.name,
             remito.diasTransito !== null ? `${remito.diasTransito} días` : undefined,
-            remito.estaAtrasado ? "Atrasado" : undefined
+            remito.estaAtrasado ? "Atrasado" : undefined,
+            emision
         ].filter(Boolean).join(" · ");
     };
 
@@ -220,6 +224,7 @@ export function useViewModel(session: Session, initialRecordId?: string) {
 
     return useLibraryRecordsViewModel({
         initialRecordId,
+        newestFirst: true,
         title: "Remitos",
         initialFilters: { sedeOrigenId: "", sedeDestinoId: "", estado: "", seguimiento: "" },
         load: fetchRemitos,
@@ -230,6 +235,7 @@ export function useViewModel(session: Session, initialRecordId?: string) {
             submit: handleFilterSubmit
         },
         getLabel: getRemitoLabel,
+        getMeta: getRemitoMeta,
         create: {
             label: "Empaquetar y emitir remito",
             onOpen: onOpenCreate,

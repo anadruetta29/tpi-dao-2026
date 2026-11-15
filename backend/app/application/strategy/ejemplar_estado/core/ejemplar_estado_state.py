@@ -18,6 +18,9 @@ class EjemplarEstadoState(ABC):
     def puede_devolverse(self) -> bool:
         return False
 
+    def puede_resolver_revision(self) -> bool:
+        return False
+
     def validar_prestamo(self, ejemplar: Ejemplar) -> None:
         if not self.puede_prestarse():
             raise ErrorHandler(ErrorType.EJEMPLAR_NOT_AVAILABLE)
@@ -36,5 +39,13 @@ class EjemplarEstadoState(ABC):
 
     def devolver(self, ejemplar: Ejemplar, nuevo_estado: EstadoEjemplar) -> None:
         if not self.puede_devolverse():
+            raise ErrorHandler(ErrorType.INVALID_STATE_TRANSITION)
+        ejemplar.estado = nuevo_estado
+
+    def resolver_revision(self, ejemplar: Ejemplar, nuevo_estado: EstadoEjemplar) -> None:
+        if not self.puede_resolver_revision() or nuevo_estado not in (
+            EstadoEjemplar.DISPONIBLE,
+            EstadoEjemplar.DESTRUIDO,
+        ):
             raise ErrorHandler(ErrorType.INVALID_STATE_TRANSITION)
         ejemplar.estado = nuevo_estado

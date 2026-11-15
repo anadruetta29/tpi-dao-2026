@@ -27,6 +27,7 @@ export interface DetailSpec {
     sections?: DetailSection[];
     forms?: FormSpec<Promise<ActionState<unknown>>>[];
     commands?: { label: string; confirm: string; execute: Query<unknown>; tone?: "primary" | "danger" }[];
+    actions?: { label: string; onClick: () => void; tone?: "primary" | "danger" }[];
     queries?: { label: string; load: Query<DetailSection[]> }[];
 }
 
@@ -43,10 +44,12 @@ export interface RecordsOptions<T extends { id: string }, D, F> {
     initialFilters: F;
     initialRecordId?: string;
     initiallyOpen?: boolean;
+    newestFirst?: boolean;
     filter?: FormSpec<F>;
     load: (filters: F) => Promise<ActionState<T[]>>;
     loadDetail?: (id: string) => Promise<ActionState<D>>;
     getLabel: (record: T) => string;
+    getMeta?: (record: T) => string;
     describe?: (detail: D) => DetailSpec;
     create?: FormSpec<Promise<ActionState<unknown>>>;
 }
@@ -69,7 +72,7 @@ export interface LibraryRecordsView {
     error: string | null;
     isSaving: boolean;
     refresh: () => void;
-    records: { id: string; label: string; selected: boolean; select?: () => void }[];
+    records: { id: string; label: string; meta?: string; selected: boolean; select?: () => void }[];
     detail?: {
         loading: boolean;
         error: string | null;
@@ -233,7 +236,10 @@ export function useLibraryRecordsViewModel<T extends { id: string }, D, F>(
     const createView: FormView | undefined = isCreating && create ? writeForm(create) : undefined;
     const createLabel = create && (isCreating ? "Cancelar" : create.label);
 
-    const items = list?.data ?? [];
+    const rawItems = list?.data ?? [];
+    const items = options.newestFirst
+        ? [...rawItems].sort((a, b) => Number(b.id) - Number(a.id) || b.id.localeCompare(a.id))
+        : rawItems;
     const initialRecord = options.initialRecordId && selection?.id === options.initialRecordId
         ? items.find(({ id }) => id === options.initialRecordId)
         : undefined;
@@ -241,6 +247,7 @@ export function useLibraryRecordsViewModel<T extends { id: string }, D, F>(
     const records = ordered.map((record) => ({
         id: record.id,
         label: getLabel(record),
+        meta: options.getMeta?.(record),
         selected: selection?.id === record.id,
         select: loadDetail ? () => {
             setSelection(selection?.id === record.id ? null : { id: record.id });
@@ -256,13 +263,16 @@ export function useLibraryRecordsViewModel<T extends { id: string }, D, F>(
         info: spec?.info ?? [],
         sections: spec?.sections ?? [],
         forms: spec?.forms?.map(writeForm) ?? [],
-        commands: spec?.commands?.map(({ label, confirm, execute, tone }) => ({
-            label,
-            tone,
-            onClick: () => {
-                if (window.confirm(confirm)) void handleSave(execute);
-            }
-        })) ?? [],
+        commands: [
+            ...(spec?.commands?.map(({ label, confirm, execute, tone }) => ({
+                label,
+                tone,
+                onClick: () => {
+                    if (window.confirm(confirm)) void handleSave(execute);
+                }
+            })) ?? []),
+            ...(spec?.actions ?? [])
+        ],
         queries: spec?.queries?.map(({ label, load: loadExtra }) => ({
             label,
             onClick: () => void runQuery(loadExtra)

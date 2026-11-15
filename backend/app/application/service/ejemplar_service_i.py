@@ -3,6 +3,7 @@ from app.presentation.dto.ejemplar.request import (
     CreateEjemplarReq,
     GetAllEjemplaresReq,
     GetEjemplarByIdReq,
+    UpdateEjemplarEstadoReq,
 )
 from app.presentation.dto.ejemplar.response import EjemplarRes, GetAllEjemplaresRes
 
@@ -18,4 +19,8 @@ class EjemplarServiceI(ABC):
 
     @abstractmethod
     def create(self, dto: CreateEjemplarReq) -> EjemplarRes:
+        pass
+
+    @abstractmethod
+    def update_estado(self, dto: UpdateEjemplarEstadoReq) -> EjemplarRes:
         pass

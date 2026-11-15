@@ -38,6 +38,7 @@ class PostgresReservaRepository(BasePostgresRepository[ReservaModel]):
         socio_id: Optional[int] = None,
         sede_id: Optional[int] = None,
         estado: Optional[EstadoReserva] = None,
+        ejemplar_id: Optional[int] = None,
     ) -> List[ReservaModel]:
         query = self.db.query(ReservaModel)
         if libro_id is not None:
@@ -48,4 +49,6 @@ class PostgresReservaRepository(BasePostgresRepository[ReservaModel]):
             query = query.filter(ReservaModel.sede_id == sede_id)
         if estado is not None:
             query = query.filter(ReservaModel.estado == estado)
+        if ejemplar_id is not None:
+            query = query.filter(ReservaModel.ejemplar_id == ejemplar_id)
         return query.all()

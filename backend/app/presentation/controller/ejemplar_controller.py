@@ -51,3 +51,16 @@ class EjemplarController:
         request = EjemplarMapper.to_create_request(token, payload)
         response = service.create(request)
         return JSONResponse(status_code=201, content=response.model_dump())
+
+    @staticmethod
+    @router.patch("/{id}/estado", response_model=EjemplarRes)
+    def update_estado(
+        id: int,
+        payload: Dict[str, Any] = Body(...),
+        token: Optional[str] = Header(default=None, alias="Authorization"),
+        service: EjemplarServiceI = Depends(get_ejemplar_service),
+    ) -> JSONResponse:
+        logger.info("PATCH /ejemplares/%s/estado called", id)
+        request = EjemplarMapper.to_update_estado_request(token, id, payload)
+        response = service.update_estado(request)
+        return JSONResponse(status_code=200, content=response.model_dump())

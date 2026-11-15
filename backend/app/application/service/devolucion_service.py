@@ -26,7 +26,11 @@ class DevolucionService(DevolucionServiceI):
 
     def get_all(self, dto: GetAllDevolucionesReq) -> GetAllDevolucionesRes:
         result = self.get_all_use_case.execute(
-            GetAllDevolucionesUseCase.Command(token=dto.get_token())
+            GetAllDevolucionesUseCase.Command(
+                token=dto.get_token(),
+                prestamo_id=dto.get_prestamo_id(),
+                estado_devuelto=dto.get_estado_devuelto(),
+            )
         )
         return DevolucionMapper.to_get_all_response(result.devoluciones)
 
