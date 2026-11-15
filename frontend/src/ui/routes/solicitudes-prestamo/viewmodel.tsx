@@ -14,14 +14,19 @@ import {
 import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField, type ReadFieldValues } from "@/ui/forms/handlers/read-form";
 import { allOptions, info, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
+import { type SolicitudInterbibliotecariaInicial } from "@/ui/routes/libros/libro-ejemplares";
 import { useSelectoresViewModel } from "./selectores-viewmodel";
 
 const nextStates = [EstadoSolicitud.RECHAZADA, EstadoSolicitud.CANCELADA].map((estado) => estado.toOption());
 
-export function useViewModel(session: Session, initialRecordId?: string) {
-    const [tipo, setTipo] = useState(TipoPrestamo.LOCAL);
+export function useViewModel(
+    session: Session,
+    initialRecordId?: string,
+    solicitudInicial?: SolicitudInterbibliotecariaInicial
+) {
+    const [tipo, setTipo] = useState(solicitudInicial ? TipoPrestamo.INTERBIBLIOTECARIO : TipoPrestamo.LOCAL);
     const esInterbibliotecaria = tipo === TipoPrestamo.INTERBIBLIOTECARIO;
-    const selectors = useSelectoresViewModel(session, esInterbibliotecaria);
+    const selectors = useSelectoresViewModel(session, esInterbibliotecaria, solicitudInicial);
     const isRecepcionista = session.user?.role === Rol.RECEPCIONISTA;
 
     {/* ===== Fetch data ===== */ }
@@ -160,6 +165,7 @@ export function useViewModel(session: Session, initialRecordId?: string) {
 
     return useLibraryRecordsViewModel({
         initialRecordId,
+        initiallyOpen: Boolean(solicitudInicial),
         title: "Solicitudes de préstamo",
         initialFilters: { tipo: "", estado: "", sedeId: "" },
         load: fetchSolicitudes,

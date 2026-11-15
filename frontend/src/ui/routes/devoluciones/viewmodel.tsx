@@ -61,10 +61,12 @@ export function useViewModel(session: Session, prestamoInicialId?: string) {
         return result;
     };
 
+    const ejemplarNames = new Map((catalog.ejemplares?.data ?? []).map(({ value, label }) => [value, label]));
+
     const describeDevolucion = (devolucion: Devolucion) => ({
         info: [
             info("Préstamo", devolucion.prestamoId),
-            info("Ejemplar", devolucion.ejemplarId),
+            info("Ejemplar", ejemplarNames.get(devolucion.ejemplarId) ?? devolucion.ejemplarId),
             info("Fecha", devolucion.fecha),
             info("Estado devuelto", devolucion.estadoDevueltoName),
             info(

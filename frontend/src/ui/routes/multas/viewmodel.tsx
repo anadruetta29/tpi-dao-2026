@@ -58,9 +58,11 @@ export function useViewModel(session: Session) {
         return anularMultaAction(multa.id, session);
     };
 
+    const socioNames = new Map((catalog.socios?.data ?? []).map(({ value, label }) => [value, label]));
+
     const describeMulta = (multa: Multa) => ({
         info: [
-            info("Socio", multa.socioId),
+            info("Socio", socioNames.get(multa.socioId) ?? multa.socioId),
             info("Préstamo", multa.prestamoId),
             info("Motivo", multa.motivoName),
             info("Estado", multa.estadoName),

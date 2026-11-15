@@ -12,16 +12,38 @@ import { getAllSociosAction } from "@/ui/actions/socio/socio.actions";
 import { getRecepcionistasAction } from "@/ui/actions/solicitud-prestamo/solicitud-prestamo.actions";
 import { type SearchOption } from "@/ui/components/library-search-select/library-search-select";
 import { useMultipleSelector, useSelector } from "@/ui/hooks/use-selector";
+import { type SolicitudInterbibliotecariaInicial } from "@/ui/routes/libros/libro-ejemplares";
 import { pickData } from "@/ui/routes/use-library-records-viewmodel";
 import { opcionesSedeOrigen } from "./sedes-origen";
 
-export function useSelectoresViewModel(session: Session, interbibliotecaria: boolean) {
+export function useSelectoresViewModel(
+    session: Session,
+    interbibliotecaria: boolean,
+    solicitudInicial?: SolicitudInterbibliotecariaInicial
+) {
     const socio = useSelector("socioId", "Socio", "Buscá por nombre o documento");
     const recepcionista = useSelector("recepcionistaId", "Recepcionista de origen", "Buscá por nombre o apellido");
-    const origen = useSelector("sedeOrigenId", "Sede de origen", "Buscá una sede de origen");
-    const destino = useSelector("sedeDestinoId", "Sede de destino", "Buscá una sede de destino");
+    const origen = useSelector(
+        "sedeOrigenId",
+        "Sede de origen",
+        "Buscá una sede de origen",
+        true,
+        solicitudInicial?.sedeOrigenId ? { value: solicitudInicial.sedeOrigenId, label: `Sede #${solicitudInicial.sedeOrigenId}` } : undefined
+    );
+    const destino = useSelector(
+        "sedeDestinoId",
+        "Sede de destino",
+        "Buscá una sede de destino",
+        true,
+        solicitudInicial?.sedeDestinoId ? { value: solicitudInicial.sedeDestinoId, label: `Sede #${solicitudInicial.sedeDestinoId}` } : undefined
+    );
     const libro = useSelector("libroId", "Título para consultar stock", "Buscá un libro", false);
-    const ejemplar = useMultipleSelector("ejemplaresIds", "Ejemplares", "Buscá por título o código");
+    const ejemplar = useMultipleSelector(
+        "ejemplaresIds",
+        "Ejemplares",
+        "Buscá por título o código",
+        solicitudInicial?.ejemplarId ? [{ value: solicitudInicial.ejemplarId, label: `Ejemplar #${solicitudInicial.ejemplarId}` }] : []
+    );
     const filterSede = useSelector("sedeId", "Sede", "Buscá por nombre de sede", false);
 
     const [revision, setRevision] = useState(0);

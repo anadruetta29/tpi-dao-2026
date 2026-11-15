@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Optional
 from app.application.strategy.reserva_estado.core.reserva_estado_state_factory import ReservaEstadoStateFactory
 from app.application.strategy.vencimiento_prestamo.core.vencimiento_prestamo_strategy_factory import VencimientoPrestamoStrategyFactory
 from app.application.use_case.reserva.asignar_reserva_use_case import asignar_reserva
@@ -11,6 +12,7 @@ from app.domain.entity.prestamo import Prestamo
 from app.domain.entity.reserva import Reserva
 from app.domain.error.error_handler import ErrorHandler
 from app.domain.error.error_type import ErrorType
+from app.domain.repository.aviso_repository_i import AvisoRepositoryI
 from app.domain.repository.ejemplar_repository_i import EjemplarRepositoryI
 from app.domain.repository.prestamo_repository_i import PrestamoRepositoryI
 from app.domain.repository.reserva_repository_i import ReservaRepositoryI
@@ -26,12 +28,14 @@ class GestionarRetiroReserva:
         prestamo_repository: PrestamoRepositoryI,
         socio_repository: SocioRepositoryI,
         sede_repository: SedeRepositoryI,
+        aviso_repository: Optional[AvisoRepositoryI] = None,
     ) -> None:
         self.reserva_repository = reserva_repository
         self.ejemplar_repository = ejemplar_repository
         self.prestamo_repository = prestamo_repository
         self.socio_repository = socio_repository
         self.sede_repository = sede_repository
+        self.aviso_repository = aviso_repository
         self.estado_factory = ReservaEstadoStateFactory()
         self.vencimiento_factory = VencimientoPrestamoStrategyFactory()
 
@@ -82,7 +86,7 @@ class GestionarRetiroReserva:
         if estaba_lista:
             ejemplar = self._get_ejemplar(reserva)
             ejemplar.estado = EstadoEjemplar.DISPONIBLE
-            asignar_reserva(ejemplar, self.reserva_repository, hoy)
+            asignar_reserva(ejemplar, self.reserva_repository, hoy, aviso_repository=self.aviso_repository)
             self.ejemplar_repository.update(ejemplar.id, ejemplar)
         return actualizada
 

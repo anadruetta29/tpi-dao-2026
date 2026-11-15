@@ -82,9 +82,14 @@ export function useSelector(name: string, label: string, placeholder: string, re
     };
 }
 
-export function useMultipleSelector(name: string, label: string, placeholder: string) {
+export function useMultipleSelector(
+    name: string,
+    label: string,
+    placeholder: string,
+    initialSelection: SearchOption[] = []
+) {
     const selector = useSelector(name, label, placeholder);
-    const [selected, setSelected] = useState<SearchOption[]>([]);
+    const [selected, setSelected] = useState<SearchOption[]>(initialSelection);
 
     return {
         selected,

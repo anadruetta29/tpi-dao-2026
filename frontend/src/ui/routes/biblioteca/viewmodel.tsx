@@ -1,9 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Rol } from "@/domain/entities/rol";
+import { getAllAvisosAction } from "@/ui/actions/aviso/aviso.actions";
 import { useAuth } from "@/ui/hooks/use-auth";
 import { BandejaRoute } from "@/ui/routes/bandeja/bandeja-route";
 import { AvisosRoute } from "@/ui/routes/avisos/avisos-route";
 import { type DestinoBandeja } from "@/ui/routes/bandeja/viewmodel";
+import { type SolicitudInterbibliotecariaInicial } from "@/ui/routes/libros/libro-ejemplares";
 import { SedesRoute } from "@/ui/routes/sedes/sedes-route";
 import { SociosRoute } from "@/ui/routes/socios/socios-route";
 import { UsuariosRoute } from "@/ui/routes/usuarios/usuarios-route";
@@ -37,7 +39,24 @@ type ModuleLabel = (typeof modules)[number]["label"];
 
 export function useViewModel() {
     const { session, user, error, isLoading, logout, refreshCurrentUser } = useAuth();
-    const [active, setActive] = useState<{ label: ModuleLabel; recordId?: string; prestamoId?: string }>({ label: "Bandeja" });
+    const [active, setActive] = useState<{
+        label: ModuleLabel;
+        recordId?: string;
+        prestamoId?: string;
+        solicitudInicial?: SolicitudInterbibliotecariaInicial;
+    }>({ label: "Bandeja" });
+    const [unreadAvisos, setUnreadAvisos] = useState(0);
+
+    useEffect(() => {
+        if (!user || !session) return;
+        let activeReq = true;
+        void getAllAvisosAction({ session }).then((res) => {
+            if (activeReq && res.success && res.data) {
+                setUnreadAvisos(res.data.filter((a) => !a.leido).length);
+            }
+        });
+        return () => { activeReq = false; };
+    }, [user, session, active.label]);
 
     {/* ===== onActions functions ===== */ }
 
@@ -51,6 +70,10 @@ export function useViewModel() {
 
     const openReturn = (prestamoId: string) => {
         setActive({ label: "Devoluciones", prestamoId });
+    };
+
+    const openInterbibliotecaria = (solicitudInicial: SolicitudInterbibliotecariaInicial) => {
+        setActive({ label: "Solicitudes de préstamo", solicitudInicial });
     };
 
     const onLogout = async () => {
@@ -80,13 +103,13 @@ export function useViewModel() {
                 groups.set(area, group);
             }
             group.items.push({
-                label,
+                label: label === "Avisos" && unreadAvisos > 0 ? `Avisos (${unreadAvisos})` : label,
                 selected: label === selectedModule.label,
                 onClick: () => onTabClick(label)
             });
         }
         return [...groups.values()];
-    }, [availableModules, selectedModule.label]);
+    }, [availableModules, selectedModule.label, unreadAvisos]);
 
     const userProfile = user ? {
         username: `${user.nombre} ${user.apellido}`.trim() || user.email,
@@ -106,8 +129,10 @@ export function useViewModel() {
         label: selectedModule.label,
         openPending,
         openReturn,
+        openInterbibliotecaria,
         initialRecordId: active.recordId,
         prestamoInicialId: active.prestamoId,
+        solicitudInicial: active.solicitudInicial,
         area: selectedModule.area,
         navigation: navigationGroups,
         profile: userProfile

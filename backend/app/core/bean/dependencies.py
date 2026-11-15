@@ -405,6 +405,10 @@ def get_solicitud_prestamo_service(
     )
 
 
+def get_aviso_repository(db: Session = Depends(get_db)) -> AvisoRepositoryI:
+    return AvisoRepositoryAdapter(PostgresAvisoRepository(db))
+
+
 def get_create_devolucion_use_case(
     db: Session = Depends(get_db),
     devolucion_repo: DevolucionRepositoryI = Depends(get_devolucion_repository),
@@ -414,10 +418,12 @@ def get_create_devolucion_use_case(
     reserva_repo: ReservaRepositoryI = Depends(get_reserva_repository),
     multa_repo: MultaRepositoryI = Depends(get_multa_repository),
     socio_repo: SocioRepositoryI = Depends(get_socio_repository),
+    aviso_repo: AvisoRepositoryI = Depends(get_aviso_repository),
 ) -> CreateDevolucionUseCase:
     return CreateDevolucionUseCase(
         devolucion_repo, prestamo_repo, ejemplar_repo, usuario_repo, reserva_repo, multa_repo, socio_repo,
         transaction=lambda: atomic_write(db),
+        aviso_repository=aviso_repo,
     )
 
 
@@ -441,10 +447,6 @@ def get_prestamo_service(
     )
 
 
-def get_aviso_repository(db: Session = Depends(get_db)) -> AvisoRepositoryI:
-    return AvisoRepositoryAdapter(PostgresAvisoRepository(db))
-
-
 def get_aviso_service(
     db: Session = Depends(get_db),
     avisos: AvisoRepositoryI = Depends(get_aviso_repository),
@@ -464,7 +466,7 @@ def get_vencer_reservas_use_case(db: Session) -> VencerReservasUseCase:
     reservas = get_reserva_repository(db)
     gestionar = GestionarRetiroReserva(
         reservas, get_ejemplar_repository(db), get_prestamo_repository(db),
-        get_socio_repository(db), get_sede_repository(db),
+        get_socio_repository(db), get_sede_repository(db), get_aviso_repository(db),
     )
     return VencerReservasUseCase(reservas, gestionar, lambda: atomic_write(db))
 
@@ -478,6 +480,7 @@ def get_reserva_service(
     sede_repo: SedeRepositoryI = Depends(get_sede_repository),
     ejemplar_repo: EjemplarRepositoryI = Depends(get_ejemplar_repository),
     usuario_repo: UsuarioRepositoryI = Depends(get_usuario_repository),
+    aviso_repo: AvisoRepositoryI = Depends(get_aviso_repository),
 ) -> ReservaServiceI:
     return ReservaService(
         get_all_use_case=GetAllReservasUseCase(reserva_repo, usuario_repo),
@@ -493,7 +496,7 @@ def get_reserva_service(
         ),
         update_estado_use_case=UpdateReservaEstadoUseCase(
             reserva_repo, usuario_repo,
-            GestionarRetiroReserva(reserva_repo, ejemplar_repo, prestamo_repo, socio_repo, sede_repo),
+            GestionarRetiroReserva(reserva_repo, ejemplar_repo, prestamo_repo, socio_repo, sede_repo, aviso_repo),
             lambda: atomic_write(db),
         ),
     )

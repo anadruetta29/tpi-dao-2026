@@ -84,6 +84,10 @@ export function useViewModel(session: Session, initialRecordId?: string) {
     };
 
     const describeReserva = (reserva: Reserva) => {
+        const socioNames = new Map((catalog.socios?.data ?? []).map(({ value, label }) => [value, label]));
+        const libroNames = new Map((catalog.libros?.data ?? []).map(({ value, label }) => [value, label]));
+        const sedeNames = new Map((catalog.sedes?.data ?? []).map(({ value, label }) => [value, label]));
+        const ejemplarNames = new Map((catalog.ejemplares?.data ?? []).map(({ value, label }) => [value, label]));
         const opcionesEstado = reserva.estadoEntity === EstadoReserva.LISTA_PARA_RETIRO
             ? estadosListaRetiro
             : reserva.estadoEntity === EstadoReserva.ACTIVA
@@ -95,10 +99,10 @@ export function useViewModel(session: Session, initialRecordId?: string) {
                 info("Estado", reserva.estadoName),
                 info("Límite de retiro", reserva.fechaLimiteRetiro),
                 info("Préstamo generado", reserva.prestamoId),
-                info("Socio", reserva.socioId),
-                info("Libro", reserva.libroId),
-                info("Ejemplar", reserva.ejemplarId),
-                info("Sede", reserva.sedeId)
+                info("Socio", socioNames.get(reserva.socioId) ?? reserva.socioId),
+                info("Libro", libroNames.get(reserva.libroId) ?? reserva.libroId),
+                info("Ejemplar", ejemplarNames.get(reserva.ejemplarId) ?? reserva.ejemplarId),
+                info("Sede", sedeNames.get(reserva.sedeId) ?? reserva.sedeId)
             ],
             forms: opcionesEstado ? [{
                 label: "Actualizar estado",

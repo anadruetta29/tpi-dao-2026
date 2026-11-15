@@ -5,13 +5,16 @@ from typing import Callable, ContextManager, Optional
 from app.application.strategy.devolucion_ejemplar.core.devolucion_ejemplar_strategy_factory import (
     DevolucionEjemplarStrategyFactory,
 )
+from app.application.use_case.reserva.asignar_reserva_use_case import registrar_aviso_reserva_lista
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.devolucion import Devolucion
 from app.domain.entity.estado_ejemplar import EstadoEjemplar
+from app.domain.entity.estado_reserva import EstadoReserva
 from app.domain.entity.prestamo import Prestamo
 from app.domain.entity.rol import Rol
 from app.domain.error.error_handler import ErrorHandler
 from app.domain.error.error_type import ErrorType
+from app.domain.repository.aviso_repository_i import AvisoRepositoryI
 from app.domain.repository.devolucion_repository_i import DevolucionRepositoryI
 from app.domain.repository.ejemplar_repository_i import EjemplarRepositoryI
 from app.domain.repository.multa_repository_i import MultaRepositoryI
@@ -33,6 +36,7 @@ class CreateDevolucionUseCase:
         socio_repository: Optional[SocioRepositoryI] = None,
         devolucion_strategy_factory: Optional[DevolucionEjemplarStrategyFactory] = None,
         transaction: Callable[[], ContextManager] = nullcontext,
+        aviso_repository: Optional[AvisoRepositoryI] = None,
     ) -> None:
         self.devolucion_repository = devolucion_repository
         self.prestamo_repository = prestamo_repository
@@ -41,6 +45,7 @@ class CreateDevolucionUseCase:
         self.reserva_repository = reserva_repository
         self.multa_repository = multa_repository
         self.socio_repository = socio_repository
+        self.aviso_repository = aviso_repository
         self.transaction = transaction
         self.devolucion_strategy_factory = (
             devolucion_strategy_factory or DevolucionEjemplarStrategyFactory()
@@ -129,6 +134,16 @@ class CreateDevolucionUseCase:
                 fecha_atraso=date.today() if prestamo.ejemplares_pendientes() else fecha_dev,
             )
             estado_ejemplar = ejemplar.estado if ejemplar is not None else None
+            if (
+                ejemplar is not None
+                and ejemplar.estado == EstadoEjemplar.RESERVADO
+                and self.aviso_repository is not None
+                and self.reserva_repository is not None
+            ):
+                for reserva in self.reserva_repository.get_all_filtered(
+                    ejemplar_id=ejemplar.id, estado=EstadoReserva.LISTA_PARA_RETIRO
+                ):
+                    registrar_aviso_reserva_lista(reserva, self.aviso_repository, date.today())
             saved = self.devolucion_repository.save(Devolucion(
                 fecha=fecha_dev,
                 observaciones=command.observaciones,

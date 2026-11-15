@@ -3,6 +3,7 @@ import { type Aviso } from "@/domain/entities/aviso";
 import { type Session } from "@/domain/entities/session";
 import { getAllAvisosAction, marcarAvisoLeidoAction } from "@/ui/actions/aviso/aviso.actions";
 import { type DestinoBandeja } from "@/ui/routes/bandeja/viewmodel";
+import { useSelectorCatalog } from "@/ui/hooks/use-selector-catalog";
 import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
 import { allOptions, info, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
@@ -19,6 +20,10 @@ const estadosLectura = allOptions([
 ]);
 
 export function useViewModel(session: Session, onOpen?: (destino: DestinoBandeja) => void) {
+    const catalog = useSelectorCatalog(session, "sedes", "socios");
+    const sedeNames = new Map((catalog.sedes?.data ?? []).map(({ value, label }) => [value, label]));
+    const socioNames = new Map((catalog.socios?.data ?? []).map(({ value, label }) => [value, label]));
+
     const fetchAvisos = useCallback(async ({ tipo, lectura }: { tipo: string; lectura: string }) => {
         const result = await getAllAvisosAction({ session });
         return pickData(result, (avisos) => avisos.filter((aviso) =>
@@ -37,8 +42,8 @@ export function useViewModel(session: Session, onOpen?: (destino: DestinoBandeja
             info("Fecha", aviso.fecha),
             info("Estado", aviso.leido ? "Leído" : "Pendiente de lectura"),
             info("Mensaje", aviso.mensaje),
-            info("Sede", aviso.sedeId),
-            info("Socio", aviso.socioId),
+            info("Sede", sedeNames.get(aviso.sedeId) ?? aviso.sedeId),
+            info("Socio", socioNames.get(aviso.socioId) ?? aviso.socioId),
             info("Reserva", aviso.reservaId),
             info("Préstamo", aviso.prestamoId)
         ],

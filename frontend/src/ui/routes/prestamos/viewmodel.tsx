@@ -18,9 +18,13 @@ export function useViewModel(session: Session, initialRecordId?: string) {
     const today = localDateISO();
     const isRecepcionista = session.user?.role === Rol.RECEPCIONISTA;
 
-    const catalog = useSelectorCatalog(session, "sedes", "socios");
+    const catalog = useSelectorCatalog(session, "sedes", "socios", "ejemplares");
     const socio = useSelector("socioId", "Socio", "Buscá por nombre o documento", false);
     const sede = useSelector("sedeId", "Sede", "Buscá por nombre de sede", false);
+    const socioNames = new Map((catalog.socios?.data ?? []).map(({ value, label }) => [value, label]));
+    const sedeNames = new Map((catalog.sedes?.data ?? []).map(({ value, label }) => [value, label]));
+    const ejemplarNames = new Map((catalog.ejemplares?.data ?? []).map(({ value, label }) => [value, label]));
+    const joinEjemplares = (ids: string[]) => ids.map((id) => ejemplarNames.get(id) ?? `#${id}`).join(", ");
 
     {/* ===== Fetch data ===== */ }
 
@@ -60,11 +64,11 @@ export function useViewModel(session: Session, initialRecordId?: string) {
         return {
             info: [
                 info("Solicitud", prestamo.solicitudId),
-                info("Socio", prestamo.socioId),
-                info("Ejemplares", prestamo.ejemplaresIds.join(", ")),
-                info("Devueltos", prestamo.ejemplaresDevueltosIds.join(", ")),
-                info("Pendientes", prestamo.ejemplaresIds.filter((id) => !prestamo.ejemplaresDevueltosIds.includes(id)).join(", ")),
-                info("Sede", prestamo.sedeId),
+                info("Socio", socioNames.get(prestamo.socioId) ?? prestamo.socioId),
+                info("Ejemplares", joinEjemplares(prestamo.ejemplaresIds)),
+                info("Devueltos", joinEjemplares(prestamo.ejemplaresDevueltosIds)),
+                info("Pendientes", joinEjemplares(prestamo.ejemplaresIds.filter((id) => !prestamo.ejemplaresDevueltosIds.includes(id)))),
+                info("Sede", sedeNames.get(prestamo.sedeId) ?? prestamo.sedeId),
                 info("Estado", prestamo.estadoName),
                 info("Modalidad", prestamo.modalidadName),
                 info("Renovaciones", String(prestamo.renovaciones)),
