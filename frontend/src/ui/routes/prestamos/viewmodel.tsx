@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { type Session } from "@/domain/entities/session";
 import { EstadoPrestamo, ModalidadPrestamoLocal, type Prestamo } from "@/domain/entities/prestamo";
-import { EstadoSolicitud } from "@/domain/entities/solicitud-prestamo";
+import { EstadoSolicitud, TipoPrestamo } from "@/domain/entities/solicitud-prestamo";
 import { cancelarPrestamoAction, createPrestamoAction, getAllPrestamosAction, getPrestamoByIdAction } from "@/ui/actions/prestamo/prestamo.actions";
 import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
@@ -23,6 +23,7 @@ function dateKey(value?: string | Date | null) {
 export function useViewModel(session: Session) {
     const [today, setToday] = useState(localDateISO);
     const [startDate, setStartDate] = useState("");
+    const [isInterbibliotecaria, setIsInterbibliotecaria] = useState(false);
 
     const catalog = useSelectorCatalog(session, "sedes", "socios", "solicitudes", "prestamos");
     const socio = useSelector("socioId", "Socio", "Buscá por nombre o documento", false);
@@ -48,6 +49,7 @@ export function useViewModel(session: Session) {
         catalog.refresh();
         setToday(localDateISO());
         setStartDate("");
+        setIsInterbibliotecaria(false);
     };
 
     {/* ===== handlers functions ===== */ }
@@ -65,10 +67,13 @@ export function useViewModel(session: Session) {
         if (fechaVencimiento && fechaVencimiento < fechaInicio) {
             return { success: false, error: "La fecha de vencimiento no puede ser anterior al inicio." };
         }
+        const modalidad = isInterbibliotecaria
+            ? ModalidadPrestamoLocal.DOMICILIO
+            : ModalidadPrestamoLocal.fromString(field("modalidad"));
         return createPrestamoAction({
             session,
             solicitud_id: field("solicitudId"),
-            modalidad: ModalidadPrestamoLocal.fromString(field("modalidad")),
+            modalidad,
             fechaInicio,
             fechaVencimiento
         });
@@ -118,8 +123,13 @@ export function useViewModel(session: Session) {
     ];
 
     const createFields: Field[] = [
-        solicitud.field(availableSolicitudes ?? null),
-        { name: "modalidad", label: "Modalidad", options: ModalidadPrestamoLocal.toOptions() },
+        solicitud.field(availableSolicitudes ?? null, undefined, (value) => {
+            const option = availableSolicitudes?.data?.find((item) => item.value === value);
+            setIsInterbibliotecaria((option as any)?.tipo === TipoPrestamo.INTERBIBLIOTECARIO.value);
+        }),
+        ...(!isInterbibliotecaria ? [
+            { name: "modalidad", label: "Modalidad", options: ModalidadPrestamoLocal.toOptions() } as Field
+        ] : []),
         {
             name: "fechaInicio",
             placeholder: "Seleccioná la fecha de inicio",

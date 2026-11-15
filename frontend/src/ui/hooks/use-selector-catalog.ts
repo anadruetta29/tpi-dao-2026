@@ -42,8 +42,8 @@ async function loadCatalog(session: Session, sources: Set<Source>) {
             label: [copies.get(ejemplarId) || "Préstamo", members.get(socioId), fechaInicio, estadoName].filter(Boolean).join(" · "),
             socioId, solicitudId, estado
         }))),
-        solicitudes: solicitudes && pickData(solicitudes, (items) => items.map(({ id, numero, socioId, ejemplarId, estado }) => ({
-            value: id, label: [numero, copies.get(ejemplarId), members.get(socioId)].filter(Boolean).join(" · "), estado
+        solicitudes: solicitudes && pickData(solicitudes, (items) => items.map(({ id, numero, socioId, ejemplarId, estado, tipo }) => ({
+            value: id, label: [numero, copies.get(ejemplarId), members.get(socioId)].filter(Boolean).join(" · "), estado, tipo: tipo?.value ?? tipo
         })))
     };
 }

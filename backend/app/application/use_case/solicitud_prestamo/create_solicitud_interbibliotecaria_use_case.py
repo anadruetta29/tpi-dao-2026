@@ -64,7 +64,7 @@ class CreateSolicitudInterbibliotecariaUseCase:
             raise ErrorHandler(ErrorType.MISSING_REQUIRED_FIELDS)
 
         recepcionista = self.usuario_repository.get_by_id(command.recepcionista_id)
-        if recepcionista is None or not recepcionista.activo or recepcionista.role != Rol.RECEPCIONISTA:
+        if recepcionista is None or not recepcionista.activo or recepcionista.role not in (Rol.RECEPCIONISTA, Rol.ADMIN):
             raise ErrorHandler(ErrorType.RECEPCIONISTA_INVALIDO)
 
         strategy = self.solicitud_tipo_factory.get_strategy(TipoPrestamo.INTERBIBLIOTECARIO)

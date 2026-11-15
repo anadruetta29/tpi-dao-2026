@@ -29,8 +29,14 @@ class SolicitudInterbibliotecariaTest(unittest.TestCase):
         self.assertIsNone(result.solicitud.socio_id)
         self.assertIsNone(result.solicitud.responsable_destino_id)
 
+    def test_admin_activo_puede_ser_responsable_de_origen(self):
+        self.usuarios.get_by_id.return_value = Usuario(id=7, role=Rol.ADMIN, activo=True)
+        result = self.use_case.execute(self.command)
+        self.assertEqual(result.solicitud.responsable_origen_id, 7)
+        self.assertIsNone(result.solicitud.socio_id)
+
     def test_rechaza_usuarios_inactivos_o_con_otro_rol(self):
-        for role, activo in [(Rol.ADMIN, True), (Rol.RECEPCIONISTA, False)]:
+        for role, activo in [(Rol.MODERADOR, True), (Rol.RECEPCIONISTA, False), (Rol.ADMIN, False)]:
             self.usuarios.get_by_id.return_value = Usuario(id=7, role=role, activo=activo)
             with self.subTest(role=role, activo=activo), self.assertRaises(ErrorHandler) as error:
                 self.use_case.execute(self.command)
