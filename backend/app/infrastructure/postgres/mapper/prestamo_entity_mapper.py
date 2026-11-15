@@ -17,6 +17,9 @@ class PrestamoEntityMapper:
             socio_id=model.socio_id,
             sede_id=model.sede_id,
             ejemplar_id=model.ejemplar_id,
+            renovaciones=model.renovaciones or 0,
+            ejemplar_ids=model.ejemplar_ids,
+            ejemplares_devueltos_ids=model.ejemplares_devueltos_ids,
         )
 
     @staticmethod
@@ -36,4 +39,7 @@ class PrestamoEntityMapper:
             socio_id=entity.socio_id,
             sede_id=entity.sede_id,
             ejemplar_id=entity.ejemplar_id,
+            renovaciones=entity.renovaciones,
+            ejemplar_ids=entity.ejemplar_ids,
+            ejemplares_devueltos_ids=entity.ejemplares_devueltos_ids,
         )

@@ -3,6 +3,8 @@ import { BaseEntity } from "./base-entity";
 export class EstadoReserva extends BaseEntity {
     public static readonly ACTIVA = new EstadoReserva("ACTIVA", "Activa");
     public static readonly ATENDIDA = new EstadoReserva("ATENDIDA", "Atendida");
+    public static readonly LISTA_PARA_RETIRO = new EstadoReserva("LISTA_PARA_RETIRO", "Lista para retiro");
+    public static readonly RETIRADA = new EstadoReserva("RETIRADA", "Retirada");
     public static readonly CANCELADA = new EstadoReserva("CANCELADA", "Cancelada");
     public static readonly VENCIDA = new EstadoReserva("VENCIDA", "Vencida");
 
@@ -31,6 +33,8 @@ export class EstadoReserva extends BaseEntity {
         return [
             EstadoReserva.ACTIVA,
             EstadoReserva.ATENDIDA,
+            EstadoReserva.LISTA_PARA_RETIRO,
+            EstadoReserva.RETIRADA,
             EstadoReserva.CANCELADA,
             EstadoReserva.VENCIDA
         ];

@@ -108,13 +108,16 @@ export async function createMultaAction(
 
 export async function pagarMultaAction(
     id: string,
-    fechaPago?: string | null,
+    fechaPago: string,
     customSession?: Session | null
 ): Promise<ActionState<{ id: string; multa?: Multa | null }>> {
     try {
         const session = resolveSession(customSession);
         if (!session?.accessToken) {
             return { success: false, error: ErrorMessages.AUTH_UNAUTHORIZED };
+        }
+        if (!fechaPago) {
+            return { success: false, error: ErrorMessages.MULTA_FECHA_PAGO_REQUERIDA };
         }
 
         const result = await pagarMultaUseCase.execute({

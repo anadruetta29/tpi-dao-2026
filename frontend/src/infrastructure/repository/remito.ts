@@ -7,6 +7,8 @@ import { type GetRemitoByIdRes } from "@/domain/dto/remito/response/GetRemitoByI
 import { type CreateRemitoReq } from "@/domain/dto/remito/request/CreateRemitoReq";
 import { type CreateRemitoRes } from "@/domain/dto/remito/response/CreateRemitoRes";
 import { type RegistrarDespachoRemitoReq } from "@/domain/dto/remito/request/RegistrarDespachoRemitoReq";
+import { type RegistrarEmpaqueRemitoReq } from "@/domain/dto/remito/request/RegistrarEmpaqueRemitoReq";
+import { type RegistrarEmpaqueRemitoRes } from "@/domain/dto/remito/response/RegistrarEmpaqueRemitoRes";
 import { type RegistrarDespachoRemitoRes } from "@/domain/dto/remito/response/RegistrarDespachoRemitoRes";
 import { type RegistrarRecepcionRemitoReq } from "@/domain/dto/remito/request/RegistrarRecepcionRemitoReq";
 import { type RegistrarRecepcionRemitoRes } from "@/domain/dto/remito/response/RegistrarRecepcionRemitoRes";
@@ -31,6 +33,10 @@ export class RemitoRepository implements RemitoRepositoryI {
 
     public async createRemito(dto: CreateRemitoReq): Promise<CreateRemitoRes> {
         return await this.dataSource.createRemito(dto);
+    }
+
+    public async registrarEmpaque(dto: RegistrarEmpaqueRemitoReq): Promise<RegistrarEmpaqueRemitoRes> {
+        return await this.dataSource.registrarEmpaque(dto);
     }
 
     public async registrarDespacho(dto: RegistrarDespachoRemitoReq): Promise<RegistrarDespachoRemitoRes> {

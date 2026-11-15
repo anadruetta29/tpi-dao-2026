@@ -51,7 +51,7 @@ export function useViewModel(session: Session) {
     };
 
     const handlePagarMulta = (multa: Multa, field: ReadField) => {
-        return pagarMultaAction(multa.id, field("fechaPago") || undefined, session);
+        return pagarMultaAction(multa.id, field("fechaPago"), session);
     };
 
     const handleAnularMulta = (multa: Multa) => {
@@ -70,7 +70,7 @@ export function useViewModel(session: Session) {
         ],
         forms: multa.estadoEntity === EstadoMulta.PENDIENTE ? [{
             label: "Registrar pago",
-            fields: [{ name: "fechaPago", placeholder: "Seleccioná la fecha de pago", label: "Fecha de pago", type: "date" }],
+            fields: [{ name: "fechaPago", placeholder: "Seleccioná la fecha de pago", label: "Fecha de pago", type: "date", required: true }],
             submit: (field: ReadField) => handlePagarMulta(multa, field)
         }] : [],
         commands: multa.estadoEntity === EstadoMulta.PENDIENTE ? [{

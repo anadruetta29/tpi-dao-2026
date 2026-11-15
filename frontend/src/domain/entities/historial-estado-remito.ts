@@ -13,7 +13,9 @@ export class HistorialEstadoRemito extends BaseEntity {
         public id: string,
         public fechaInicio?: string | Date | null,
         public fechaFin?: string | Date | null,
-        public estado: EstadoEnvio = EstadoEnvio.PENDIENTE
+        public estado: EstadoEnvio = EstadoEnvio.PENDIENTE,
+        public responsableId: string = "",
+        public responsableNombre: string = ""
     ) {
         super();
         this.estadoName = this.estado.name;
@@ -40,7 +42,9 @@ export class HistorialEstadoRemito extends BaseEntity {
             obj.id !== undefined && obj.id !== null ? String(obj.id) : "",
             obj.fechaInicio || null,
             obj.fechaFin || null,
-            estado
+            estado,
+            String(obj.responsableId ?? obj.responsable_id ?? ""),
+            obj.responsableNombre ?? obj.responsable_nombre ?? ""
         );
     }
 

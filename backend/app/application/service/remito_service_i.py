@@ -27,6 +27,10 @@ class RemitoServiceI(ABC):
         pass
 
     @abstractmethod
+    def empacar(self, dto: GetRemitoByIdReq) -> RemitoRes:
+        pass
+
+    @abstractmethod
     def despachar(self, dto: DespachoRemitoReq) -> RemitoRes:
         pass
 

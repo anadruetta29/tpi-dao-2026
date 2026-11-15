@@ -16,7 +16,9 @@ export class Reserva extends BaseEntity {
         public socioId: string = "",
         public libroId: string = "",
         public sedeId: string = "",
-        public ejemplarId: string = ""
+        public ejemplarId: string = "",
+        public fechaLimiteRetiro: string | Date | null = null,
+        public prestamoId: string = ""
     ) {
         super();
         this.estadoName = this.estado.name;
@@ -46,7 +48,9 @@ export class Reserva extends BaseEntity {
             String(obj.socioId ?? obj.socio_id ?? ""),
             String(obj.libroId ?? obj.libro_id ?? ""),
             String(obj.sedeId ?? obj.sede_id ?? ""),
-            String(obj.ejemplarId ?? obj.ejemplar_id ?? "")
+            String(obj.ejemplarId ?? obj.ejemplar_id ?? ""),
+            obj.fechaLimiteRetiro ?? obj.fecha_limite_retiro ?? null,
+            String(obj.prestamoId ?? obj.prestamo_id ?? "")
         );
     }
 

@@ -4,6 +4,7 @@ from typing import Optional
 from app.application.strategy.calculo_multa.core.calculo_multa_strategy_factory import (
     CalculoMultaStrategyFactory,
 )
+from app.application.use_case.multa.registrar_multa_por_atraso import registrar_multa_por_atraso
 from app.domain.entity.ejemplar import Ejemplar
 from app.domain.entity.estado_ejemplar import EstadoEjemplar
 from app.domain.entity.estado_multa import EstadoMulta
@@ -28,6 +29,7 @@ class DevolucionEjemplarStrategy(ABC):
         reserva_repository: Optional[ReservaRepositoryI] = None,
         multa_repository: Optional[MultaRepositoryI] = None,
         socio_repository: Optional[SocioRepositoryI] = None,
+        fecha_atraso: Optional[date] = None,
     ) -> None:
         pass
 
@@ -46,6 +48,7 @@ class DevolucionEjemplarStrategy(ABC):
         monto = CalculoMultaStrategyFactory().get_strategy(motivo).calcular_monto(
             dias_atraso=dias_atraso
         )
+        socio = socio_repository.get_by_id_for_update(socio_id) if socio_repository is not None else None
         multa_repository.save(
             Multa(
                 fechaEmision=fecha_emision,
@@ -56,28 +59,18 @@ class DevolucionEjemplarStrategy(ABC):
                 prestamo_id=prestamo_id,
             )
         )
-        if socio_repository is not None:
-            socio = socio_repository.get_by_id(socio_id)
-            if socio is not None and socio.id is not None:
-                socio.inhabilitar()
-                socio_repository.update(socio.id, socio)
+        if socio_repository is not None and socio is not None and socio.id is not None:
+            socio.inhabilitar()
+            socio_repository.update(socio.id, socio)
 
-    @classmethod
+    @staticmethod
     def _verificar_entrega_tardia(
-        cls,
         prestamo: Prestamo,
         fecha_devolucion: date,
         multa_repository: Optional[MultaRepositoryI],
         socio_repository: Optional[SocioRepositoryI],
     ) -> None:
-        if prestamo.esta_vencido(fecha_devolucion):
-            dias_atraso = prestamo.dias_de_atraso(fecha_devolucion)
-            cls._generar_multa(
-                socio_id=prestamo.socio_id,
-                prestamo_id=prestamo.id,
-                motivo=MotivoMulta.ENTREGA_TARDIA,
-                fecha_emision=fecha_devolucion,
-                dias_atraso=dias_atraso,
-                multa_repository=multa_repository,
-                socio_repository=socio_repository,
+        if prestamo.fechaVencimiento is not None:
+            registrar_multa_por_atraso(
+                prestamo, fecha_devolucion, multa_repository, socio_repository
             )

@@ -1,4 +1,19 @@
 import { EstadoEnvio } from "@/domain/entities/estado-envio";
+import { type Remito } from "@/domain/entities/remito";
+
+export function filtrarRemitosPorSeguimiento(remitos: Remito[], seguimiento: string): Remito[] {
+    switch (seguimiento) {
+        case "atrasados":
+            return remitos.filter((remito) => remito.estaAtrasado);
+        case "incidencias":
+            return remitos.filter(({ estadoActual }) => estadoActual === EstadoEnvio.CON_INCIDENCIA);
+        case "pendientes":
+            return remitos.filter(({ estadoActual }) =>
+                estadoActual !== EstadoEnvio.RECIBIDO && estadoActual !== EstadoEnvio.CON_INCIDENCIA);
+        default:
+            return remitos;
+    }
+}
 
 export class RemitoFilters {
 

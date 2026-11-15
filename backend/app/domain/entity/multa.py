@@ -31,10 +31,10 @@ class Multa:
         if self.estado != EstadoMulta.PENDIENTE:
             raise ErrorHandler(ErrorType.MULTA_ALREADY_CLOSED)
 
-    def pagar(self, fecha_pago: Optional[date] = None) -> None:
+    def pagar(self, fecha_pago: date) -> None:
         self.validar_pendiente()
         self.estado = EstadoMulta.PAGADA
-        self.fechaPago = fecha_pago or date.today()
+        self.fechaPago = fecha_pago
 
     def anular(self) -> None:
         self.validar_pendiente()

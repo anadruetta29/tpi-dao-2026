@@ -4,6 +4,7 @@ import { EstadoEjemplar, type Ejemplar } from "@/domain/entities/ejemplar";
 import { EstadoSede, type Sede } from "@/domain/entities/sede";
 import { type Session } from "@/domain/entities/session";
 import { createEjemplarAction, getAllEjemplaresAction, getEjemplarByIdAction } from "@/ui/actions/ejemplar/ejemplar.actions";
+import { getLibroDisponibilidadAction } from "@/ui/actions/libro/libro.actions";
 import { getAllSedesAction } from "@/ui/actions/sede/sede.actions";
 import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
@@ -12,6 +13,8 @@ import { allOptions, info, pickData, useLibraryRecordsViewModel, type Field } fr
 export function useEjemplaresViewModel(session: Session, libroId: string) {
     const [sedesResult, setSedesResult] = useState<ActionState<Sede[]> | null>(null);
     const [revision, setRevision] = useState(0);
+    const [disponibilidad, setDisponibilidad] = useState<Awaited<ReturnType<typeof getLibroDisponibilidadAction>> | null>(null);
+    const [revisionDisponibilidad, setRevisionDisponibilidad] = useState(0);
 
     {/* ===== Main useEffects ===== */ }
 
@@ -24,6 +27,14 @@ export function useEjemplaresViewModel(session: Session, libroId: string) {
             active = false;
         };
     }, [session, revision]);
+
+    useEffect(() => {
+        let active = true;
+        void getLibroDisponibilidadAction(libroId, session).then((result) => {
+            if (active) setDisponibilidad(result);
+        });
+        return () => { active = false; };
+    }, [libroId, session, revisionDisponibilidad]);
 
     {/* ===== Fetch data ===== */ }
 
@@ -44,19 +55,26 @@ export function useEjemplaresViewModel(session: Session, libroId: string) {
         setRevision((current) => current + 1);
     };
 
+    const refreshDisponibilidad = () => {
+        setDisponibilidad(null);
+        setRevisionDisponibilidad((current) => current + 1);
+    };
+
     {/* ===== handlers functions ===== */ }
 
     const handleFilterSubmit = (field: ReadField) => {
         return readFields(field, "sedeId", "estado");
     };
 
-    const handleCreateEjemplar = (field: ReadField) => {
-        return createEjemplarAction({
+    const handleCreateEjemplar = async (field: ReadField) => {
+        const result = await createEjemplarAction({
             session,
             codigo: field("codigo"),
             libro_id: libroId,
             sede_id: field("sedeId")
         });
+        if (result.success) refreshDisponibilidad();
+        return result;
     };
 
     const describeEjemplar = (ejemplar: Ejemplar) => ({
@@ -125,7 +143,9 @@ export function useEjemplaresViewModel(session: Session, libroId: string) {
         loadingSedes: sedesResult === null,
         sedesError: sedesResult && !sedesResult.success ? sedesResult.error || "No se pudieron cargar las sedes." : null,
         noActiveSedes: Boolean(sedesResult?.success && activeOptionsLengthZero(activeSedeOptions)),
-        retrySedes: onRetrySedes
+        retrySedes: onRetrySedes,
+        disponibilidad,
+        refreshDisponibilidad
     };
 }
 

@@ -11,6 +11,8 @@ class DevolucionRes(BaseModel):
     observaciones: Optional[str] = None
     estadoDevuelto: Optional[EstadoEjemplar] = None
     prestamo_id: Optional[int] = None
+    ejemplar_id: Optional[int] = None
+    estadoEjemplar: Optional[EstadoEjemplar] = None
 
     @staticmethod
     def from_domain(devolucion: Devolucion) -> "DevolucionRes":
@@ -20,6 +22,7 @@ class DevolucionRes(BaseModel):
             observaciones=devolucion.observaciones,
             estadoDevuelto=devolucion.estadoDevuelto,
             prestamo_id=devolucion.prestamo_id,
+            ejemplar_id=devolucion.ejemplar_id,
         )
 
 

@@ -1,6 +1,7 @@
+from contextlib import nullcontext
 from dataclasses import dataclass
 from datetime import date
-from typing import Optional
+from typing import Callable, ContextManager, Optional
 from app.application.strategy.multa_estado.core.multa_estado_state_factory import (
     MultaEstadoStateFactory,
 )
@@ -21,11 +22,13 @@ class PagarMultaUseCase:
         socio_repository: SocioRepositoryI,
         usuario_repository: UsuarioRepositoryI,
         multa_state_factory: Optional[MultaEstadoStateFactory] = None,
+        transaction: Callable[[], ContextManager] = nullcontext,
     ) -> None:
         self.multa_repository = multa_repository
         self.socio_repository = socio_repository
         self.usuario_repository = usuario_repository
         self.multa_state_factory = multa_state_factory or MultaEstadoStateFactory()
+        self.transaction = transaction
 
     @dataclass(frozen=True)
     class Command:
@@ -38,6 +41,10 @@ class PagarMultaUseCase:
         multa: Multa
 
     def execute(self, command: Command) -> Result:
+        with self.transaction():
+            return self._execute(command)
+
+    def _execute(self, command: Command) -> Result:
         AuthHelper.authenticate(
             command.token,
             self.usuario_repository,
@@ -47,20 +54,22 @@ class PagarMultaUseCase:
         )
         if command.id is None:
             raise ErrorHandler(ErrorType.MISSING_REQUIRED_FIELDS)
+        if command.fechaPago is None:
+            raise ErrorHandler(ErrorType.MULTA_FECHA_PAGO_REQUERIDA)
 
-        multa = self.multa_repository.get_by_id(command.id)
+        multa = self.multa_repository.get_by_id_for_update(command.id)
         if multa is None:
             raise ErrorHandler(ErrorType.MULTA_NOT_FOUND)
 
         state = self.multa_state_factory.get_state(multa.estado)
-        state.pagar(multa, command.fechaPago or date.today())
+        state.pagar(multa, command.fechaPago)
         updated = self.multa_repository.update(command.id, multa)
         if updated is None:
             raise ErrorHandler(ErrorType.MULTA_NOT_FOUND)
 
-        if updated.socio_id is not None and not self.multa_repository.has_pending_by_socio(updated.socio_id):
-            socio = self.socio_repository.get_by_id(updated.socio_id)
-            if socio is not None and socio.id is not None:
+        if updated.socio_id is not None:
+            socio = self.socio_repository.get_by_id_for_update(updated.socio_id)
+            if socio is not None and socio.id is not None and not self.multa_repository.has_pending_by_socio(socio.id):
                 socio.habilitar()
                 self.socio_repository.update(socio.id, socio)
 

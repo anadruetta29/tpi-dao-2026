@@ -4,7 +4,8 @@ import { type SolicitudPrestamo } from "@/domain/entities/solicitud-prestamo";
 
 export interface CreateSolicitudLocalCommand {
     socioId: string;
-    ejemplarId: string;
+    ejemplarId?: string;
+    ejemplaresIds?: string[];
     sedeOrigenId: string;
     session: Session;
 }
@@ -25,6 +26,7 @@ export class CreateSolicitudLocalUseCase {
         const response = await this.solicitudPrestamoRepository.createSolicitudLocal({
             socioId: command.socioId,
             ejemplarId: command.ejemplarId,
+            ejemplaresIds: command.ejemplaresIds,
             sedeOrigenId: command.sedeOrigenId,
             session: command.session
         });

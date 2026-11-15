@@ -28,7 +28,7 @@ class GetRemitoByIdUseCase:
         remito: Remito
 
     def execute(self, command: Command) -> Result:
-        AuthHelper.authenticate(
+        user = AuthHelper.authenticate(
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
@@ -39,7 +39,8 @@ class GetRemitoByIdUseCase:
             raise ErrorHandler(ErrorType.MISSING_REQUIRED_FIELDS)
 
         remito = self.remito_repository.get_by_id(command.id)
-        if remito is None:
+        sede_id = user.sede_recepcionista()
+        if remito is None or (sede_id is not None and sede_id not in (remito.sede_origen_id, remito.sede_destino_id)):
             raise ErrorHandler(ErrorType.REMITO_NOT_FOUND)
 
         return GetRemitoByIdUseCase.Result(remito=remito)

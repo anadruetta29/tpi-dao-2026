@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from app.core.handler.exception_handler import register_exception_handlers
+from app.presentation.controller.aviso_controller import router as aviso_router
+from app.infrastructure.scheduler.multas_vencidas_scheduler import multas_vencidas_lifespan
 from app.presentation.controller import (
     auth_router,
     autor_router,
@@ -19,6 +21,7 @@ from app.presentation.controller import (
 app = FastAPI(
     title="Sistema de Préstamos Interbibliotecarios - API",
     version="1.0.0",
+    lifespan=multas_vencidas_lifespan,
 )
 
 register_exception_handlers(app)
@@ -36,3 +39,4 @@ app.include_router(reserva_router)
 app.include_router(remito_router)
 app.include_router(devolucion_router)
 app.include_router(multa_router)
+app.include_router(aviso_router)

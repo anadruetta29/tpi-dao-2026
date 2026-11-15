@@ -16,6 +16,14 @@ class BasePostgresRepository(Generic[M]):
     def find_by_id(self, id: int) -> Optional[M]:
         return self.db.query(self.model_cls).filter(self.model_cls.id == id).first()
 
+    def find_by_id_for_update(self, id: int) -> Optional[M]:
+        return (
+            self.db.query(self.model_cls)
+            .filter(self.model_cls.id == id)
+            .with_for_update(of=self.model_cls)
+            .first()
+        )
+
     def save(self, model: M) -> M:
         self.db.add(model)
         flush_or_commit(self.db)

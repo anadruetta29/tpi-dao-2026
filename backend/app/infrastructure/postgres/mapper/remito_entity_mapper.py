@@ -1,11 +1,12 @@
-from typing import List
+from typing import List, Optional
+from app.domain.entity.estado_envio import EstadoEnvio
 from app.domain.entity.remito import Remito
 from app.infrastructure.postgres.model.remito_model import RemitoModel
 
 
 class RemitoEntityMapper:
     @staticmethod
-    def to_domain(model: RemitoModel) -> Remito:
+    def to_domain(model: RemitoModel, estado_actual: Optional[EstadoEnvio] = None) -> Remito:
         ejemplar_ids = [e.id for e in (model.ejemplares or []) if e.id is not None]
         return Remito(
             id=model.id,
@@ -16,6 +17,8 @@ class RemitoEntityMapper:
             sede_origen_id=model.sede_origen_id,
             sede_destino_id=model.sede_destino_id,
             ejemplar_ids=ejemplar_ids,
+            solicitud_id=model.solicitud_id,
+            estado_actual=estado_actual,
         )
 
     @staticmethod
@@ -32,4 +35,5 @@ class RemitoEntityMapper:
             fechaRecepcion=entity.fechaRecepcion,
             sede_origen_id=entity.sede_origen_id,
             sede_destino_id=entity.sede_destino_id,
+            solicitud_id=entity.solicitud_id,
         )

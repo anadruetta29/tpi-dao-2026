@@ -98,12 +98,9 @@ export class MultaApiDataSource implements MultaDataSourceI {
 
     public async pagarMulta(dto: PagarMultaReq): Promise<PagarMultaRes> {
         try {
-            const payload: Record<string, any> = {};
-            if (dto.fechaPago) payload.fechaPago = dto.fechaPago;
-
             const response = await this.httpClient.patch(
                 `/multas/${dto.id}/pagar`,
-                payload,
+                { fechaPago: dto.fechaPago },
                 dto.session?.accessToken
             );
 

@@ -5,7 +5,7 @@ import { Multa } from "../../entities/multa";
 export interface PagarMultaCommand {
     session: Session;
     id: string;
-    fechaPago?: string | null;
+    fechaPago: string;
 }
 
 export interface PagarMultaResult {

@@ -30,7 +30,7 @@ class GetAllSolicitudesPrestamoUseCase:
         solicitudes: List[SolicitudPrestamo]
 
     def execute(self, command: Command) -> Result:
-        AuthHelper.authenticate(
+        usuario = AuthHelper.authenticate(
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
@@ -41,5 +41,6 @@ class GetAllSolicitudesPrestamoUseCase:
             tipo=command.tipo,
             estado=command.estado,
             sede_id=command.sede_id,
+            sede_recepcionista_id=usuario.sede_recepcionista(),
         )
         return GetAllSolicitudesPrestamoUseCase.Result(solicitudes=solicitudes)

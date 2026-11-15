@@ -13,3 +13,5 @@ class ReservaModel(Base):
     libro_id = Column(Integer, ForeignKey("libros.id"), nullable=True, index=True)
     sede_id = Column(Integer, ForeignKey("sedes.id"), nullable=True, index=True)
     ejemplar_id = Column(Integer, ForeignKey("ejemplares.id"), nullable=True, index=True)
+    fecha_limite_retiro = Column(Date, nullable=True)
+    prestamo_id = Column(Integer, ForeignKey("prestamos.id"), nullable=True)

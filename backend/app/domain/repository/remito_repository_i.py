@@ -7,10 +7,15 @@ from app.domain.repository.base_repository_i import BaseRepositoryI
 
 class RemitoRepositoryI(BaseRepositoryI[Remito]):
     @abstractmethod
+    def get_by_solicitud_id(self, solicitud_id: int) -> Optional[Remito]:
+        pass
+
+    @abstractmethod
     def get_all_filtered(
         self,
         sede_origen_id: Optional[int] = None,
         sede_destino_id: Optional[int] = None,
         estado: Optional[EstadoEnvio] = None,
+        sede_recepcionista_id: Optional[int] = None,
     ) -> List[Remito]:
         pass

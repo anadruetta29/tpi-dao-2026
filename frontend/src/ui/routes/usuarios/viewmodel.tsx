@@ -4,6 +4,7 @@ import { Rol, type Usuario } from "@/domain/entities/usuario";
 import { createUsuarioAction, getAllUsuariosAction, getUsuarioByIdAction, updateUsuarioAction } from "@/ui/actions/usuario/usuario.actions";
 import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
+import { useSelectorCatalog } from "@/ui/hooks/use-selector-catalog";
 import { allOptions, info, pickData, type Field, useLibraryRecordsViewModel } from "@/ui/routes/use-library-records-viewmodel";
 
 const activity = [
@@ -11,23 +12,33 @@ const activity = [
     { value: "false", label: "Inactivo" }
 ];
 
-function userFields(user?: Usuario): Field[] {
+function userFields(sedes: { value: string; label: string }[], user?: Usuario): Field[] {
+    const sedeOptions = [{ value: "", label: "Seleccioná una sede" }, ...sedes];
+    if (user?.sedeId && !sedes.some(({ value }) => value === user.sedeId)) {
+        sedeOptions.push({ value: user.sedeId, label: user.sedeId });
+    }
+
     return [
         { name: "nombre", placeholder: "Ej. Ana", label: "Nombre", defaultValue: user?.nombre, required: true },
         { name: "apellido", placeholder: "Ej. Pérez", label: "Apellido", defaultValue: user?.apellido, required: true },
         { name: "email", placeholder: "nombre@ejemplo.com", label: "Correo electrónico", type: "email", defaultValue: user?.email, required: true },
         { name: "password", placeholder: "Ingresá una contraseña", label: user ? "Nueva contraseña (opcional)" : "Contraseña", type: "password", autoComplete: "new-password", required: !user },
         { name: "role", label: "Rol", options: Rol.toOptions(), defaultValue: user?.role.value },
+        { name: "sedeId", label: "Sede del recepcionista", options: sedeOptions, defaultValue: user?.sedeId },
         ...(user ? [{ name: "activo", label: "Estado", options: activity, defaultValue: String(user.activo) }] : [])
     ];
 }
 
 const userData = (field: ReadField) => ({
     ...readFields(field, "nombre", "apellido", "email"),
-    role: Rol.fromString(field("role"))
+    role: Rol.fromString(field("role")),
+    sedeId: field("sedeId") || undefined
 });
 
 export function useViewModel(session: Session) {
+    const catalog = useSelectorCatalog(session, "sedes");
+    const sedes = catalog.sedes?.data ?? [];
+
     {/* ===== Fetch data ===== */ }
 
     const fetchUsuarios = useCallback(async ({ role, activo }: { role: string; activo: string }) => {
@@ -50,19 +61,27 @@ export function useViewModel(session: Session) {
         return readFields(field, "role", "activo");
     };
 
-    const handleCreateUsuario = (field: ReadField) => {
+    const handleCreateUsuario = async (field: ReadField) => {
+        const data = userData(field);
+        if (data.role === Rol.RECEPCIONISTA && !data.sedeId) {
+            return { success: false, error: "Seleccioná la sede del recepcionista." };
+        }
         return createUsuarioAction({
             session,
-            ...userData(field),
+            ...data,
             password: field("password")
         });
     };
 
-    const handleUpdateUsuario = (user: Usuario, field: ReadField) => {
+    const handleUpdateUsuario = async (user: Usuario, field: ReadField) => {
+        const data = userData(field);
+        if (data.role === Rol.RECEPCIONISTA && !data.sedeId) {
+            return { success: false, error: "Seleccioná la sede del recepcionista." };
+        }
         return updateUsuarioAction({
             session,
             id: user.id,
-            ...userData(field),
+            ...data,
             password: field("password") || undefined,
             activo: field("activo") === "true"
         });
@@ -73,11 +92,14 @@ export function useViewModel(session: Session) {
             info("Nombre", `${user.nombre} ${user.apellido}`),
             info("Correo electrónico", user.email),
             info("Rol", user.roleName),
+            ...(user.role === Rol.RECEPCIONISTA ? [
+                info("Sede", sedes.find(({ value }) => value === user.sedeId)?.label ?? user.sedeId)
+            ] : []),
             info("Estado", user.activo ? "Activo" : "Inactivo")
         ],
         forms: [{
             label: "Modificar usuario",
-            fields: userFields(user),
+            fields: userFields(sedes, user),
             submit: (field: ReadField) => handleUpdateUsuario(user, field)
         }]
     });
@@ -104,7 +126,7 @@ export function useViewModel(session: Session) {
         getLabel: getUsuarioLabel,
         create: {
             label: "Registrar usuario",
-            fields: userFields(),
+            fields: userFields(sedes),
             submit: handleCreateUsuario
         },
         describe: describeUsuario

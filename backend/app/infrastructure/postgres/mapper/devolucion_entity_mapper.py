@@ -12,6 +12,7 @@ class DevolucionEntityMapper:
             observaciones=model.observaciones,
             estadoDevuelto=model.estadoDevuelto,
             prestamo_id=model.prestamo_id,
+            ejemplar_id=model.ejemplar_id,
         )
 
     @staticmethod
@@ -26,4 +27,5 @@ class DevolucionEntityMapper:
             observaciones=entity.observaciones,
             estadoDevuelto=entity.estadoDevuelto,
             prestamo_id=entity.prestamo_id,
+            ejemplar_id=entity.ejemplar_id,
         )

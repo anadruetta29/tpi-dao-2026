@@ -49,18 +49,18 @@ class CreateSocioUseCase:
         ):
             raise ErrorHandler(ErrorType.MISSING_REQUIRED_FIELDS)
 
-        if self.socio_repository.get_by_documento(command.documento) is not None:
-            raise ErrorHandler(ErrorType.SOCIO_ALREADY_EXISTS)
-        if self.socio_repository.get_by_email(command.email) is not None:
-            raise ErrorHandler(ErrorType.SOCIO_ALREADY_EXISTS)
-
-        socio = Socio(
+        socio = Socio(estado=EstadoSocio.HABILITADO)
+        socio.actualizar_datos(
             nombre=command.nombre,
             apellido=command.apellido,
             documento=command.documento,
             email=command.email,
             telefono=command.telefono,
-            estado=EstadoSocio.HABILITADO,
         )
+        if self.socio_repository.get_by_documento(command.documento) is not None:
+            raise ErrorHandler(ErrorType.SOCIO_ALREADY_EXISTS)
+        if self.socio_repository.get_by_email(command.email) is not None:
+            raise ErrorHandler(ErrorType.SOCIO_ALREADY_EXISTS)
+
         saved = self.socio_repository.save(socio)
         return CreateSocioUseCase.Result(socio=saved)

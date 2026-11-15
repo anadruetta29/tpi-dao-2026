@@ -14,7 +14,9 @@ export class Devolucion extends BaseEntity {
         public fecha?: string | Date | null,
         public observaciones?: string | null,
         public estadoDevuelto: EstadoEjemplar = EstadoEjemplar.DISPONIBLE,
-        public prestamoId: string = ""
+        public prestamoId: string = "",
+        public ejemplarId: string = "",
+        public estadoEjemplar: EstadoEjemplar | null = null
     ) {
         super();
         this.estadoDevueltoName = this.estadoDevuelto.name;
@@ -42,7 +44,9 @@ export class Devolucion extends BaseEntity {
             obj.fecha || null,
             obj.observaciones || null,
             estadoDevuelto,
-            String(obj.prestamoId ?? obj.prestamo_id ?? "")
+            String(obj.prestamoId ?? obj.prestamo_id ?? ""),
+            String(obj.ejemplarId ?? obj.ejemplar_id ?? ""),
+            obj.estadoEjemplar ? EstadoEjemplar.fromObject(obj.estadoEjemplar) : null
         );
     }
 

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, Date, Enum as SQLEnum
+from sqlalchemy import Column, ForeignKey, Integer, Date, String, Enum as SQLEnum
 from app.infrastructure.database import Base
 from app.domain.entity.estado_envio import EstadoEnvio
 
@@ -11,3 +11,5 @@ class HistorialEstadoRemitoModel(Base):
     fechaFin = Column(Date, nullable=True)
     estado = Column(SQLEnum(EstadoEnvio), nullable=True)
     remito_id = Column(Integer, ForeignKey("remitos.id", ondelete="CASCADE"), nullable=True, index=True)
+    responsable_id = Column(Integer, nullable=True)
+    responsable_nombre = Column(String(201), nullable=True)

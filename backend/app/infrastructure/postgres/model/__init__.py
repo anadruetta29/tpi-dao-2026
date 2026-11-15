@@ -3,6 +3,7 @@ from app.infrastructure.postgres.model.socio_model import SocioModel
 from app.infrastructure.postgres.model.sede_model import SedeModel
 from app.infrastructure.postgres.model.libro_model import LibroModel
 from app.infrastructure.postgres.model.autor_model import AutorModel
+from app.infrastructure.postgres.model.aviso_model import AvisoLecturaModel, AvisoModel
 from app.infrastructure.postgres.model.ejemplar_model import EjemplarModel
 from app.infrastructure.postgres.model.reserva_model import ReservaModel
 from app.infrastructure.postgres.model.solicitud_prestamo_model import SolicitudPrestamoModel
@@ -18,6 +19,8 @@ __all__ = [
     "SedeModel",
     "LibroModel",
     "AutorModel",
+    "AvisoModel",
+    "AvisoLecturaModel",
     "EjemplarModel",
     "ReservaModel",
     "SolicitudPrestamoModel",

@@ -3,6 +3,7 @@ from enum import Enum
 
 class EstadoEnvio(str, Enum):
     PENDIENTE = "PENDIENTE"
+    ACEPTADO = "ACEPTADO"
     EMPACADO = "EMPACADO"
     DESPACHADO = "DESPACHADO"
     EN_TRANSITO = "EN_TRANSITO"

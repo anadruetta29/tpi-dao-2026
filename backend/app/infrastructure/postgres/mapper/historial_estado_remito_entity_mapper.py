@@ -12,6 +12,8 @@ class HistorialEstadoRemitoEntityMapper:
             fechaFin=model.fechaFin,
             estado=model.estado,
             remito_id=model.remito_id,
+            responsable_id=model.responsable_id,
+            responsable_nombre=model.responsable_nombre,
         )
 
     @staticmethod
@@ -26,4 +28,6 @@ class HistorialEstadoRemitoEntityMapper:
             fechaFin=entity.fechaFin,
             estado=entity.estado,
             remito_id=entity.remito_id,
+            responsable_id=entity.responsable_id,
+            responsable_nombre=entity.responsable_nombre,
         )

@@ -4,7 +4,8 @@ import { type SolicitudPrestamo } from "@/domain/entities/solicitud-prestamo";
 
 export interface CreateSolicitudInterbibliotecariaCommand {
     recepcionistaId?: string;
-    ejemplarId: string;
+    ejemplarId?: string;
+    ejemplaresIds?: string[];
     sedeOrigenId: string;
     sedeDestinoId: string;
     session: Session;
@@ -27,6 +28,7 @@ export class CreateSolicitudInterbibliotecariaUseCase {
         const response = await this.solicitudPrestamoRepository.createSolicitudInterbibliotecaria({
             recepcionistaId,
             ejemplarId: command.ejemplarId,
+            ejemplaresIds: command.ejemplaresIds,
             sedeOrigenId: command.sedeOrigenId,
             sedeDestinoId: command.sedeDestinoId,
             session: command.session

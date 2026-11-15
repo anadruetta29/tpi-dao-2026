@@ -13,19 +13,24 @@ class RemitoRepositoryAdapter(BaseRepositoryAdapter[Remito, RemitoModel], Remito
     def __init__(self, repository: PostgresRemitoRepository) -> None:
         super().__init__(repository, RemitoEntityMapper)
 
+    def get_by_solicitud_id(self, solicitud_id: int) -> Optional[Remito]:
+        model = self.repository.find_by_solicitud_id(solicitud_id)
+        return self.mapper.to_domain(model) if model is not None else None
+
     def get_all_filtered(
         self,
         sede_origen_id: Optional[int] = None,
         sede_destino_id: Optional[int] = None,
         estado: Optional[EstadoEnvio] = None,
+        sede_recepcionista_id: Optional[int] = None,
     ) -> List[Remito]:
-        return RemitoEntityMapper.to_domain_list(
-            self.repository.find_all_filtered(
-                sede_origen_id=sede_origen_id,
-                sede_destino_id=sede_destino_id,
-                estado=estado,
-            )
+        rows = self.repository.find_all_filtered(
+            sede_origen_id=sede_origen_id,
+            sede_destino_id=sede_destino_id,
+            estado=estado,
+            sede_recepcionista_id=sede_recepcionista_id,
         )
+        return [RemitoEntityMapper.to_domain(model, EstadoEnvio(estado_actual)) for model, estado_actual in rows]
 
     def save(self, entity: Remito) -> Remito:
         model = RemitoEntityMapper.to_model(entity)

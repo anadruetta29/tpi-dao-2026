@@ -7,7 +7,7 @@ from app.domain.entity.reserva import Reserva
 
 class ActivaReservaState(ReservaEstadoState):
     def atender(self, reserva: Reserva) -> None:
-        reserva.estado = EstadoReserva.ATENDIDA
+        reserva.estado = EstadoReserva.LISTA_PARA_RETIRO
 
     def cancelar(self, reserva: Reserva) -> None:
         reserva.estado = EstadoReserva.CANCELADA

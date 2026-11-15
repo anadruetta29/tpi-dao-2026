@@ -1,8 +1,7 @@
 from dataclasses import dataclass
-from typing import Optional
-from app.application.strategy.reserva_estado.core.reserva_estado_state_factory import (
-    ReservaEstadoStateFactory,
-)
+from datetime import date
+from typing import Callable, ContextManager, Optional
+from app.application.use_case.reserva.gestionar_retiro_reserva import GestionarRetiroReserva
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.estado_reserva import EstadoReserva
 from app.domain.entity.reserva import Reserva
@@ -18,11 +17,13 @@ class UpdateReservaEstadoUseCase:
         self,
         reserva_repository: ReservaRepositoryI,
         usuario_repository: UsuarioRepositoryI,
-        reserva_state_factory: Optional[ReservaEstadoStateFactory] = None,
+        retiro: GestionarRetiroReserva,
+        transaction: Callable[[], ContextManager],
     ) -> None:
         self.reserva_repository = reserva_repository
         self.usuario_repository = usuario_repository
-        self.reserva_state_factory = reserva_state_factory or ReservaEstadoStateFactory()
+        self.retiro = retiro
+        self.transaction = transaction
 
     @dataclass(frozen=True)
     class Command:
@@ -35,7 +36,11 @@ class UpdateReservaEstadoUseCase:
         reserva: Reserva
 
     def execute(self, command: Command) -> Result:
-        AuthHelper.authenticate(
+        with self.transaction():
+            return self._execute(command)
+
+    def _execute(self, command: Command) -> Result:
+        usuario = AuthHelper.authenticate(
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
@@ -45,14 +50,13 @@ class UpdateReservaEstadoUseCase:
         if command.id is None or command.estado is None:
             raise ErrorHandler(ErrorType.MISSING_REQUIRED_FIELDS)
 
-        reserva = self.reserva_repository.get_by_id(command.id)
+        reserva = self.reserva_repository.get_by_id_for_update(command.id)
         if reserva is None:
             raise ErrorHandler(ErrorType.RESERVA_NOT_FOUND)
 
-        state = self.reserva_state_factory.get_state(reserva.estado)
-        state.transicionar(reserva, command.estado)
-        updated = self.reserva_repository.update(command.id, reserva)
-        if updated is None:
-            raise ErrorHandler(ErrorType.RESERVA_NOT_FOUND)
-
-        return UpdateReservaEstadoUseCase.Result(reserva=updated)
+        usuario.validar_sede(reserva.sede_id)
+        if command.estado == EstadoReserva.RETIRADA:
+            return self.Result(reserva=self.retiro.retirar(reserva, date.today()))
+        if command.estado == EstadoReserva.CANCELADA:
+            return self.Result(reserva=self.retiro.liberar(reserva, command.estado, date.today()))
+        raise ErrorHandler(ErrorType.INVALID_STATE_TRANSITION)

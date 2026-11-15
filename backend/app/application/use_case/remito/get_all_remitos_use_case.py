@@ -29,7 +29,7 @@ class GetAllRemitosUseCase:
         remitos: List[Remito]
 
     def execute(self, command: Command) -> Result:
-        AuthHelper.authenticate(
+        user = AuthHelper.authenticate(
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
@@ -40,5 +40,6 @@ class GetAllRemitosUseCase:
             sede_origen_id=command.sede_origen_id,
             sede_destino_id=command.sede_destino_id,
             estado=command.estado,
+            sede_recepcionista_id=user.sede_recepcionista(),
         )
         return GetAllRemitosUseCase.Result(remitos=remitos)

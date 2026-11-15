@@ -1,6 +1,7 @@
+from contextlib import nullcontext
 from dataclasses import dataclass
 from datetime import date
-from typing import Optional
+from typing import Callable, ContextManager, Optional
 from app.application.strategy.calculo_multa.core.calculo_multa_strategy_factory import (
     CalculoMultaStrategyFactory,
 )
@@ -25,12 +26,14 @@ class CreateMultaUseCase:
         prestamo_repository: PrestamoRepositoryI,
         usuario_repository: UsuarioRepositoryI,
         calculo_multa_factory: Optional[CalculoMultaStrategyFactory] = None,
+        transaction: Callable[[], ContextManager] = nullcontext,
     ) -> None:
         self.multa_repository = multa_repository
         self.socio_repository = socio_repository
         self.prestamo_repository = prestamo_repository
         self.usuario_repository = usuario_repository
         self.calculo_multa_factory = calculo_multa_factory or CalculoMultaStrategyFactory()
+        self.transaction = transaction
 
     @dataclass(frozen=True)
     class Command:
@@ -45,6 +48,10 @@ class CreateMultaUseCase:
         multa: Multa
 
     def execute(self, command: Command) -> Result:
+        with self.transaction():
+            return self._execute(command)
+
+    def _execute(self, command: Command) -> Result:
         AuthHelper.authenticate(
             command.token,
             self.usuario_repository,
@@ -55,15 +62,23 @@ class CreateMultaUseCase:
         if command.socio_id is None or command.motivo is None:
             raise ErrorHandler(ErrorType.MISSING_REQUIRED_FIELDS)
 
-        socio = self.socio_repository.get_by_id(command.socio_id)
-        if socio is None:
-            raise ErrorHandler(ErrorType.SOCIO_NOT_FOUND)
-
         prestamo = None
         if command.prestamo_id is not None:
-            prestamo = self.prestamo_repository.get_by_id(command.prestamo_id)
+            prestamo = self.prestamo_repository.get_by_id_for_update(command.prestamo_id)
             if prestamo is None:
                 raise ErrorHandler(ErrorType.PRESTAMO_NOT_FOUND)
+            if prestamo.socio_id != command.socio_id:
+                raise ErrorHandler(ErrorType.BAD_REQUEST, "El préstamo debe pertenecer al socio indicado.")
+            if command.motivo == MotivoMulta.ENTREGA_TARDIA:
+                multas = self.multa_repository.get_all_by_prestamo_and_motivo_for_update(
+                    command.prestamo_id, command.motivo
+                )
+                if any(multa.socio_id == command.socio_id for multa in multas):
+                    raise ErrorHandler(ErrorType.MULTA_ATRASO_EXISTENTE)
+
+        socio = self.socio_repository.get_by_id_for_update(command.socio_id)
+        if socio is None:
+            raise ErrorHandler(ErrorType.SOCIO_NOT_FOUND)
 
         monto = command.monto
         if monto is None:

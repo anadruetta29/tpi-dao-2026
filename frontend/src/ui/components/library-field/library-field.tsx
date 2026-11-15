@@ -17,6 +17,9 @@ interface InputFieldProps extends CommonFieldProps {
     placeholder: string;
     type?: HTMLInputTypeAttribute;
     pattern?: string;
+    minLength?: number;
+    maxLength?: number;
+    title?: string;
     inputMode?: ComponentPropsWithoutRef<"input">["inputMode"];
     onInput?: FormEventHandler<HTMLInputElement>;
     min?: number | string;
@@ -50,6 +53,7 @@ export function LibraryField(field: LibraryFieldProps) {
             ) : (
                 <input id={id} name={name} type={field.type ?? "text"} defaultValue={defaultValue}
                     required={required} placeholder={field.placeholder} pattern={field.pattern} inputMode={field.inputMode}
+                    minLength={field.minLength} maxLength={field.maxLength} title={field.title}
                     onInput={field.onInput} min={field.min} max={field.max} step={field.step} autoComplete={field.autoComplete}
                     onChange={(event) => onChange?.(event.target.value)} className={styles.control} />
             )}

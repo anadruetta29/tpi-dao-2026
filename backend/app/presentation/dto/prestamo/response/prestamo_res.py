@@ -1,6 +1,7 @@
 from datetime import date
 from typing import List, Optional, Union
 from pydantic import BaseModel
+from app.core.config.settings import settings
 from app.domain.entity.estado_prestamo import EstadoPrestamo
 from app.domain.entity.modalidad_prestamo_local import ModalidadPrestamoLocal
 from app.domain.entity.prestamo import Prestamo
@@ -17,6 +18,10 @@ class PrestamoRes(BaseModel):
     socio_id: Optional[int] = None
     sede_id: Optional[int] = None
     ejemplar_id: Optional[int] = None
+    renovaciones: int = 0
+    max_renovaciones: int = settings.PRESTAMO_MAX_RENOVACIONES
+    ejemplar_ids: List[int] = []
+    ejemplares_devueltos_ids: List[int] = []
 
     @staticmethod
     def from_domain(prestamo: Prestamo) -> "PrestamoRes":
@@ -31,6 +36,9 @@ class PrestamoRes(BaseModel):
             socio_id=prestamo.socio_id,
             sede_id=prestamo.sede_id,
             ejemplar_id=prestamo.ejemplar_id,
+            renovaciones=prestamo.renovaciones,
+            ejemplar_ids=prestamo.ejemplar_ids,
+            ejemplares_devueltos_ids=prestamo.ejemplares_devueltos_ids,
         )
 
 

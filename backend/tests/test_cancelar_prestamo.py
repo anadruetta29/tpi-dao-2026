@@ -8,6 +8,8 @@ from app.domain.entity.ejemplar import Ejemplar
 from app.domain.entity.estado_ejemplar import EstadoEjemplar
 from app.domain.entity.estado_prestamo import EstadoPrestamo
 from app.domain.entity.prestamo import Prestamo
+from app.domain.entity.rol import Rol
+from app.domain.entity.usuario import Usuario
 from app.domain.error.error_handler import ErrorHandler
 
 
@@ -15,7 +17,7 @@ class CancelarPrestamoTest(unittest.TestCase):
     def setUp(self):
         self.today = date.today()
         self.prestamo = Prestamo(
-            id=5, ejemplar_id=8, estado=EstadoPrestamo.ACTIVO,
+            id=5, ejemplar_id=8, estado=EstadoPrestamo.ACTIVO, sede_id=3,
             fechaInicio=self.today, fechaVencimiento=self.today + timedelta(days=2),
         )
         self.ejemplar = Ejemplar(id=8, estado=EstadoEjemplar.PRESTADO)
@@ -23,14 +25,15 @@ class CancelarPrestamoTest(unittest.TestCase):
         self.prestamos.get_by_id_for_update.return_value = self.prestamo
         self.prestamos.update.side_effect = lambda _, prestamo: prestamo
         self.ejemplares = Mock()
-        self.ejemplares.get_by_id.return_value = self.ejemplar
+        self.ejemplares.get_by_id_for_update.return_value = self.ejemplar
         self.devoluciones = Mock()
         self.devoluciones.save.side_effect = lambda devolucion: devolucion
         self.use_case = CancelarPrestamoUseCase(
             CreateDevolucionUseCase(self.devoluciones, self.prestamos, self.ejemplares, Mock())
         )
         auth = patch("app.application.use_case.devolucion.create_devolucion_use_case.AuthHelper.authenticate")
-        auth.start()
+        self.authenticate = auth.start()
+        self.authenticate.return_value = Usuario(role=Rol.ADMIN)
         self.addCleanup(auth.stop)
 
     def test_cierra_prestamo_registra_devolucion_y_libera_ejemplar_una_sola_vez(self):
@@ -57,3 +60,13 @@ class CancelarPrestamoTest(unittest.TestCase):
             self.assertEqual(error.exception.code, "PRESTAMO_NO_CANCELABLE")
         self.devoluciones.save.assert_not_called()
         self.ejemplares.update.assert_not_called()
+
+    def test_recepcionista_solo_puede_cancelar_prestamos_de_su_sede(self):
+        self.authenticate.return_value = Usuario(role=Rol.RECEPCIONISTA, sede_id=7)
+
+        with self.assertRaises(ErrorHandler) as error:
+            self.use_case.execute(CancelarPrestamoUseCase.Command("token", 5))
+
+        self.assertEqual(error.exception.code, "FORBIDDEN")
+        self.assertEqual(self.prestamo.estado, EstadoPrestamo.ACTIVO)
+        self.devoluciones.save.assert_not_called()

@@ -8,6 +8,7 @@ from app.application.strategy.solicitud_estado.core.solicitud_estado_state impor
 from app.domain.entity.ejemplar import Ejemplar
 from app.domain.entity.estado_solicitud import EstadoSolicitud
 from app.domain.entity.solicitud_prestamo import SolicitudPrestamo
+from app.domain.entity.tipo_prestamo import TipoPrestamo
 
 
 class PendienteState(SolicitudEstadoState):
@@ -24,7 +25,8 @@ class PendienteState(SolicitudEstadoState):
             self._ejemplar_state_factory.get_state(ejemplar.estado).validar_prestamo(
                 ejemplar
             )
-        solicitud.responsable_destino_id = responsable_id
+        if solicitud.tipo != TipoPrestamo.INTERBIBLIOTECARIO:
+            solicitud.responsable_destino_id = responsable_id
         solicitud.estado = EstadoSolicitud.APROBADA
 
     def rechazar(self, solicitud: SolicitudPrestamo) -> None:

@@ -25,12 +25,16 @@ class GetAllDevolucionesUseCase:
         devoluciones: List[Devolucion]
 
     def execute(self, command: Command) -> Result:
-        AuthHelper.authenticate(
+        user = AuthHelper.authenticate(
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
             Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
-        devoluciones = self.devolucion_repository.get_all()
+        sede_id = user.sede_recepcionista()
+        devoluciones = (
+            self.devolucion_repository.get_all_by_sede(sede_id) if sede_id is not None
+            else self.devolucion_repository.get_all()
+        )
         return GetAllDevolucionesUseCase.Result(devoluciones=devoluciones)

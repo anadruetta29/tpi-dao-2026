@@ -11,12 +11,14 @@ class CreateDevolucionReq:
         fecha: Optional[date] = None,
         observaciones: Optional[str] = None,
         estadoDevuelto: Optional[EstadoEjemplar] = None,
+        ejemplar_id: Optional[int] = None,
     ) -> None:
         self.token = token
         self.prestamo_id = prestamo_id
         self.fecha = fecha
         self.observaciones = observaciones
         self.estadoDevuelto = estadoDevuelto
+        self.ejemplar_id = ejemplar_id
 
     @staticmethod
     def build(token: Optional[str], payload: Dict[str, Any]) -> "CreateDevolucionReq":
@@ -38,6 +40,7 @@ class CreateDevolucionReq:
                 else None
             ),
             estadoDevuelto=estado,
+            ejemplar_id=int(payload["ejemplar_id"]) if payload.get("ejemplar_id") is not None else None,
         )
 
     def get_token(self) -> Optional[str]:
@@ -54,3 +57,6 @@ class CreateDevolucionReq:
 
     def get_estado_devuelto(self) -> Optional[EstadoEjemplar]:
         return self.estadoDevuelto
+
+    def get_ejemplar_id(self) -> Optional[int]:
+        return self.ejemplar_id

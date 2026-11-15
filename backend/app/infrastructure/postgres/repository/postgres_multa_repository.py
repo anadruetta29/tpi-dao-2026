@@ -1,6 +1,7 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.domain.entity.estado_multa import EstadoMulta
+from app.domain.entity.motivo_multa import MotivoMulta
 from app.infrastructure.postgres.model.multa_model import MultaModel
 from app.infrastructure.postgres.repository.base_postgres_repository import BasePostgresRepository
 
@@ -8,6 +9,17 @@ from app.infrastructure.postgres.repository.base_postgres_repository import Base
 class PostgresMultaRepository(BasePostgresRepository[MultaModel]):
     def __init__(self, db: Session) -> None:
         super().__init__(db, MultaModel)
+
+    def find_all_by_prestamo_and_motivo_for_update(
+        self, prestamo_id: int, motivo: MotivoMulta
+    ) -> List[MultaModel]:
+        return (
+            self.db.query(MultaModel)
+            .filter(MultaModel.prestamo_id == prestamo_id, MultaModel.motivo == motivo)
+            .order_by(MultaModel.id)
+            .with_for_update(of=MultaModel)
+            .all()
+        )
 
     def find_all_filtered(
         self,

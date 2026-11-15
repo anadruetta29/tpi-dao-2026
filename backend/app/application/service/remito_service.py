@@ -68,6 +68,12 @@ class RemitoService(RemitoServiceI):
         )
         return RemitoMapper.to_response(result.remito)
 
+    def empacar(self, dto: GetRemitoByIdReq) -> RemitoRes:
+        result = self.despacho_use_case.empacar(
+            DespachoRemitoUseCase.Command(token=dto.get_token(), id=dto.get_id(), fechaDespacho=None)
+        )
+        return RemitoMapper.to_response(result.remito)
+
     def despachar(self, dto: DespachoRemitoReq) -> RemitoRes:
         result = self.despacho_use_case.execute(
             DespachoRemitoUseCase.Command(

@@ -17,7 +17,8 @@ class FechasPrestamoTest(unittest.TestCase):
         with patch("app.application.use_case.prestamo.create_prestamo_use_case.AuthHelper.authenticate"):
             for start, end, code in [
                 (yesterday, None, "PRESTAMO_INICIO_ANTERIOR"),
-                (tomorrow, today, "PRESTAMO_VENCIMIENTO_ANTERIOR"),
+                (tomorrow, None, "PRESTAMO_INICIO_FUTURO"),
+                (today, yesterday, "PRESTAMO_VENCIMIENTO_ANTERIOR"),
             ]:
                 with self.subTest(start=start, end=end), self.assertRaises(ErrorHandler) as error:
                     use_case.execute(CreatePrestamoUseCase.Command("token", 1, None, start, end))
@@ -29,6 +30,8 @@ class FechasPrestamoTest(unittest.TestCase):
     def test_permite_inicio_y_vencimiento_en_el_dia(self):
         prestamos, solicitudes, socios, ejemplares, usuarios, estados = (Mock() for _ in range(6))
         prestamos.save.side_effect = lambda prestamo: prestamo
+        prestamos.get_by_solicitud_id.return_value = None
+        solicitudes.get_by_id_for_update.return_value.ejemplar_ids = [1]
         use_case = CreatePrestamoUseCase(prestamos, solicitudes, socios, ejemplares, usuarios, estados)
         today = date.today()
         with patch("app.application.use_case.prestamo.create_prestamo_use_case.AuthHelper.authenticate"):

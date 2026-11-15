@@ -1,4 +1,5 @@
 import { type Session } from "@/domain/entities/session";
+import { type ModalidadPrestamoLocal } from "@/domain/entities/modalidad-prestamo-local";
 import { type EstadoSolicitud } from "@/domain/entities/estado-solicitud";
 import { type SolicitudPrestamoRepositoryI } from "@/domain/repositories/solicitud-prestamo";
 import { type SolicitudPrestamo } from "@/domain/entities/solicitud-prestamo";
@@ -6,6 +7,8 @@ import { type SolicitudPrestamo } from "@/domain/entities/solicitud-prestamo";
 export interface UpdateSolicitudEstadoCommand {
     id: string;
     estado: EstadoSolicitud;
+    modalidad?: ModalidadPrestamoLocal;
+    fechaVencimiento?: string;
     session: Session;
 }
 
@@ -25,6 +28,8 @@ export class UpdateSolicitudEstadoUseCase {
         const response = await this.solicitudPrestamoRepository.updateSolicitudEstado({
             id: command.id,
             estado: command.estado,
+            modalidad: command.modalidad,
+            fechaVencimiento: command.fechaVencimiento,
             session: command.session
         });
 

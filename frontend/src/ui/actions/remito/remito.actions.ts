@@ -9,6 +9,7 @@ import { GetAllRemitosUseCase } from "@/domain/use-cases/remito/get-all-remitos"
 import { GetRemitoByIdUseCase } from "@/domain/use-cases/remito/get-remito-by-id";
 import { CreateRemitoUseCase } from "@/domain/use-cases/remito/create-remito";
 import { RegistrarDespachoRemitoUseCase } from "@/domain/use-cases/remito/registrar-despacho-remito";
+import { RegistrarEmpaqueRemitoUseCase } from "@/domain/use-cases/remito/registrar-empaque-remito";
 import { RegistrarRecepcionRemitoUseCase } from "@/domain/use-cases/remito/registrar-recepcion-remito";
 import { GetTrazabilidadRemitoUseCase } from "@/domain/use-cases/remito/get-trazabilidad-remito";
 import { RemitoApiDataSource } from "@/infrastructure/datasource/api/remito-api";
@@ -23,6 +24,7 @@ const getAllRemitosUseCase = new GetAllRemitosUseCase(remitoRepository);
 const getRemitoByIdUseCase = new GetRemitoByIdUseCase(remitoRepository);
 const createRemitoUseCase = new CreateRemitoUseCase(remitoRepository);
 const registrarDespachoRemitoUseCase = new RegistrarDespachoRemitoUseCase(remitoRepository);
+const registrarEmpaqueRemitoUseCase = new RegistrarEmpaqueRemitoUseCase(remitoRepository);
 const registrarRecepcionRemitoUseCase = new RegistrarRecepcionRemitoUseCase(remitoRepository);
 const getTrazabilidadRemitoUseCase = new GetTrazabilidadRemitoUseCase(remitoRepository);
 
@@ -108,6 +110,23 @@ export async function createRemitoAction(
         };
     } catch (error: any) {
         return { success: false, error: error?.message || ErrorMessages.REMITO_CREATE_ERROR };
+    }
+}
+
+export async function registrarEmpaqueRemitoAction(
+    id: string,
+    customSession?: Session | null
+): Promise<ActionState<{ id: string; remito?: Remito | null }>> {
+    try {
+        const session = resolveSession(customSession);
+        if (!session?.accessToken) {
+            return { success: false, error: ErrorMessages.AUTH_UNAUTHORIZED };
+        }
+
+        const result = await registrarEmpaqueRemitoUseCase.execute({ session, id });
+        return { success: true, data: result, message: SuccessMessages.REMITO_EMPACADO };
+    } catch (error: any) {
+        return { success: false, error: error?.message || ErrorMessages.REMITO_EMPAQUE_ERROR };
     }
 }
 

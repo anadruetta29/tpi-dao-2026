@@ -8,6 +8,9 @@ from app.application.strategy.reserva_estado.implementation.activa_reserva_state
 from app.application.strategy.reserva_estado.implementation.atendida_reserva_state import (
     AtendidaReservaState,
 )
+from app.application.strategy.reserva_estado.implementation.lista_para_retiro_reserva_state import (
+    ListaParaRetiroReservaState,
+)
 from app.application.strategy.reserva_estado.implementation.cancelada_reserva_state import (
     CanceladaReservaState,
 )
@@ -24,6 +27,8 @@ class ReservaEstadoStateFactory:
         self._states: Dict[EstadoReserva, ReservaEstadoState] = {
             EstadoReserva.ACTIVA: ActivaReservaState(),
             EstadoReserva.ATENDIDA: AtendidaReservaState(),
+            EstadoReserva.LISTA_PARA_RETIRO: ListaParaRetiroReservaState(),
+            EstadoReserva.RETIRADA: AtendidaReservaState(),
             EstadoReserva.CANCELADA: CanceladaReservaState(),
             EstadoReserva.VENCIDA: VencidaReservaState(),
         }

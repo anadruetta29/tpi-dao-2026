@@ -10,4 +10,5 @@ export interface UpdateUsuarioReq {
     password?: string;
     activo?: boolean;
     role?: Rol | string;
+    sedeId?: string;
 }

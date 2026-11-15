@@ -28,7 +28,7 @@ class GetDevolucionByIdUseCase:
         devolucion: Devolucion
 
     def execute(self, command: Command) -> Result:
-        AuthHelper.authenticate(
+        user = AuthHelper.authenticate(
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
@@ -38,7 +38,11 @@ class GetDevolucionByIdUseCase:
         if command.id is None:
             raise ErrorHandler(ErrorType.MISSING_REQUIRED_FIELDS)
 
-        devolucion = self.devolucion_repository.get_by_id(command.id)
+        sede_id = user.sede_recepcionista()
+        devolucion = (
+            self.devolucion_repository.get_by_id_and_sede(command.id, sede_id) if sede_id is not None
+            else self.devolucion_repository.get_by_id(command.id)
+        )
         if devolucion is None:
             raise ErrorHandler(ErrorType.DEVOLUCION_NOT_FOUND)
 

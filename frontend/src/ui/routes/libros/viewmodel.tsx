@@ -2,32 +2,43 @@ import { useCallback, useEffect, useState } from "react";
 import { type ActionState } from "@/core/types";
 import { type Session } from "@/domain/entities/session";
 import { type Libro } from "@/domain/entities/libro";
-import { createLibroAction, deleteLibroAction, getAllLibrosAction, getLibroByIdAction, getLibroDisponibilidadAction, updateLibroAction } from "@/ui/actions/libro/libro.actions";
+import { createLibroAction, deleteLibroAction, getAllLibrosAction, getLibroByIdAction, updateLibroAction } from "@/ui/actions/libro/libro.actions";
 import { getAllAutoresAction } from "@/ui/actions/autor/autor.actions";
 import { type LibraryChoicesProps } from "@/ui/components/library-choices/library-choices";
-import { info, pickData, type DetailSection, type Field, useLibraryRecordsViewModel } from "@/ui/routes/use-library-records-viewmodel";
+import { useMultipleSelector } from "@/ui/hooks/use-selector";
+import { digitsInput } from "@/ui/forms/handlers/input-format";
+import { info, pickData, type Field, useLibraryRecordsViewModel } from "@/ui/routes/use-library-records-viewmodel";
 import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField, type ReadFieldValues } from "@/ui/forms/handlers/read-form";
 
 type Options = { value: string; label: string }[];
 
-function bookFields(authors: LibraryChoicesProps, currentYear: number, libro?: Libro): Field[] {
+const onYearInput = digitsInput(4);
+
+function bookFields(authors: Field, currentYear: number, libro?: Libro): Field[] {
     return [
         { name: "titulo", placeholder: "Ej. El Aleph", label: "Título", required: true, defaultValue: libro?.titulo },
         {
             name: "añoPublicacion",
             label: "Año de publicación",
             placeholder: "Ej. 1949",
-            type: "number",
-            min: 1,
-            max: currentYear,
-            step: 1,
+            inputMode: "numeric",
+            pattern: "[0-9]{1,4}",
+            title: `Ingresá un año entre 1 y ${currentYear}.`,
+            onInput: (event) => {
+                onYearInput(event);
+                const input = event.currentTarget;
+                const year = Number(input.value);
+                input.setCustomValidity(input.value && (year < 1 || year > currentYear)
+                    ? `Ingresá un año entre 1 y ${currentYear}.`
+                    : "");
+            },
             required: true,
             defaultValue: libro?.añoPublicacion ? String(libro.añoPublicacion) : undefined
         },
         { name: "editorial", placeholder: "Ej. Losada", label: "Editorial", required: true, defaultValue: libro?.editorial },
         { name: "edicion", placeholder: "Ej. Primera edición", label: "Edición", required: true, defaultValue: libro?.edicion },
-        { kind: "choices", ...authors }
+        authors
     ];
 }
 
@@ -41,6 +52,7 @@ export function useViewModel(session: Session) {
     const [currentYear] = useState(() => new Date().getFullYear());
     const [authors, setAuthors] = useState<{ session: Session; result: ActionState<Options> } | null>(null);
     const [revision, setRevision] = useState(0);
+    const authorSelector = useMultipleSelector("autoresIds", "Autores", "Buscá por nombre o apellido");
 
     {/* ===== Main useEffects ===== */ }
 
@@ -72,17 +84,6 @@ export function useViewModel(session: Session) {
         const result = await getLibroByIdAction(id, session);
         return pickData(result, (data) => data.libro);
     }, [session]);
-
-    const fetchDisponibilidad = async (libroId: string) => {
-        const result = await getLibroDisponibilidadAction(libroId, session);
-        return pickData(result, ({ sedes }): DetailSection[] => sedes.length
-            ? sedes.map(({ sedeNombre, sedeId, ejemplares }) => ({
-                title: sedeNombre ? `${sedeNombre} (sede ${sedeId})` : `Sede ${sedeId || "sin asignar"}`,
-                emptyMessage: "No hay ejemplares en esta sede.",
-                entries: ejemplares.map((item) => ({ id: item.id, label: `${item.codigo} · ${item.estadoName}` }))
-            }))
-            : [{ title: "Disponibilidad", entries: [], emptyMessage: "No hay ejemplares registrados para este libro." }]);
-    };
 
     {/* ===== onActions functions ===== */ }
 
@@ -126,7 +127,7 @@ export function useViewModel(session: Session) {
         ],
         forms: [{
             label: "Modificar libro",
-            fields: bookFields(buildAuthorField(libro.autoresIds), currentYear, libro),
+            fields: bookFields({ kind: "choices", ...buildAuthorField(libro.autoresIds) }, currentYear, libro),
             submitDisabled: !authorResult?.success,
             submit: (field: ReadField, values: ReadFieldValues) => handleUpdateLibro(libro, field, values)
         }],
@@ -134,10 +135,6 @@ export function useViewModel(session: Session) {
             label: "Eliminar libro",
             confirm: `¿Querés eliminar «${libro.titulo}»?`,
             execute: () => handleDeleteLibro(libro)
-        }],
-        queries: [{
-            label: "Consultar disponibilidad",
-            load: () => fetchDisponibilidad(libro.id)
         }]
     });
 
@@ -185,7 +182,12 @@ export function useViewModel(session: Session) {
         getLabel: getLibroLabel,
         create: {
             label: "Registrar libro",
-            fields: bookFields(buildAuthorField(), currentYear),
+            onOpen: authorSelector.reset,
+            fields: bookFields({
+                ...authorSelector.field(authorResult, "Cargando autores..."),
+                required: false,
+                retry: authorResult?.success === false ? onRetryAuthors : undefined
+            }, currentYear),
             submitDisabled: !authorResult?.success,
             submit: handleCreateLibro
         },

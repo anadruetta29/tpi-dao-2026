@@ -38,3 +38,48 @@ test("catálogo y remitos respetan el contrato HTTP del backend", async () => {
         await server.close();
     }
 });
+
+test("la aprobación de solicitudes, el empaque y la trazabilidad usan el contrato HTTP", async () => {
+    const server = await createServer({ server: { middlewareMode: true, ws: false }, appType: "custom" });
+    const originalFetch = globalThis.fetch;
+    const requests = [];
+    try {
+        const { SolicitudPrestamoApiDataSource } = await server.ssrLoadModule("/src/infrastructure/datasource/api/solicitud-prestamo-api.ts");
+        const { RemitoApiDataSource } = await server.ssrLoadModule("/src/infrastructure/datasource/api/remito-api.ts");
+        const { EstadoSolicitud } = await server.ssrLoadModule("/src/domain/entities/estado-solicitud.ts");
+        const { ModalidadPrestamoLocal } = await server.ssrLoadModule("/src/domain/entities/modalidad-prestamo-local.ts");
+        const session = { accessToken: "token-de-prueba" };
+        globalThis.fetch = async (url, init) => {
+            const path = new URL(url, "http://localhost").pathname.replace(/^\/api/, "");
+            requests.push([path, init.method, init.body && JSON.parse(init.body)]);
+            if (path.endsWith("/trazabilidad")) {
+                return Response.json({
+                    remito_id: 12,
+                    historial: [{ id: 7, estado: "ACEPTADO", responsable_id: 3, responsable_nombre: "Ana Ruiz" }]
+                });
+            }
+            return Response.json({ id: 12, solicitud_id: 5 });
+        };
+        const solicitudes = new SolicitudPrestamoApiDataSource();
+        const remitos = new RemitoApiDataSource();
+        await solicitudes.updateSolicitudEstado({
+            session, id: "5", estado: EstadoSolicitud.APROBADA,
+            modalidad: ModalidadPrestamoLocal.SALA_LECTURA, fechaVencimiento: "2026-11-16"
+        });
+        const { remito } = await remitos.registrarEmpaque({ session, id: "12" });
+        const { historial } = await remitos.getTrazabilidad({ session, id: "12" });
+        assert.deepEqual(requests, [
+            ["/solicitudes-prestamo/5/estado", "PATCH", {
+                estado: "APROBADA", modalidad: "SALA_LECTURA", fechaVencimiento: "2026-11-16"
+            }],
+            ["/remitos/12/empaque", "PATCH", {}],
+            ["/remitos/12/trazabilidad", "GET", undefined]
+        ]);
+        assert.equal(remito.solicitudId, "5");
+        assert.equal(historial[0].estadoName, "Aceptado");
+        assert.equal(historial[0].responsableNombre, "Ana Ruiz");
+    } finally {
+        globalThis.fetch = originalFetch;
+        await server.close();
+    }
+});

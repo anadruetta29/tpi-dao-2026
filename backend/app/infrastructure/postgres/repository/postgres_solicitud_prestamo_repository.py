@@ -16,17 +16,19 @@ class PostgresSolicitudPrestamoRepository(BasePostgresRepository[SolicitudPresta
         tipo: Optional[TipoPrestamo] = None,
         estado: Optional[EstadoSolicitud] = None,
         sede_id: Optional[int] = None,
+        sede_recepcionista_id: Optional[int] = None,
     ) -> List[SolicitudPrestamoModel]:
         query = self.db.query(SolicitudPrestamoModel)
         if tipo is not None:
             query = query.filter(SolicitudPrestamoModel.tipo == tipo)
         if estado is not None:
             query = query.filter(SolicitudPrestamoModel.estado == estado)
-        if sede_id is not None:
-            query = query.filter(
-                or_(
-                    SolicitudPrestamoModel.sede_origen_id == sede_id,
-                    SolicitudPrestamoModel.sede_destino_id == sede_id,
+        for sede in (sede_id, sede_recepcionista_id):
+            if sede is not None:
+                query = query.filter(
+                    or_(
+                        SolicitudPrestamoModel.sede_origen_id == sede,
+                        SolicitudPrestamoModel.sede_destino_id == sede,
+                    )
                 )
-            )
         return query.all()

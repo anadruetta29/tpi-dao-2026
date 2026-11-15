@@ -1,4 +1,6 @@
 import { useId, type KeyboardEventHandler } from "react";
+import { LibraryButton } from "@/ui/components/library-button/library-button";
+import { LibraryStatus } from "@/ui/components/library-status/library-status";
 import styles from "./style.module.css";
 
 export interface SearchOption {
@@ -15,6 +17,7 @@ export interface LibrarySearchSelectProps {
     options: SearchOption[];
     status: string;
     required?: boolean;
+    retry?: () => void;
     selectedItems?: SearchOption[];
     onRemove?: (value: string) => void;
     expanded: boolean;
@@ -27,7 +30,7 @@ export interface LibrarySearchSelectProps {
 }
 
 export function LibrarySearchSelect({
-    name, label, placeholder, query, value, options, status, expanded, activeIndex, required, selectedItems, onRemove,
+    name, label, placeholder, query, value, options, status, expanded, activeIndex, required, retry, selectedItems, onRemove,
     onOpen, onClose, onKeyDown, onSearch, onSelect
 }: LibrarySearchSelectProps) {
     const id = useId();
@@ -44,7 +47,7 @@ export function LibrarySearchSelect({
                     onChange={(event) => onSearch(event.target.value)} />
                 {!selectedItems && <input type="hidden" name={name} value={value} />}
                 <div className={styles.popup} hidden={!expanded}>
-                    {status && <p role="status" className={styles.status}>{status}</p>}
+                    {status && !retry && <p role="status" className={styles.status}>{status}</p>}
                     <ul id={listId} role="listbox" aria-label={label} className={styles.options}>
                         {options.map((option, index) => (
                             <li key={option.value} id={`${listId}-${index}`} role="option"
@@ -56,6 +59,12 @@ export function LibrarySearchSelect({
                     </ul>
                 </div>
             </div>
+            {retry && (
+                <>
+                    <LibraryStatus kind="error">{status}</LibraryStatus>
+                    <LibraryButton onClick={retry}>Reintentar</LibraryButton>
+                </>
+            )}
             {selectedItems && selectedItems.length > 0 && (
                 <ul className={styles.selected}>
                     {selectedItems.map((option) => (

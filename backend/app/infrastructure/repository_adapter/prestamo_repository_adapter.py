@@ -1,3 +1,4 @@
+from datetime import date
 from typing import List, Optional
 from app.domain.entity.estado_prestamo import EstadoPrestamo
 from app.domain.entity.prestamo import Prestamo
@@ -12,6 +13,17 @@ class PrestamoRepositoryAdapter(BaseRepositoryAdapter[Prestamo, PrestamoModel], 
     def __init__(self, repository: PostgresPrestamoRepository) -> None:
         super().__init__(repository, PrestamoEntityMapper)
 
+    def get_by_solicitud_id(self, solicitud_id: int) -> Optional[Prestamo]:
+        model = self.repository.find_by_solicitud_id(solicitud_id)
+        return self.mapper.to_domain(model) if model is not None else None
+
+    def get_ids_vencidos(self, fecha: date) -> List[int]:
+        return self.repository.find_ids_vencidos(fecha)
+
+    def get_by_id(self, id: int, sede_recepcionista_id: Optional[int] = None) -> Optional[Prestamo]:
+        model = self.repository.find_by_id(id, sede_recepcionista_id)
+        return self.mapper.to_domain(model) if model is not None else None
+
     def get_by_id_for_update(self, id: int) -> Optional[Prestamo]:
         model = self.repository.find_by_id_for_update(id)
         return self.mapper.to_domain(model) if model is not None else None
@@ -21,7 +33,10 @@ class PrestamoRepositoryAdapter(BaseRepositoryAdapter[Prestamo, PrestamoModel], 
         socio_id: Optional[int] = None,
         sede_id: Optional[int] = None,
         estado: Optional[EstadoPrestamo] = None,
+        sede_recepcionista_id: Optional[int] = None,
     ) -> List[Prestamo]:
         return PrestamoEntityMapper.to_domain_list(
-            self.repository.find_all_filtered(socio_id=socio_id, sede_id=sede_id, estado=estado)
+            self.repository.find_all_filtered(
+                socio_id=socio_id, sede_id=sede_id, estado=estado, sede_recepcionista_id=sede_recepcionista_id,
+            )
         )

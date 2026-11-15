@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional
 from app.domain.entity.ejemplar import Ejemplar
 from app.domain.entity.libro import Libro
+from app.domain.entity.sede import Sede
 from app.presentation.dto.libro.request import (
     CreateLibroReq,
     DeleteLibroReq,
@@ -50,5 +51,7 @@ class LibroMapper:
         return LibroRes.from_domain(libro)
 
     @staticmethod
-    def to_disponibilidad_response(libro_id: int, ejemplares: List[Ejemplar]) -> GetLibroDisponibilidadRes:
-        return GetLibroDisponibilidadRes.from_ejemplares(libro_id, ejemplares)
+    def to_disponibilidad_response(
+        libro_id: int, ejemplares: List[Ejemplar], sedes: List[Sede]
+    ) -> GetLibroDisponibilidadRes:
+        return GetLibroDisponibilidadRes.from_ejemplares(libro_id, ejemplares, sedes)

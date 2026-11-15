@@ -43,10 +43,12 @@ export const ErrorMessages = {
     REMITO_NOT_FOUND: "Remito no encontrado.",
     REMITO_CREATE_ERROR: "No se pudo emitir el remito.",
     REMITO_DESPACHO_ERROR: "No se pudo registrar el despacho del envío.",
+    REMITO_EMPAQUE_ERROR: "No se pudo registrar el empaque.",
     REMITO_RECEPCION_ERROR: "No se pudo registrar la recepción del envío.",
     MULTA_NOT_FOUND: "Multa no encontrada.",
     MULTA_CREATE_ERROR: "No se pudo registrar la multa.",
     MULTA_PAGAR_ERROR: "No se pudo registrar el pago de la multa.",
+    MULTA_FECHA_PAGO_REQUERIDA: "Ingresá la fecha de pago de la multa.",
     MULTA_ANULAR_ERROR: "No se pudo anular la multa.",
     UNEXPECTED_ERROR: "Ocurrió un error inesperado. Intentá nuevamente."
 } as const;

@@ -20,10 +20,12 @@ import { ErrorHandler, ErrorMessages } from "@/domain/messages";
 export class SolicitudPrestamoApiDataSource implements SolicitudPrestamoDataSourceI {
     public async getRecepcionistas({ session }: GetRecepcionistasReq): Promise<GetRecepcionistasRes> {
         try {
-            const response = await this.httpClient.get<{ recepcionistas: { id: number; nombre: string; apellido: string }[] }>(
+            const response = await this.httpClient.get<{ recepcionistas: { id: number; nombre: string; apellido: string; sede_id?: number | null }[] }>(
                 "/solicitudes-prestamo/recepcionistas", {}, session.accessToken
             );
-            return { recepcionistas: response.recepcionistas.map((user) => ({ ...user, id: String(user.id) })) };
+            return { recepcionistas: response.recepcionistas.map(({ id, nombre, apellido, sede_id }) => ({
+                id: String(id), nombre, apellido, sedeId: String(sede_id ?? "")
+            })) };
         } catch (error) {
             throw ErrorHandler.handleError(error);
         }
@@ -78,7 +80,8 @@ export class SolicitudPrestamoApiDataSource implements SolicitudPrestamoDataSour
                 "/solicitudes-prestamo/local",
                 {
                     socio_id: Number(dto.socioId),
-                    ejemplar_id: Number(dto.ejemplarId),
+                    ejemplar_id: dto.ejemplarId ? Number(dto.ejemplarId) : undefined,
+                    ejemplar_ids: dto.ejemplaresIds?.map(Number),
                     sede_origen_id: Number(dto.sedeOrigenId)
                 },
                 dto.session.accessToken
@@ -102,7 +105,8 @@ export class SolicitudPrestamoApiDataSource implements SolicitudPrestamoDataSour
                 "/solicitudes-prestamo/interbibliotecario",
                 {
                     recepcionista_id: Number(dto.recepcionistaId),
-                    ejemplar_id: Number(dto.ejemplarId),
+                    ejemplar_id: dto.ejemplarId ? Number(dto.ejemplarId) : undefined,
+                    ejemplar_ids: dto.ejemplaresIds?.map(Number),
                     sede_origen_id: Number(dto.sedeOrigenId),
                     sede_destino_id: Number(dto.sedeDestinoId)
                 },
@@ -126,7 +130,9 @@ export class SolicitudPrestamoApiDataSource implements SolicitudPrestamoDataSour
             const response = await this.httpClient.patch(
                 `/solicitudes-prestamo/${encodeURIComponent(dto.id)}/estado`,
                 {
-                    estado: dto.estado.getValue()
+                    estado: dto.estado.getValue(),
+                    modalidad: dto.modalidad?.getValue(),
+                    fechaVencimiento: dto.fechaVencimiento
                 },
                 dto.session.accessToken
             );

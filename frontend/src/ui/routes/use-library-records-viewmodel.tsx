@@ -41,6 +41,8 @@ async function resolve<T>(query: Query<T>): Promise<ActionState<T>> {
 export interface RecordsOptions<T extends { id: string }, D, F> {
     title: string;
     initialFilters: F;
+    initialRecordId?: string;
+    initiallyOpen?: boolean;
     filter?: FormSpec<F>;
     load: (filters: F) => Promise<ActionState<T[]>>;
     loadDetail?: (id: string) => Promise<ActionState<D>>;
@@ -105,9 +107,11 @@ export function useLibraryRecordsViewModel<T extends { id: string }, D, F>(
     const [filters, setFilters] = useState(initialFilters);
     const [revision, setRevision] = useState(0);
     const [loaded, setLoaded] = useState<{ load: typeof load; result: ActionState<T[]> } | null>(null);
-    const [selection, setSelection] = useState<{ id: string } | null>(null);
+    const [selection, setSelection] = useState<{ id: string } | null>(
+        options.initialRecordId ? { id: options.initialRecordId } : null
+    );
     const [detail, setDetail] = useState<{ selection: typeof selection; loadDetail: typeof loadDetail; result: ActionState<D> } | null>(null);
-    const [isCreating, setIsCreating] = useState(false);
+    const [isCreating, setIsCreating] = useState(Boolean(options.initiallyOpen));
     const [isSaving, setIsSaving] = useState(false);
     const [feedback, setFeedback] = useState<LibraryRecordsView["feedback"]>(null);
 
@@ -229,7 +233,12 @@ export function useLibraryRecordsViewModel<T extends { id: string }, D, F>(
     const createView: FormView | undefined = isCreating && create ? writeForm(create) : undefined;
     const createLabel = create && (isCreating ? "Cancelar" : create.label);
 
-    const records = (list?.data ?? []).map((record) => ({
+    const items = list?.data ?? [];
+    const initialRecord = options.initialRecordId && selection?.id === options.initialRecordId
+        ? items.find(({ id }) => id === options.initialRecordId)
+        : undefined;
+    const ordered = initialRecord ? [initialRecord, ...items.filter((item) => item !== initialRecord)] : items;
+    const records = ordered.map((record) => ({
         id: record.id,
         label: getLabel(record),
         selected: selection?.id === record.id,

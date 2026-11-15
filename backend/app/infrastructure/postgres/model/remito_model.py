@@ -21,4 +21,6 @@ class RemitoModel(Base):
     sede_origen_id = Column(Integer, ForeignKey("sedes.id"), nullable=True, index=True)
     sede_destino_id = Column(Integer, ForeignKey("sedes.id"), nullable=True, index=True)
 
+    solicitud_id = Column(Integer, ForeignKey("solicitudes_prestamo.id"), nullable=True, unique=True)
+
     ejemplares = relationship("EjemplarModel", secondary=remito_ejemplar_table, lazy="joined")

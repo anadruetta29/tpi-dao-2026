@@ -1,5 +1,8 @@
 import { useCallback, useState } from "react";
 import { type Session } from "@/domain/entities/session";
+import { ModalidadPrestamoLocal } from "@/domain/entities/modalidad-prestamo-local";
+import { Rol } from "@/domain/entities/rol";
+import { localDateISO } from "@/ui/forms/handlers/local-date";
 import { EstadoSolicitud, TipoPrestamo, type SolicitudPrestamo } from "@/domain/entities/solicitud-prestamo";
 import {
     createSolicitudInterbibliotecariaAction,
@@ -9,20 +12,16 @@ import {
     updateSolicitudEstadoAction
 } from "@/ui/actions/solicitud-prestamo/solicitud-prestamo.actions";
 import { readFields } from "@/ui/forms/handlers/record-fields";
-import { type ReadField } from "@/ui/forms/handlers/read-form";
+import { type ReadField, type ReadFieldValues } from "@/ui/forms/handlers/read-form";
 import { allOptions, info, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
 import { useSelectoresViewModel } from "./selectores-viewmodel";
 
-function nextStates(estado: EstadoSolicitud) {
-    if (estado === EstadoSolicitud.PENDIENTE) {
-        return [EstadoSolicitud.APROBADA, EstadoSolicitud.RECHAZADA, EstadoSolicitud.CANCELADA];
-    }
-    return estado === EstadoSolicitud.APROBADA ? [EstadoSolicitud.CANCELADA] : [];
-}
+const nextStates = [EstadoSolicitud.RECHAZADA, EstadoSolicitud.CANCELADA].map((estado) => estado.toOption());
 
-export function useViewModel(session: Session) {
+export function useViewModel(session: Session, initialRecordId?: string) {
     const [tipo, setTipo] = useState(TipoPrestamo.LOCAL);
-    const selectors = useSelectoresViewModel(session);
+    const esInterbibliotecaria = tipo === TipoPrestamo.INTERBIBLIOTECARIO;
+    const selectors = useSelectoresViewModel(session, esInterbibliotecaria);
 
     {/* ===== Fetch data ===== */ }
 
@@ -48,6 +47,7 @@ export function useViewModel(session: Session) {
 
     const onTipoChange = (value: string) => {
         setTipo(TipoPrestamo.fromString(value));
+        selectors.open();
     };
 
     {/* ===== handlers functions ===== */ }
@@ -56,13 +56,13 @@ export function useViewModel(session: Session) {
         return readFields(field, "tipo", "estado", "sedeId");
     };
 
-    const handleCreateSolicitud = (field: ReadField) => {
-        const command = { session, ...readFields(field, "ejemplarId", "sedeOrigenId") };
+    const handleCreateSolicitud = (field: ReadField, values: ReadFieldValues) => {
+        const command = { session, sedeOrigenId: field("sedeOrigenId"), ejemplaresIds: values("ejemplaresIds") };
         return esInterbibliotecaria
             ? createSolicitudInterbibliotecariaAction({
                 ...command,
                 sedeDestinoId: field("sedeDestinoId"),
-                recepcionistaId: session.user?.id ?? ""
+                recepcionistaId: field("recepcionistaId")
             })
             : createSolicitudLocalAction({ ...command, socioId: field("socioId") });
     };
@@ -75,15 +75,36 @@ export function useViewModel(session: Session) {
         });
     };
 
+    const handleAprobar = (solicitud: SolicitudPrestamo, field: ReadField) => {
+        const local = solicitud.tipo === TipoPrestamo.LOCAL;
+        return updateSolicitudEstadoAction({
+            session,
+            id: solicitud.id,
+            estado: EstadoSolicitud.APROBADA,
+            modalidad: local ? ModalidadPrestamoLocal.fromString(field("modalidad")) : undefined,
+            fechaVencimiento: local ? field("fechaVencimiento") || undefined : undefined
+        });
+    };
+
     const describeSolicitud = (solicitud: SolicitudPrestamo) => {
-        const options = nextStates(solicitud.estadoEntity).map((estado) => estado.toOption());
+        const pendiente = solicitud.estadoEntity === EstadoSolicitud.PENDIENTE;
+        const local = solicitud.tipo === TipoPrestamo.LOCAL;
+        const aprobacionPendiente = solicitud.estadoEntity === EstadoSolicitud.APROBADA
+            && solicitud.aprobacionCompleta === false;
+        const puedeAprobar = (pendiente || aprobacionPendiente) && (session.user?.roleEntity !== Rol.RECEPCIONISTA
+            || session.user.sedeId === solicitud.sedeOrigenId
+            || (aprobacionPendiente && !local && session.user.sedeId === solicitud.sedeDestinoId));
+        const camposAprobacion: Field[] = local ? [
+            { name: "modalidad", label: "Modalidad", options: ModalidadPrestamoLocal.toOptions() },
+            { name: "fechaVencimiento", placeholder: "Seleccioná la fecha de vencimiento", label: "Fecha de vencimiento", type: "date", min: localDateISO() }
+        ] : [];
         return {
             info: [
                 info("Número", solicitud.numero),
                 info("Tipo", solicitud.tipoName),
                 info("Estado", solicitud.estadoName),
                 ...(solicitud.socioId ? [info("Socio", selectors.socios.get(solicitud.socioId) ?? solicitud.socioId)] : []),
-                info("Ejemplar", selectors.copyNames.get(solicitud.ejemplarId) ?? solicitud.ejemplarId),
+                info("Ejemplares", solicitud.ejemplaresIds.map((id) => selectors.copyNames.get(id) ?? id).join(", ")),
                 info("Sede de origen", selectors.sedeNames.get(solicitud.sedeOrigenId) ?? solicitud.sedeOrigenId),
                 info("Sede de destino", selectors.sedeNames.get(solicitud.sedeDestinoId) ?? solicitud.sedeDestinoId),
                 info(
@@ -92,17 +113,22 @@ export function useViewModel(session: Session) {
                 ),
                 info("Responsable de destino", solicitud.responsableDestinoId)
             ],
-            forms: options.length ? [{
-                label: "Actualizar estado",
-                fields: [{ name: "estado", label: "Nuevo estado", options }],
-                submit: (field: ReadField) => handleUpdateEstado(solicitud.id, field)
-            }] : []
+            forms: [
+                ...(puedeAprobar ? [{
+                    label: aprobacionPendiente ? "Completar aprobación" : "Aprobar solicitud",
+                    fields: camposAprobacion,
+                    submit: (field: ReadField) => handleAprobar(solicitud, field)
+                }] : []),
+                ...(pendiente ? [{
+                    label: "Actualizar estado",
+                    fields: [{ name: "estado", label: "Nuevo estado", options: nextStates }],
+                    submit: (field: ReadField) => handleUpdateEstado(solicitud.id, field)
+                }] : [])
+            ]
         };
     };
 
     {/* ===== variables ===== */ }
-
-    const esInterbibliotecaria = tipo === TipoPrestamo.INTERBIBLIOTECARIO;
 
     const getSolicitudLabel = (solicitud: SolicitudPrestamo) => {
         return `${solicitud.numero} · ${solicitud.tipoName} · ${solicitud.estadoName}`;
@@ -115,7 +141,7 @@ export function useViewModel(session: Session) {
     ];
 
     const submitDisabled = !selectors.canSubmit || (esInterbibliotecaria
-        ? !selectors.hasDestination || !session.user?.id
+        ? !selectors.hasDestination || !selectors.hasRecepcionista
         : !selectors.hasSocio);
 
     const createFields: Field[] = [
@@ -128,10 +154,11 @@ export function useViewModel(session: Session) {
         },
         ...(esInterbibliotecaria ? [] : [selectors.socioField]),
         ...selectors.fields,
-        ...(esInterbibliotecaria ? [selectors.destinationField] : [])
+        ...(esInterbibliotecaria ? [selectors.recepcionistaField] : [])
     ];
 
     return useLibraryRecordsViewModel({
+        initialRecordId,
         title: "Solicitudes de préstamo",
         initialFilters: { tipo: "", estado: "", sedeId: "" },
         load: fetchSolicitudes,

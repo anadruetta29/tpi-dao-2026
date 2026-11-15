@@ -13,6 +13,8 @@ class Reserva:
         libro_id: Optional[int] = None,
         sede_id: Optional[int] = None,
         ejemplar_id: Optional[int] = None,
+        fecha_limite_retiro: Optional[date] = None,
+        prestamo_id: Optional[int] = None,
     ) -> None:
         self.id = id
         self.fecha = fecha
@@ -21,3 +23,5 @@ class Reserva:
         self.libro_id = libro_id
         self.sede_id = sede_id
         self.ejemplar_id = ejemplar_id
+        self.fecha_limite_retiro = fecha_limite_retiro
+        self.prestamo_id = prestamo_id

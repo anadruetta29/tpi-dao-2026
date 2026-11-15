@@ -17,7 +17,7 @@ const nextStates = [
     EstadoReserva.VENCIDA
 ].map((estado) => estado.toOption());
 
-export function useViewModel(session: Session) {
+export function useViewModel(session: Session, initialRecordId?: string) {
     const catalog = useSelectorCatalog(session, "libros", "socios", "sedes", "ejemplares");
     const filterLibro = useSelector("libroId", "Libro", "Buscá por título", false);
     const filterSocio = useSelector("socioId", "Socio", "Buscá por nombre o documento", false);
@@ -160,6 +160,7 @@ export function useViewModel(session: Session) {
         || Boolean(ejemplar.selected && !ejemplarValido);
 
     return useLibraryRecordsViewModel({
+        initialRecordId,
         title: "Reservas",
         initialFilters: { libroId: "", socioId: "", sedeId: "", estado: "" },
         load: fetchReservas,

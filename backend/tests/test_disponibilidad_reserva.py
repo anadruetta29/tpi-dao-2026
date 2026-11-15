@@ -46,11 +46,12 @@ class DisponibilidadReservaTest(unittest.TestCase):
         copia = Ejemplar(id=8, libro_id=2, sede_id=3, estado=EstadoEjemplar.PRESTADO)
         otra_copia = Reserva(id=1, libro_id=2, ejemplar_id=9, estado=EstadoReserva.ACTIVA)
         sin_sede = Reserva(id=2, libro_id=2, estado=EstadoReserva.ACTIVA)
-        self.reservas.get_all_filtered.return_value = [otra_copia, sin_sede]
+        self.reservas.get_pendientes_for_update.return_value = [sin_sede]
+        self.reservas.update.side_effect = lambda _, reserva: reserva
         DevolucionDisponibleStrategy().procesar_devolucion(
             Prestamo(), copia, date.today(), EstadoEjemplar.DISPONIBLE, self.ejemplares, self.reservas
         )
-        self.assertEqual(sin_sede.estado, EstadoReserva.ATENDIDA)
+        self.assertEqual(sin_sede.estado, EstadoReserva.LISTA_PARA_RETIRO)
         self.assertEqual(sin_sede.ejemplar_id, 8)
         self.assertEqual(otra_copia.estado, EstadoReserva.ACTIVA)
         self.assertEqual(copia.estado, EstadoEjemplar.RESERVADO)

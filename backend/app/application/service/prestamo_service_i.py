@@ -24,3 +24,7 @@ class PrestamoServiceI(ABC):
     @abstractmethod
     def cancelar(self, dto: CancelarPrestamoReq) -> PrestamoRes:
         pass
+
+    @abstractmethod
+    def renovar(self, dto: GetPrestamoByIdReq) -> PrestamoRes:
+        pass

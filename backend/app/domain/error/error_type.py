@@ -35,10 +35,22 @@ class ErrorType(Enum):
     SOCIO_ALREADY_EXISTS = (409, "SOCIO_ALREADY_EXISTS", "Ya existe un socio con ese documento o email.")
     SOCIO_INHABILITADO = (403, "SOCIO_INHABILITADO", "El socio se encuentra inhabilitado.")
     SOCIO_MULTAS_PENDIENTES = (409, "SOCIO_MULTAS_PENDIENTES", "El socio tiene multas pendientes y todavía no se puede habilitar.")
+    SOCIO_NOMBRE_INVALIDO = (
+        400, "SOCIO_NOMBRE_INVALIDO", "El nombre y el apellido deben tener entre 2 y 100 caracteres, solo letras y espacios."
+    )
+    SOCIO_DOCUMENTO_INVALIDO = (
+        400, "SOCIO_DOCUMENTO_INVALIDO", "El DNI debe ser positivo y tener 7 u 8 dígitos."
+    )
+    SOCIO_TELEFONO_INVALIDO = (
+        400, "SOCIO_TELEFONO_INVALIDO", "El teléfono debe tener entre 1 y 10 dígitos."
+    )
 
     # Catálogo (Libro, Autor, Ejemplar)
     LIBRO_NOT_FOUND = (404, "LIBRO_NOT_FOUND", "Libro no encontrado.")
     LIBRO_ALREADY_EXISTS = (409, "LIBRO_ALREADY_EXISTS", "Ya existe un libro con esos datos.")
+    LIBRO_ANIO_INVALIDO = (
+        400, "LIBRO_ANIO_INVALIDO", "El año de publicación debe tener solo dígitos y estar entre 1 y el año actual."
+    )
     AUTOR_NOT_FOUND = (404, "AUTOR_NOT_FOUND", "Autor no encontrado.")
     EJEMPLAR_NOT_FOUND = (404, "EJEMPLAR_NOT_FOUND", "Ejemplar no encontrado.")
     EJEMPLAR_ALREADY_EXISTS = (409, "EJEMPLAR_ALREADY_EXISTS", "Ya existe un ejemplar con ese código.")
@@ -60,7 +72,10 @@ class ErrorType(Enum):
         409, "PRESTAMO_NO_CANCELABLE", "Solo se puede cancelar un préstamo activo que ya empezó y aún no llegó a su fecha de vencimiento."
     )
     PRESTAMO_INICIO_ANTERIOR = (
-        400, "PRESTAMO_INICIO_ANTERIOR", "La fecha de inicio debe ser hoy o posterior."
+        400, "PRESTAMO_INICIO_ANTERIOR", "La fecha de inicio debe ser hoy."
+    )
+    PRESTAMO_INICIO_FUTURO = (
+        400, "PRESTAMO_INICIO_FUTURO", "La fecha de inicio debe ser hoy."
     )
     PRESTAMO_VENCIMIENTO_ANTERIOR = (
         400, "PRESTAMO_VENCIMIENTO_ANTERIOR", "La fecha de vencimiento no puede ser anterior al inicio."
@@ -74,6 +89,9 @@ class ErrorType(Enum):
     DEVOLUCION_NOT_FOUND = (404, "DEVOLUCION_NOT_FOUND", "Devolución no encontrada.")
     MULTA_NOT_FOUND = (404, "MULTA_NOT_FOUND", "Multa no encontrada.")
     MULTA_ALREADY_CLOSED = (409, "MULTA_ALREADY_CLOSED", "La multa ya fue pagada o anulada.")
+    MULTA_FECHA_PAGO_REQUERIDA = (400, "MULTA_FECHA_PAGO_REQUERIDA", "Ingresá la fecha de pago de la multa.")
+    MULTA_FECHA_PAGO_INVALIDA = (400, "MULTA_FECHA_PAGO_INVALIDA", "La fecha de pago de la multa es inválida.")
+    MULTA_ATRASO_EXISTENTE = (409, "MULTA_ATRASO_EXISTENTE", "Ya existe una multa por atraso para este préstamo.")
 
     def __init__(self, status_code: int, code: str, message: str) -> None:
         self.status_code = status_code

@@ -37,10 +37,11 @@ async function loadCatalog(session: Session, sources: Set<Source>) {
         ejemplares: ejemplares && pickData(ejemplares, ({ ejemplares: items }) => items.map(({ id, sedeId, libroId, estado }) => ({
             value: id, label: [copies.get(id), branches.get(sedeId)].filter(Boolean).join(" · "), sedeId, libroId, estado
         }))),
-        prestamos: prestamos && pickData(prestamos, ({ prestamos: items }) => items.map(({ id, ejemplarId, socioId, solicitudId, fechaInicio, estado, estadoName }) => ({
+prestamos: prestamos && pickData(prestamos, ({ prestamos: items }) => items.map(({ id, ejemplaresIds, ejemplaresDevueltosIds, sedeId, socioId, solicitudId, fechaInicio, estado, estadoName }) => ({
             value: id,
-            label: [copies.get(ejemplarId) || "Préstamo", members.get(socioId), fechaInicio, estadoName].filter(Boolean).join(" · "),
-            socioId, solicitudId, estado
+            label: [`Préstamo #${id}`, ...ejemplaresIds.map((id) => copies.get(id)), members.get(socioId), fechaInicio, estadoName].filter(Boolean).join(" · "),
+            socioId, solicitudId, sedeId, fechaInicio, estado,
+            pendientes: ejemplaresIds.filter((id) => !ejemplaresDevueltosIds.includes(id))
         }))),
         solicitudes: solicitudes && pickData(solicitudes, (items) => items.map(({ id, numero, socioId, ejemplarId, estado, tipo }) => ({
             value: id, label: [numero, copies.get(ejemplarId), members.get(socioId)].filter(Boolean).join(" · "), estado, tipo: tipo?.value ?? tipo

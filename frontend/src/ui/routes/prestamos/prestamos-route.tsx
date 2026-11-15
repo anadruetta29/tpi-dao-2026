@@ -2,7 +2,7 @@ import { type Session } from "@/domain/entities/session";
 import { LibraryRecords } from "@/ui/components/library-records/library-records";
 import { useViewModel } from "./viewmodel";
 
-export function PrestamosRoute({ session }: { session: Session }) {
-    const view = useViewModel(session);
+export function PrestamosRoute({ session, initialRecordId }: { session: Session; initialRecordId?: string }) {
+    const view = useViewModel(session, initialRecordId);
     return <LibraryRecords view={view} />;
 }

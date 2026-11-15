@@ -1,5 +1,7 @@
 import { useCallback } from "react";
 import { type Session } from "@/domain/entities/session";
+import { Rol } from "@/domain/entities/rol";
+import { localDateISO } from "@/ui/forms/handlers/local-date";
 import { EstadoEjemplar, type Devolucion } from "@/domain/entities/devolucion";
 import { EstadoPrestamo } from "@/domain/entities/prestamo";
 import { createDevolucionAction, getAllDevolucionesAction, getDevolucionByIdAction } from "@/ui/actions/devolucion/devolucion.actions";
@@ -16,9 +18,12 @@ const estados = [
     EstadoEjemplar.EN_REVISION
 ].map((estado) => estado.toOption());
 
-export function useViewModel(session: Session) {
-    const catalog = useSelectorCatalog(session, "prestamos", "socios");
-    const prestamo = useSelector("prestamoId", "Préstamo", "Buscá por libro, ejemplar o socio");
+export function useViewModel(session: Session, prestamoInicialId?: string) {
+    const catalog = useSelectorCatalog(session, "prestamos", "socios", "ejemplares");
+    const ejemplar = useSelector("ejemplarId", "Ejemplar pendiente", "Buscá por título o código");
+    const prestamo = useSelector("prestamoId", "Préstamo", "Buscá por libro, ejemplar o socio", true,
+        prestamoInicialId ? { value: prestamoInicialId, label: `Préstamo #${prestamoInicialId}` } : undefined
+    );
 
     {/* ===== Fetch data ===== */ }
 
@@ -34,24 +39,32 @@ export function useViewModel(session: Session) {
 
     const onOpenCreate = () => {
         prestamo.reset();
+        ejemplar.reset();
         catalog.refresh();
     };
 
     {/* ===== handlers functions ===== */ }
 
     const handleCreateDevolucion = async (field: ReadField) => {
-        return createDevolucionAction({
+        const result = await createDevolucionAction({
             session,
             prestamoId: field("prestamoId"),
+            ejemplarId: field("ejemplarId") || pendientes[0],
             fecha: field("fecha"),
             observaciones: field("observaciones") || undefined,
             estadoDevuelto: EstadoEjemplar.fromString(field("estadoDevuelto"))
         });
+        if (result.success) {
+            ejemplar.reset();
+            catalog.refresh();
+        }
+        return result;
     };
 
     const describeDevolucion = (devolucion: Devolucion) => ({
         info: [
             info("Préstamo", devolucion.prestamoId),
+            info("Ejemplar", devolucion.ejemplarId),
             info("Fecha", devolucion.fecha),
             info("Estado del ejemplar", devolucion.estadoDevueltoName),
             info("Observaciones", devolucion.observaciones)
@@ -61,22 +74,31 @@ export function useViewModel(session: Session) {
     {/* ===== variables ===== */ }
 
     const availablePrestamos = catalog?.prestamos ? pickData(catalog.prestamos, (items) =>
-        items.filter(({ estado }) => estado !== EstadoPrestamo.DEVUELTO)
+        items.filter(({ estado, sedeId }) => estado !== EstadoPrestamo.DEVUELTO
+            && (session.user?.roleEntity !== Rol.RECEPCIONISTA || session.user.sedeId === sedeId))
     ) : null;
+
+    const prestamoSeleccionado = availablePrestamos?.data?.find(({ value }) => value === prestamo.selected);
+    const pendientes = prestamoSeleccionado?.pendientes ?? [];
+    const copiasPendientes = pendientes.map((id) => catalog.ejemplares?.data?.find(({ value }) => value === id)
+        ?? { value: id, label: `Ejemplar #${id}` });
 
     const getDevolucionLabel = (devolucion: Devolucion) => {
         return `Préstamo ${devolucion.prestamoId} · ${devolucion.estadoDevueltoName}`;
     };
 
     const createFields: Field[] = [
-        prestamo.field(availablePrestamos ?? null),
-        { name: "fecha", placeholder: "Seleccioná la fecha de devolución", label: "Fecha de devolución", type: "date", required: true },
+        prestamo.field(availablePrestamos ?? null, undefined, ejemplar.reset),
+        ...(pendientes.length > 1 ? [ejemplar.field({ success: true, data: copiasPendientes })] : []),
+        { name: "fecha", placeholder: "Seleccioná la fecha de devolución", label: "Fecha de devolución", type: "date",
+            defaultValue: localDateISO(), max: localDateISO(), min: String(prestamoSeleccionado?.fechaInicio ?? "").slice(0, 10), required: true },
         { name: "observaciones", placeholder: "Agregá una observación", label: "Observaciones" },
         { name: "estadoDevuelto", label: "Estado del ejemplar", options: estados }
     ];
 
     return useLibraryRecordsViewModel({
         title: "Devoluciones",
+        initiallyOpen: Boolean(prestamoInicialId),
         initialFilters: null,
         load: fetchDevoluciones,
         loadDetail: fetchDevolucionDetail,
@@ -84,7 +106,7 @@ export function useViewModel(session: Session) {
         create: {
             label: "Registrar devolución",
             onOpen: onOpenCreate,
-            submitDisabled: !prestamo.selected,
+            submitDisabled: !prestamoSeleccionado || (pendientes.length > 1 && !pendientes.includes(ejemplar.selected)),
             fields: createFields,
             submit: handleCreateDevolucion
         },

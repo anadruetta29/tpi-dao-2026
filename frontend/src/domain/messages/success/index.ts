@@ -25,6 +25,7 @@ export const SuccessMessages = {
     PRESTAMO_CANCELADO: "Préstamo cerrado y devolución registrada.",
     REMITO_CREATED: "Remito emitido correctamente.",
     REMITO_DESPACHADO: "Despacho registrado correctamente.",
+    REMITO_EMPACADO: "Empaque registrado correctamente.",
     REMITO_RECIBIDO: "Recepción registrada correctamente.",
     MULTA_CREATED: "Multa registrada correctamente.",
     MULTA_PAGADA: "Pago de multa registrado correctamente.",

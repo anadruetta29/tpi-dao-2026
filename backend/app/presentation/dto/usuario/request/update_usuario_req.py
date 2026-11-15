@@ -1,5 +1,6 @@
 from typing import Any, Dict, Optional
 from app.domain.entity.rol import Rol
+from app.presentation.dto.usuario.request.create_usuario_req import parse_sede_id
 
 
 class UpdateUsuarioReq:
@@ -13,6 +14,7 @@ class UpdateUsuarioReq:
         password: Optional[str] = None,
         activo: Optional[bool] = None,
         role: Optional[Rol] = None,
+        sede_id: Optional[int] = None,
     ) -> None:
         self.token = token
         self.id = id
@@ -22,6 +24,7 @@ class UpdateUsuarioReq:
         self.password = password
         self.activo = activo
         self.role = role
+        self.sede_id = sede_id
 
     @staticmethod
     def build(token: Optional[str], id: int, payload: Dict[str, Any]) -> "UpdateUsuarioReq":
@@ -37,6 +40,7 @@ class UpdateUsuarioReq:
             password=str(payload["password"]) if payload.get("password") is not None else None,
             activo=payload.get("activo"),
             role=role,
+            sede_id=parse_sede_id(payload),
         )
 
     def get_token(self) -> Optional[str]:
@@ -62,3 +66,6 @@ class UpdateUsuarioReq:
 
     def get_role(self) -> Optional[Rol]:
         return self.role
+
+    def get_sede_id(self) -> Optional[int]:
+        return self.sede_id

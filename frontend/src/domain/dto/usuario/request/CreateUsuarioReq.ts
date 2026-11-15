@@ -8,5 +8,6 @@ export interface CreateUsuarioReq {
     email: string;
     password: string;
     role: Rol | string;
+    sedeId?: string;
     activo?: boolean;
 }

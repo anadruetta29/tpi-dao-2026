@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Optional
+from app.domain.entity.libro import Libro
 
 
 class UpdateLibroReq:
@@ -23,13 +24,12 @@ class UpdateLibroReq:
     @staticmethod
     def build(token: Optional[str], id: int, payload: Dict[str, Any]) -> "UpdateLibroReq":
         payload = payload or {}
-        raw_year = payload.get("añoPublicacion")
         raw_autores = payload.get("autor_ids")
         return UpdateLibroReq(
             token=token,
             id=id,
             titulo=str(payload["titulo"]).strip() if payload.get("titulo") is not None else None,
-            añoPublicacion=int(raw_year) if raw_year is not None else None,
+            añoPublicacion=Libro.normalizar_año_publicacion(payload.get("añoPublicacion")),
             editorial=str(payload["editorial"]).strip() if payload.get("editorial") is not None else None,
             edicion=str(payload["edicion"]).strip() if payload.get("edicion") is not None else None,
             autor_ids=[int(a) for a in raw_autores] if isinstance(raw_autores, list) else None,

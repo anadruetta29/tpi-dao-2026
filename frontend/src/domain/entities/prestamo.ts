@@ -22,7 +22,9 @@ export class Prestamo extends BaseEntity {
         public solicitudId: string = "",
         public sedeId: string = "",
         public ejemplarId: string = "",
-        public socioId: string = ""
+        public socioId: string = "",
+        public ejemplaresIds: string[] = ejemplarId ? [ejemplarId] : [],
+        public ejemplaresDevueltosIds: string[] = estado === EstadoPrestamo.DEVUELTO ? ejemplaresIds : []
     ) {
         super();
         this.estadoName = this.estado.name;
@@ -61,7 +63,9 @@ export class Prestamo extends BaseEntity {
             String(obj.solicitudId ?? obj.solicitud_id ?? ""),
             String(obj.sedeId ?? obj.sede_id ?? ""),
             String(obj.ejemplarId ?? obj.ejemplar_id ?? ""),
-            String(obj.socioId ?? obj.socio_id ?? "")
+            String(obj.socioId ?? obj.socio_id ?? ""),
+            (obj.ejemplaresIds ?? obj.ejemplar_ids)?.map(String),
+            (obj.ejemplaresDevueltosIds ?? obj.ejemplares_devueltos_ids)?.map(String)
         );
     }
 

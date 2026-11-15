@@ -2,6 +2,7 @@ from typing import Dict
 from app.application.strategy.remito_estado.core.remito_estado_state import (
     RemitoEstadoState,
 )
+from app.application.strategy.remito_estado.implementation.aceptado_state import AceptadoState
 from app.application.strategy.remito_estado.implementation.con_incidencia_state import (
     ConIncidenciaState,
 )
@@ -29,6 +30,7 @@ class RemitoEstadoStateFactory:
     def __init__(self) -> None:
         self._states: Dict[EstadoEnvio, RemitoEstadoState] = {
             EstadoEnvio.PENDIENTE: PendienteEnvioState(),
+            EstadoEnvio.ACEPTADO: AceptadoState(),
             EstadoEnvio.EMPACADO: EmpacadoState(),
             EstadoEnvio.DESPACHADO: DespachadoState(),
             EstadoEnvio.EN_TRANSITO: EnTransitoState(),

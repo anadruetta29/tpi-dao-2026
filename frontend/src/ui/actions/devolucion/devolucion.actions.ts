@@ -1,5 +1,5 @@
 import { type ActionState } from "@/core/types";
-import { type Devolucion } from "@/domain/entities/devolucion";
+import { EstadoEjemplar, type Devolucion } from "@/domain/entities/devolucion";
 import { ErrorMessages, SuccessMessages } from "@/domain/messages";
 import { GetAllDevolucionesUseCase, type GetAllDevolucionesCommand } from "@/domain/use-cases/devolucion/get-all-devoluciones";
 import { GetDevolucionByIdUseCase, type GetDevolucionByIdCommand } from "@/domain/use-cases/devolucion/get-devolucion-by-id";
@@ -49,11 +49,17 @@ export async function getDevolucionByIdAction(command: GetDevolucionByIdCommand)
 export async function createDevolucionAction(command: CreateDevolucionCommand): Promise<ActionState<Devolucion>> {
     try {
         const result = await createDevolucionUseCase.execute(command);
+        const estado = result.devolucion.estadoEjemplar;
+        const message = estado === EstadoEjemplar.RESERVADO
+            ? "Devolución registrada. El ejemplar quedó reservado para retiro."
+            : estado === EstadoEjemplar.DISPONIBLE
+                ? "Devolución registrada. El ejemplar quedó disponible."
+                : SuccessMessages.CREATE_DEVOLUCION_SUCCESS;
 
         return {
             success: true,
             data: result.devolucion,
-            message: SuccessMessages.CREATE_DEVOLUCION_SUCCESS
+            message
         };
     } catch (error: any) {
         return {

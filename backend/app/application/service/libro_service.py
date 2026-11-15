@@ -60,7 +60,7 @@ class LibroService(LibroServiceI):
         result = self.get_disponibilidad_use_case.execute(
             GetLibroDisponibilidadUseCase.Command(token=dto.get_token(), id=dto.get_id())
         )
-        return LibroMapper.to_disponibilidad_response(result.libro_id, result.ejemplares)
+        return LibroMapper.to_disponibilidad_response(result.libro_id, result.ejemplares, result.sedes)
 
     def create(self, dto: CreateLibroReq) -> LibroRes:
         result = self.create_use_case.execute(

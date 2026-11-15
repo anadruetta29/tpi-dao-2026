@@ -1,7 +1,7 @@
 import { LibroDataSourceI } from "../../../domain/datasources/libro";
 import { Libro } from "../../../domain/entities/libro";
-import { Ejemplar } from "../../../domain/entities/ejemplar";
-import { Sede } from "../../../domain/entities/sede";
+import { Ejemplar, EstadoEjemplar } from "../../../domain/entities/ejemplar";
+import { Sede, EstadoSede } from "../../../domain/entities/sede";
 import { LibroFilters } from "../../../domain/filters/libro-filters";
 import { type GetAllLibrosReq } from "../../../domain/dto/libro/request/GetAllLibrosReq";
 import { type GetAllLibrosRes } from "../../../domain/dto/libro/response/GetAllLibrosRes";
@@ -85,11 +85,16 @@ export class LibroApiDataSource implements LibroDataSourceI {
 
             const sedes: LibroDisponibilidadSedeItem[] = rawSedes.map((item: any) => {
                 const sedeEntity = item.sede ? Sede.fromObject(item.sede) : null;
+                const sedeActiva = item.sede_activa ?? item.sedeActiva ?? (sedeEntity ? sedeEntity.estadoEntity === EstadoSede.ACTIVA : true);
+                const ejemplares = Ejemplar.fromList(item.ejemplares || []);
                 return {
                     sedeId: String(item.sedeId ?? item.sede_id ?? sedeEntity?.id ?? ""),
                     sedeNombre: String(item.sedeNombre ?? item.sede_nombre ?? item.nombre ?? sedeEntity?.nombre ?? ""),
+                    sedeActiva,
+                    disponibles: item.disponibles ?? (sedeActiva ? ejemplares.filter(({ estadoEntity }) =>
+                        estadoEntity === EstadoEjemplar.DISPONIBLE).length : 0),
                     sede: sedeEntity,
-                    ejemplares: Ejemplar.fromList(item.ejemplares || [])
+                    ejemplares
                 };
             });
 

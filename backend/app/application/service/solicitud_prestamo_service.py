@@ -43,7 +43,7 @@ class SolicitudPrestamoService(SolicitudPrestamoServiceI):
     def get_recepcionistas(self, token: Optional[str]) -> GetRecepcionistasRes:
         result = self.get_recepcionistas_use_case.execute(GetRecepcionistasUseCase.Command(token))
         return GetRecepcionistasRes(recepcionistas=[
-            RecepcionistaRes(id=user.id, nombre=user.nombre or "", apellido=user.apellido or "")
+            RecepcionistaRes(id=user.id, nombre=user.nombre or "", apellido=user.apellido or "", sede_id=user.sede_id)
             for user in result.recepcionistas if user.id is not None
         ])
 
@@ -62,7 +62,9 @@ class SolicitudPrestamoService(SolicitudPrestamoServiceI):
         result = self.get_by_id_use_case.execute(
             GetSolicitudPrestamoByIdUseCase.Command(token=dto.get_token(), id=dto.get_id())
         )
-        return SolicitudPrestamoMapper.to_response(result.solicitud)
+        response = SolicitudPrestamoMapper.to_response(result.solicitud)
+        response.aprobacion_completa = result.aprobacion_completa
+        return response
 
     def create_local(self, dto: CreateSolicitudLocalReq) -> SolicitudPrestamoRes:
         result = self.create_local_use_case.execute(
@@ -71,6 +73,7 @@ class SolicitudPrestamoService(SolicitudPrestamoServiceI):
                 socio_id=dto.get_socio_id(),
                 ejemplar_id=dto.get_ejemplar_id(),
                 sede_origen_id=dto.get_sede_origen_id(),
+                ejemplar_ids=dto.get_ejemplar_ids(),
             )
         )
         return SolicitudPrestamoMapper.to_response(result.solicitud)
@@ -85,6 +88,7 @@ class SolicitudPrestamoService(SolicitudPrestamoServiceI):
                 ejemplar_id=dto.get_ejemplar_id(),
                 sede_origen_id=dto.get_sede_origen_id(),
                 sede_destino_id=dto.get_sede_destino_id(),
+                ejemplar_ids=dto.get_ejemplar_ids(),
             )
         )
         return SolicitudPrestamoMapper.to_response(result.solicitud)
@@ -95,6 +99,8 @@ class SolicitudPrestamoService(SolicitudPrestamoServiceI):
                 token=dto.get_token(),
                 id=dto.get_id(),
                 estado=dto.get_estado(),
+                modalidad=dto.get_modalidad(),
+                fechaVencimiento=dto.get_fecha_vencimiento(),
             )
         )
         return SolicitudPrestamoMapper.to_response(result.solicitud)

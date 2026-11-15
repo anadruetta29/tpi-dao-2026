@@ -28,7 +28,7 @@ class GetReservaByIdUseCase:
         reserva: Reserva
 
     def execute(self, command: Command) -> Result:
-        AuthHelper.authenticate(
+        usuario = AuthHelper.authenticate(
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
@@ -39,7 +39,8 @@ class GetReservaByIdUseCase:
             raise ErrorHandler(ErrorType.MISSING_REQUIRED_FIELDS)
 
         reserva = self.reserva_repository.get_by_id(command.id)
-        if reserva is None:
+        sede = usuario.sede_recepcionista()
+        if reserva is None or (sede is not None and reserva.sede_id != sede):
             raise ErrorHandler(ErrorType.RESERVA_NOT_FOUND)
 
         return GetReservaByIdUseCase.Result(reserva=reserva)

@@ -1,5 +1,16 @@
 from typing import Any, Dict, Optional
 from app.domain.entity.rol import Rol
+from app.domain.error.error_handler import ErrorHandler
+from app.domain.error.error_type import ErrorType
+
+
+def parse_sede_id(payload: Dict[str, Any]) -> Optional[int]:
+    sede_id = payload.get("sede_id")
+    if sede_id is None:
+        return None
+    if type(sede_id) is not int or not 0 < sede_id <= 2_147_483_647:
+        raise ErrorHandler(ErrorType.BAD_REQUEST, "Seleccioná una sede válida.")
+    return sede_id
 
 
 class CreateUsuarioReq:
@@ -11,6 +22,7 @@ class CreateUsuarioReq:
         email: Optional[str] = None,
         password: Optional[str] = None,
         role: Optional[Rol] = None,
+        sede_id: Optional[int] = None,
     ) -> None:
         self.token = token
         self.nombre = nombre
@@ -18,6 +30,7 @@ class CreateUsuarioReq:
         self.email = email
         self.password = password
         self.role = role
+        self.sede_id = sede_id
 
     @staticmethod
     def build(token: Optional[str], payload: Dict[str, Any]) -> "CreateUsuarioReq":
@@ -31,6 +44,7 @@ class CreateUsuarioReq:
             email=str(payload["email"]).strip() if payload.get("email") is not None else None,
             password=str(payload["password"]) if payload.get("password") is not None else None,
             role=role,
+            sede_id=parse_sede_id(payload),
         )
 
     def get_token(self) -> Optional[str]:
@@ -50,3 +64,6 @@ class CreateUsuarioReq:
 
     def get_role(self) -> Optional[Rol]:
         return self.role
+
+    def get_sede_id(self) -> Optional[int]:
+        return self.sede_id

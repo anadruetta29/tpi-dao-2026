@@ -57,6 +57,18 @@ class RemitoController:
         return JSONResponse(status_code=201, content=response.model_dump(mode="json"))
 
     @staticmethod
+    @router.patch("/{id}/empaque", response_model=RemitoRes)
+    def empacar(
+        id: int,
+        token: Optional[str] = Header(default=None, alias="Authorization"),
+        service: RemitoServiceI = Depends(get_remito_service),
+    ) -> JSONResponse:
+        logger.info("PATCH /remitos/%s/empaque called", id)
+        request = RemitoMapper.to_get_by_id_request(token, id)
+        response = service.empacar(request)
+        return JSONResponse(status_code=200, content=response.model_dump(mode="json"))
+
+    @staticmethod
     @router.patch("/{id}/despacho", response_model=RemitoRes)
     def despachar(
         id: int,

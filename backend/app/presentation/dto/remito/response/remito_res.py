@@ -15,6 +15,9 @@ class RemitoRes(BaseModel):
     sede_origen_id: Optional[int] = None
     sede_destino_id: Optional[int] = None
     ejemplar_ids: List[int] = []
+    solicitud_id: Optional[int] = None
+    estado_actual: Optional[EstadoEnvio] = None
+    dias_transito: Optional[int] = None
 
     @staticmethod
     def from_domain(remito: Remito) -> "RemitoRes":
@@ -27,6 +30,9 @@ class RemitoRes(BaseModel):
             sede_origen_id=remito.sede_origen_id,
             sede_destino_id=remito.sede_destino_id,
             ejemplar_ids=remito.ejemplar_ids or [],
+            solicitud_id=remito.solicitud_id,
+            estado_actual=remito.estado_actual,
+            dias_transito=remito.dias_transito(),
         )
 
 
@@ -44,6 +50,8 @@ class HistorialEstadoRemitoRes(BaseModel):
     fechaFin: Optional[Union[date, str]] = None
     estado: Optional[EstadoEnvio] = None
     remito_id: Optional[int] = None
+    responsable_id: Optional[int] = None
+    responsable_nombre: Optional[str] = None
 
     @staticmethod
     def from_domain(item: HistorialEstadoRemito) -> "HistorialEstadoRemitoRes":
@@ -53,6 +61,8 @@ class HistorialEstadoRemitoRes(BaseModel):
             fechaFin=item.fechaFin,
             estado=item.estado,
             remito_id=item.remito_id,
+            responsable_id=item.responsable_id,
+            responsable_nombre=item.responsable_nombre,
         )
 
 

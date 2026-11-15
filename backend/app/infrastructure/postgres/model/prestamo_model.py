@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, Date, Enum as SQLEnum
+from sqlalchemy import Column, ForeignKey, Integer, Date, JSON, Enum as SQLEnum
 from app.infrastructure.database import Base
 from app.domain.entity.estado_prestamo import EstadoPrestamo
 from app.domain.entity.modalidad_prestamo_local import ModalidadPrestamoLocal
@@ -17,3 +17,6 @@ class PrestamoModel(Base):
     socio_id = Column(Integer, ForeignKey("socios.id"), nullable=True, index=True)
     sede_id = Column(Integer, ForeignKey("sedes.id"), nullable=True, index=True)
     ejemplar_id = Column(Integer, ForeignKey("ejemplares.id"), nullable=True, index=True)
+    renovaciones = Column(Integer, nullable=False, server_default="0")
+    ejemplar_ids = Column(JSON, nullable=True)
+    ejemplares_devueltos_ids = Column(JSON, nullable=True)

@@ -14,6 +14,7 @@ class Usuario:
         password: Optional[str] = None,
         activo: Optional[bool] = True,
         role: Optional[Rol] = None,
+        sede_id: Optional[int] = None,
     ) -> None:
         self.id = id
         self.nombre = nombre
@@ -22,7 +23,20 @@ class Usuario:
         self.password = password
         self.activo = activo
         self.role = role
+        self.sede_id = sede_id
 
     def validate_role(self, *allowed_roles: Rol) -> None:
         if self.role is None or self.role not in allowed_roles:
+            raise ErrorHandler(ErrorType.FORBIDDEN)
+
+    def sede_recepcionista(self) -> Optional[int]:
+        if self.role != Rol.RECEPCIONISTA:
+            return None
+        if self.sede_id is None:
+            raise ErrorHandler(ErrorType.FORBIDDEN)
+        return self.sede_id
+
+    def validar_sede(self, *sedes_autorizadas: Optional[int]) -> None:
+        sede_id = self.sede_recepcionista()
+        if sede_id is not None and sede_id not in sedes_autorizadas:
             raise ErrorHandler(ErrorType.FORBIDDEN)

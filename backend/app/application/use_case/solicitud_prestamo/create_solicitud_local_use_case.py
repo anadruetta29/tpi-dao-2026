@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import List, Optional
 from app.application.strategy.ejemplar_estado.core.ejemplar_estado_state_factory import (
     EjemplarEstadoStateFactory,
 )
@@ -44,6 +44,7 @@ class CreateSolicitudLocalUseCase:
         socio_id: Optional[int]
         ejemplar_id: Optional[int]
         sede_origen_id: Optional[int]
+        ejemplar_ids: Optional[List[int]] = None
 
     @dataclass(frozen=True)
     class Result:
@@ -57,9 +58,11 @@ class CreateSolicitudLocalUseCase:
             Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
-        if command.socio_id is None or command.ejemplar_id is None or command.sede_origen_id is None:
+        ejemplar_ids = command.ejemplar_ids or ([command.ejemplar_id] if command.ejemplar_id is not None else [])
+        if command.socio_id is None or not ejemplar_ids or command.sede_origen_id is None:
             raise ErrorHandler(ErrorType.MISSING_REQUIRED_FIELDS)
 
+        user.validar_sede(command.sede_origen_id)
         socio = self.socio_repository.get_by_id(command.socio_id)
         if socio is None:
             raise ErrorHandler(ErrorType.SOCIO_NOT_FOUND)
@@ -70,20 +73,20 @@ class CreateSolicitudLocalUseCase:
             command.sede_origen_id, command.sede_origen_id, self.sede_repository
         )
 
-        ejemplar = self.ejemplar_repository.get_by_id(command.ejemplar_id)
-        if ejemplar is None:
-            raise ErrorHandler(ErrorType.EJEMPLAR_NOT_FOUND)
-        self.ejemplar_state_factory.get_state(ejemplar.estado).validar_prestamo(ejemplar)
-        ejemplar.validar_en_sede(
-            command.sede_origen_id, "El ejemplar no pertenece a la sede indicada."
-        )
+        for ejemplar_id in ejemplar_ids:
+            ejemplar = self.ejemplar_repository.get_by_id(ejemplar_id)
+            if ejemplar is None:
+                raise ErrorHandler(ErrorType.EJEMPLAR_NOT_FOUND)
+            self.ejemplar_state_factory.get_state(ejemplar.estado).validar_prestamo(ejemplar)
+            ejemplar.validar_en_sede(command.sede_origen_id)
 
         solicitud = strategy.construir_solicitud(
             socio_id=command.socio_id,
-            ejemplar_id=command.ejemplar_id,
+            ejemplar_id=ejemplar_ids[0],
             sede_origen_id=command.sede_origen_id,
             sede_destino_id=sede_destino_id,
             responsable_origen_id=user.id,
         )
+        solicitud.ejemplar_ids = ejemplar_ids
         saved = self.solicitud_repository.save(solicitud)
         return CreateSolicitudLocalUseCase.Result(solicitud=saved)

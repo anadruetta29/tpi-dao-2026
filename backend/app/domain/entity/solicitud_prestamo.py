@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from app.domain.entity.tipo_prestamo import TipoPrestamo
 from app.domain.entity.estado_solicitud import EstadoSolicitud
 from app.domain.error.error_handler import ErrorHandler
@@ -18,13 +18,15 @@ class SolicitudPrestamo:
         sede_destino_id: Optional[int] = None,
         responsable_origen_id: Optional[int] = None,
         responsable_destino_id: Optional[int] = None,
+        ejemplar_ids: Optional[List[int]] = None,
     ) -> None:
         self.id = id
         self.numero = numero
         self.tipo = tipo
         self.estado = estado
         self.socio_id = socio_id
-        self.ejemplar_id = ejemplar_id
+        self.ejemplar_ids = list(dict.fromkeys(ejemplar_ids)) if ejemplar_ids else ([ejemplar_id] if ejemplar_id is not None else [])
+        self.ejemplar_id = self.ejemplar_ids[0] if self.ejemplar_ids else None
         self.sede_origen_id = sede_origen_id
         self.sede_destino_id = sede_destino_id
         self.responsable_origen_id = responsable_origen_id

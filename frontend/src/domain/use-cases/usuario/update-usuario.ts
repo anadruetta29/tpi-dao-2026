@@ -12,6 +12,7 @@ export interface UpdateUsuarioCommand {
     password?: string;
     activo?: boolean;
     role?: Rol | string;
+    sedeId?: string;
 }
 
 export interface UpdateUsuarioResult {
@@ -36,7 +37,8 @@ export class UpdateUsuarioUseCase {
             email: command.email,
             password: command.password,
             activo: command.activo,
-            role: command.role
+            role: command.role,
+            sedeId: command.sedeId
         });
 
         return {

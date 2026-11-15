@@ -6,10 +6,10 @@ function searchText(value: string): string {
     return value.normalize("NFD").replace(/\p{Diacritic}/gu, "").trim().toLowerCase();
 }
 
-export function useSelector(name: string, label: string, placeholder: string, required = true) {
-    const [query, setQuery] = useState("");
+export function useSelector(name: string, label: string, placeholder: string, required = true, initialSelection?: SearchOption) {
+    const [query, setQuery] = useState(initialSelection?.label ?? "");
     const [debounced, setDebounced] = useState("");
-    const [selection, setSelection] = useState<SearchOption | null>(null);
+    const [selection, setSelection] = useState<SearchOption | null>(initialSelection ?? null);
     const [expanded, setExpanded] = useState(false);
     const [active, setActive] = useState(-1);
 

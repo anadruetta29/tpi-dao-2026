@@ -12,10 +12,12 @@ class SolicitudPrestamoRes(BaseModel):
     estado: Optional[EstadoSolicitud] = None
     socio_id: Optional[int] = None
     ejemplar_id: Optional[int] = None
+    ejemplar_ids: List[int] = []
     sede_origen_id: Optional[int] = None
     sede_destino_id: Optional[int] = None
     responsable_origen_id: Optional[int] = None
     responsable_destino_id: Optional[int] = None
+    aprobacion_completa: Optional[bool] = None
 
     @staticmethod
     def from_domain(solicitud: SolicitudPrestamo) -> "SolicitudPrestamoRes":
@@ -26,6 +28,7 @@ class SolicitudPrestamoRes(BaseModel):
             estado=solicitud.estado,
             socio_id=solicitud.socio_id,
             ejemplar_id=solicitud.ejemplar_id,
+            ejemplar_ids=solicitud.ejemplar_ids,
             sede_origen_id=solicitud.sede_origen_id,
             sede_destino_id=solicitud.sede_destino_id,
             responsable_origen_id=solicitud.responsable_origen_id,

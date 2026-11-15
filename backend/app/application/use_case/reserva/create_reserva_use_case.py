@@ -51,7 +51,7 @@ class CreateReservaUseCase:
         reserva: Reserva
 
     def execute(self, command: Command) -> Result:
-        AuthHelper.authenticate(
+        usuario = AuthHelper.authenticate(
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
@@ -61,13 +61,18 @@ class CreateReservaUseCase:
         if command.socio_id is None or (command.libro_id is None and command.ejemplar_id is None):
             raise ErrorHandler(ErrorType.MISSING_REQUIRED_FIELDS)
 
+        sede_recepcionista = usuario.sede_recepcionista()
+        if command.sede_id is not None:
+            usuario.validar_sede(command.sede_id)
+        sede_id = command.sede_id or sede_recepcionista
+
         socio = self.socio_repository.get_by_id(command.socio_id)
         if socio is None:
             raise ErrorHandler(ErrorType.SOCIO_NOT_FOUND)
         socio.validar_habilitado()
 
-        if command.sede_id is not None:
-            sede = self.sede_repository.get_by_id(command.sede_id)
+        if sede_id is not None:
+            sede = self.sede_repository.get_by_id(sede_id)
             if sede is None:
                 raise ErrorHandler(ErrorType.SEDE_NOT_FOUND)
             sede.validar_activa()
@@ -78,7 +83,7 @@ class CreateReservaUseCase:
             if ejemplar is None:
                 raise ErrorHandler(ErrorType.EJEMPLAR_NOT_FOUND)
             if (libro_id is not None and libro_id != ejemplar.libro_id) or (
-                command.sede_id is not None and command.sede_id != ejemplar.sede_id
+                sede_id is not None and sede_id != ejemplar.sede_id
             ):
                 raise ErrorHandler(ErrorType.RESERVA_EJEMPLAR_NO_COINCIDE)
             libro_id = ejemplar.libro_id
@@ -91,7 +96,7 @@ class CreateReservaUseCase:
         if libro_id is None or self.libro_repository.get_by_id(libro_id) is None:
             raise ErrorHandler(ErrorType.LIBRO_NOT_FOUND)
         if self.ejemplar_repository.get_all_filtered(
-            libro_id=libro_id, sede_id=command.sede_id, estado=EstadoEjemplar.DISPONIBLE
+            libro_id=libro_id, sede_id=sede_id, estado=EstadoEjemplar.DISPONIBLE
         ):
             raise ErrorHandler(ErrorType.RESERVA_LIBRO_DISPONIBLE)
 
@@ -100,7 +105,7 @@ class CreateReservaUseCase:
             estado=EstadoReserva.ACTIVA,
             socio_id=command.socio_id,
             libro_id=libro_id,
-            sede_id=command.sede_id,
+            sede_id=sede_id,
             ejemplar_id=command.ejemplar_id,
         )
         saved = self.reserva_repository.save(reserva)

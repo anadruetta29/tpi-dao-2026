@@ -4,7 +4,7 @@ from app.application.strategy.calculo_multa.core.calculo_multa_strategy import (
 
 
 class EntregaTardiaMultaStrategy(CalculoMultaStrategy):
-    def __init__(self, tarifa_diaria: float = 500.0) -> None:
+    def __init__(self, tarifa_diaria: float = 1000.0) -> None:
         self.tarifa_diaria = tarifa_diaria
 
     def calcular_monto(self, dias_atraso: int = 1) -> float:

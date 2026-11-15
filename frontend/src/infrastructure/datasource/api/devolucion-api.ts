@@ -61,6 +61,7 @@ export class DevolucionApiDataSource implements DevolucionDataSourceI {
                 "/devoluciones",
                 {
                     prestamo_id: Number(dto.prestamoId),
+                    ejemplar_id: dto.ejemplarId ? Number(dto.ejemplarId) : undefined,
                     fecha: dto.fecha,
                     observaciones: dto.observaciones,
                     estadoDevuelto: dto.estadoDevuelto.getValue()

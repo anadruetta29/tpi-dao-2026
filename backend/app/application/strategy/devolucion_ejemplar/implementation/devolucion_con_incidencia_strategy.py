@@ -33,9 +33,10 @@ class DevolucionConIncidenciaStrategy(DevolucionEjemplarStrategy):
         reserva_repository: Optional[ReservaRepositoryI] = None,
         multa_repository: Optional[MultaRepositoryI] = None,
         socio_repository: Optional[SocioRepositoryI] = None,
+        fecha_atraso: Optional[date] = None,
     ) -> None:
         self._verificar_entrega_tardia(
-            prestamo, fecha_devolucion, multa_repository, socio_repository
+            prestamo, fecha_atraso or fecha_devolucion, multa_repository, socio_repository
         )
 
         if ejemplar is not None and ejemplar.id is not None:

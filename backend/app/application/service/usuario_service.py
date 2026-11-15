@@ -53,6 +53,7 @@ class UsuarioService(UsuarioServiceI):
                 email=dto.get_email(),
                 password=dto.get_password(),
                 role=dto.get_role(),
+                sede_id=dto.get_sede_id(),
             )
         )
         return UsuarioMapper.to_response(result.usuario)
@@ -68,6 +69,7 @@ class UsuarioService(UsuarioServiceI):
                 password=dto.get_password(),
                 activo=dto.get_activo(),
                 role=dto.get_role(),
+                sede_id=dto.get_sede_id(),
             )
         )
         return UsuarioMapper.to_response(result.usuario)

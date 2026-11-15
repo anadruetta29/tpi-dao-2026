@@ -19,6 +19,10 @@ class BaseRepositoryAdapter(BaseRepositoryI[T], Generic[T, M]):
         model = self.repository.find_by_id(id)
         return self.mapper.to_domain(model) if model is not None else None
 
+    def get_by_id_for_update(self, id: int) -> Optional[T]:
+        model = self.repository.find_by_id_for_update(id)
+        return self.mapper.to_domain(model) if model is not None else None
+
     def save(self, entity: T) -> T:
         model = self.mapper.to_model(entity)
         saved = self.repository.save(model)

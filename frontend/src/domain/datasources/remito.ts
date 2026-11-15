@@ -5,6 +5,8 @@ import { type GetRemitoByIdRes } from "../dto/remito/response/GetRemitoByIdRes";
 import { type CreateRemitoReq } from "../dto/remito/request/CreateRemitoReq";
 import { type CreateRemitoRes } from "../dto/remito/response/CreateRemitoRes";
 import { type RegistrarDespachoRemitoReq } from "../dto/remito/request/RegistrarDespachoRemitoReq";
+import { type RegistrarEmpaqueRemitoReq } from "../dto/remito/request/RegistrarEmpaqueRemitoReq";
+import { type RegistrarEmpaqueRemitoRes } from "../dto/remito/response/RegistrarEmpaqueRemitoRes";
 import { type RegistrarDespachoRemitoRes } from "../dto/remito/response/RegistrarDespachoRemitoRes";
 import { type RegistrarRecepcionRemitoReq } from "../dto/remito/request/RegistrarRecepcionRemitoReq";
 import { type RegistrarRecepcionRemitoRes } from "../dto/remito/response/RegistrarRecepcionRemitoRes";
@@ -15,6 +17,7 @@ export abstract class RemitoDataSourceI {
     abstract getAllRemitos(dto: GetAllRemitosReq): Promise<GetAllRemitosRes>;
     abstract getRemitoById(dto: GetRemitoByIdReq): Promise<GetRemitoByIdRes>;
     abstract createRemito(dto: CreateRemitoReq): Promise<CreateRemitoRes>;
+    abstract registrarEmpaque(dto: RegistrarEmpaqueRemitoReq): Promise<RegistrarEmpaqueRemitoRes>;
     abstract registrarDespacho(dto: RegistrarDespachoRemitoReq): Promise<RegistrarDespachoRemitoRes>;
     abstract registrarRecepcion(dto: RegistrarRecepcionRemitoReq): Promise<RegistrarRecepcionRemitoRes>;
     abstract getTrazabilidad(dto: GetTrazabilidadRemitoReq): Promise<GetTrazabilidadRemitoRes>;

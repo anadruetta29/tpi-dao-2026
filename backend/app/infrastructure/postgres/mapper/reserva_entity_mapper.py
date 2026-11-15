@@ -14,6 +14,8 @@ class ReservaEntityMapper:
             libro_id=model.libro_id,
             sede_id=model.sede_id,
             ejemplar_id=model.ejemplar_id,
+            fecha_limite_retiro=model.fecha_limite_retiro,
+            prestamo_id=model.prestamo_id,
         )
 
     @staticmethod
@@ -30,4 +32,6 @@ class ReservaEntityMapper:
             libro_id=entity.libro_id,
             sede_id=entity.sede_id,
             ejemplar_id=entity.ejemplar_id,
+            fecha_limite_retiro=entity.fecha_limite_retiro,
+            prestamo_id=entity.prestamo_id,
         )

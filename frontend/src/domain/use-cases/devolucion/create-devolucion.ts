@@ -5,6 +5,7 @@ import { type Devolucion } from "@/domain/entities/devolucion";
 
 export interface CreateDevolucionCommand {
     prestamoId: string;
+    ejemplarId?: string;
     fecha: string;
     observaciones?: string;
     estadoDevuelto: EstadoEjemplar;
@@ -26,6 +27,7 @@ export class CreateDevolucionUseCase {
     public async execute(command: CreateDevolucionCommand): Promise<CreateDevolucionResult> {
         const response = await this.devolucionRepository.createDevolucion({
             prestamoId: command.prestamoId,
+            ejemplarId: command.ejemplarId,
             fecha: command.fecha,
             observaciones: command.observaciones,
             estadoDevuelto: command.estadoDevuelto,

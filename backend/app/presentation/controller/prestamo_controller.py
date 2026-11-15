@@ -53,6 +53,17 @@ class PrestamoController:
         return JSONResponse(status_code=201, content=response.model_dump(mode="json"))
 
     @staticmethod
+    @router.patch("/{id}/renovacion", response_model=PrestamoRes)
+    def renovar(
+        id: int,
+        token: Optional[str] = Header(default=None, alias="Authorization"),
+        service: PrestamoServiceI = Depends(get_prestamo_service),
+    ) -> JSONResponse:
+        request = PrestamoMapper.to_get_by_id_request(token, id)
+        response = service.renovar(request)
+        return JSONResponse(status_code=200, content=response.model_dump(mode="json"))
+
+    @staticmethod
     @router.patch("/{id}/cancelar", response_model=PrestamoRes)
     def cancelar(
         id: int,

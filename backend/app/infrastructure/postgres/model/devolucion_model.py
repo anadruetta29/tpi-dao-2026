@@ -11,3 +11,4 @@ class DevolucionModel(Base):
     observaciones = Column(Text, nullable=True)
     estadoDevuelto = Column(SQLEnum(EstadoEjemplar), nullable=True)
     prestamo_id = Column(Integer, ForeignKey("prestamos.id"), nullable=True, index=True)
+    ejemplar_id = Column(Integer, ForeignKey("ejemplares.id"), nullable=True, index=True)

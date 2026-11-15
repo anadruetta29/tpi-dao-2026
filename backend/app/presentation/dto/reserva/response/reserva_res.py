@@ -13,6 +13,8 @@ class ReservaRes(BaseModel):
     libro_id: Optional[int] = None
     sede_id: Optional[int] = None
     ejemplar_id: Optional[int] = None
+    fecha_limite_retiro: Optional[date] = None
+    prestamo_id: Optional[int] = None
 
     @staticmethod
     def from_domain(reserva: Reserva) -> "ReservaRes":
@@ -24,6 +26,8 @@ class ReservaRes(BaseModel):
             libro_id=reserva.libro_id,
             sede_id=reserva.sede_id,
             ejemplar_id=reserva.ejemplar_id,
+            fecha_limite_retiro=reserva.fecha_limite_retiro,
+            prestamo_id=reserva.prestamo_id,
         )
 
 

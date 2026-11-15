@@ -2,6 +2,7 @@ import { BaseEntity } from "./base-entity";
 
 export class EstadoEnvio extends BaseEntity {
     public static readonly PENDIENTE = new EstadoEnvio("PENDIENTE", "Pendiente");
+    public static readonly ACEPTADO = new EstadoEnvio("ACEPTADO", "Aceptado");
     public static readonly EMPACADO = new EstadoEnvio("EMPACADO", "Empacado");
     public static readonly DESPACHADO = new EstadoEnvio("DESPACHADO", "Despachado");
     public static readonly EN_TRANSITO = new EstadoEnvio("EN_TRANSITO", "En tránsito");
@@ -32,6 +33,7 @@ export class EstadoEnvio extends BaseEntity {
     public static values(): EstadoEnvio[] {
         return [
             EstadoEnvio.PENDIENTE,
+            EstadoEnvio.ACEPTADO,
             EstadoEnvio.EMPACADO,
             EstadoEnvio.DESPACHADO,
             EstadoEnvio.EN_TRANSITO,

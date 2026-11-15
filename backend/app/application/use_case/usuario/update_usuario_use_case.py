@@ -6,12 +6,16 @@ from app.domain.entity.rol import Rol
 from app.domain.entity.usuario import Usuario
 from app.domain.error.error_handler import ErrorHandler
 from app.domain.error.error_type import ErrorType
+from app.domain.repository.sede_repository_i import SedeRepositoryI
 from app.domain.repository.usuario_repository_i import UsuarioRepositoryI
 
 
 class UpdateUsuarioUseCase:
-    def __init__(self, usuario_repository: UsuarioRepositoryI) -> None:
+    def __init__(
+        self, usuario_repository: UsuarioRepositoryI, sede_repository: SedeRepositoryI
+    ) -> None:
         self.usuario_repository = usuario_repository
+        self.sede_repository = sede_repository
 
     @dataclass(frozen=True)
     class Command:
@@ -23,6 +27,7 @@ class UpdateUsuarioUseCase:
         password: Optional[str]
         activo: Optional[bool]
         role: Optional[Rol]
+        sede_id: Optional[int] = None
 
     @dataclass(frozen=True)
     class Result:
@@ -38,6 +43,15 @@ class UpdateUsuarioUseCase:
         if usuario is None:
             raise ErrorHandler(ErrorType.USER_NOT_FOUND)
 
+        role = command.role if command.role is not None else usuario.role
+        sede_id = None
+        if role == Rol.RECEPCIONISTA:
+            sede_id = command.sede_id if command.sede_id is not None else usuario.sede_id
+            if sede_id is None:
+                raise ErrorHandler(ErrorType.MISSING_REQUIRED_FIELDS, "Seleccioná la sede del recepcionista.")
+            if self.sede_repository.get_by_id(sede_id) is None:
+                raise ErrorHandler(ErrorType.SEDE_NOT_FOUND)
+
         if command.nombre is not None:
             usuario.nombre = command.nombre
         if command.apellido is not None:
@@ -51,8 +65,8 @@ class UpdateUsuarioUseCase:
             usuario.password = PasswordHelper.hash(command.password)
         if command.activo is not None:
             usuario.activo = command.activo
-        if command.role is not None:
-            usuario.role = command.role
+        usuario.role = role
+        usuario.sede_id = sede_id
 
         updated = self.usuario_repository.update(command.id, usuario)
         if updated is None:

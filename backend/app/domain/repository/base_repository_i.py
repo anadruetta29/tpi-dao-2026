@@ -14,6 +14,10 @@ class BaseRepositoryI(ABC, Generic[T]):
         pass
 
     @abstractmethod
+    def get_by_id_for_update(self, id: int) -> Optional[T]:
+        pass
+
+    @abstractmethod
     def save(self, entity: T) -> T:
         pass
 

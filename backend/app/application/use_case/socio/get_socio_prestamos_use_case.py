@@ -32,7 +32,7 @@ class GetSocioPrestamosUseCase:
         prestamos: List[Prestamo]
 
     def execute(self, command: Command) -> Result:
-        AuthHelper.authenticate(
+        usuario = AuthHelper.authenticate(
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
@@ -46,5 +46,7 @@ class GetSocioPrestamosUseCase:
         if socio is None:
             raise ErrorHandler(ErrorType.SOCIO_NOT_FOUND)
 
-        prestamos = self.prestamo_repository.get_all_filtered(socio_id=command.id)
+        prestamos = self.prestamo_repository.get_all_filtered(
+            socio_id=command.id, sede_recepcionista_id=usuario.sede_recepcionista()
+        )
         return GetSocioPrestamosUseCase.Result(socio_id=command.id, prestamos=prestamos)

@@ -10,6 +10,8 @@ import { type GetRemitoByIdRes } from "@/domain/dto/remito/response/GetRemitoByI
 import { type CreateRemitoReq } from "@/domain/dto/remito/request/CreateRemitoReq";
 import { type CreateRemitoRes } from "@/domain/dto/remito/response/CreateRemitoRes";
 import { type RegistrarDespachoRemitoReq } from "@/domain/dto/remito/request/RegistrarDespachoRemitoReq";
+import { type RegistrarEmpaqueRemitoReq } from "@/domain/dto/remito/request/RegistrarEmpaqueRemitoReq";
+import { type RegistrarEmpaqueRemitoRes } from "@/domain/dto/remito/response/RegistrarEmpaqueRemitoRes";
 import { type RegistrarDespachoRemitoRes } from "@/domain/dto/remito/response/RegistrarDespachoRemitoRes";
 import { type RegistrarRecepcionRemitoReq } from "@/domain/dto/remito/request/RegistrarRecepcionRemitoReq";
 import { type RegistrarRecepcionRemitoRes } from "@/domain/dto/remito/response/RegistrarRecepcionRemitoRes";
@@ -94,6 +96,22 @@ export class RemitoApiDataSource implements RemitoDataSourceI {
                 id: String(response?.id || response?.remito?.id || remito?.id || ""),
                 remito
             };
+        }
+        catch (error: any) {
+            throw ErrorHandler.handleError(error);
+        }
+    }
+
+    public async registrarEmpaque(dto: RegistrarEmpaqueRemitoReq): Promise<RegistrarEmpaqueRemitoRes> {
+        try {
+            const response = await this.httpClient.patch(
+                `/remitos/${encodeURIComponent(dto.id)}/empaque`,
+                {},
+                dto.session.accessToken
+            );
+
+            const remito = Remito.fromObject(response?.remito || response);
+            return { id: remito?.id || dto.id, remito };
         }
         catch (error: any) {
             throw ErrorHandler.handleError(error);

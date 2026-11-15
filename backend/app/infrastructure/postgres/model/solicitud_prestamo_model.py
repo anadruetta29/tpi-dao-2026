@@ -1,4 +1,5 @@
 from sqlalchemy import Column, ForeignKey, Integer, String, Enum as SQLEnum
+from sqlalchemy import JSON
 from app.infrastructure.database import Base
 from app.domain.entity.tipo_prestamo import TipoPrestamo
 from app.domain.entity.estado_solicitud import EstadoSolicitud
@@ -13,6 +14,7 @@ class SolicitudPrestamoModel(Base):
     estado = Column(SQLEnum(EstadoSolicitud), nullable=True)
     socio_id = Column(Integer, ForeignKey("socios.id"), nullable=True, index=True)
     ejemplar_id = Column(Integer, ForeignKey("ejemplares.id"), nullable=True, index=True)
+    ejemplar_ids = Column(JSON, nullable=True)
     sede_origen_id = Column(Integer, ForeignKey("sedes.id"), nullable=True, index=True)
     sede_destino_id = Column(Integer, ForeignKey("sedes.id"), nullable=True, index=True)
     responsable_origen_id = Column(Integer, ForeignKey("usuarios.id"), nullable=True)

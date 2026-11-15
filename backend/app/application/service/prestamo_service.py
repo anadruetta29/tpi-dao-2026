@@ -1,5 +1,6 @@
 from app.application.service.prestamo_service_i import PrestamoServiceI
 from app.application.use_case.prestamo.cancelar_prestamo_use_case import CancelarPrestamoUseCase
+from app.application.use_case.prestamo.renovar_prestamo_use_case import RenovarPrestamoUseCase
 from app.presentation.dto.prestamo.request.cancelar_prestamo_req import CancelarPrestamoReq
 from app.application.use_case.prestamo import (
     CreatePrestamoUseCase,
@@ -22,11 +23,13 @@ class PrestamoService(PrestamoServiceI):
         get_by_id_use_case: GetPrestamoByIdUseCase,
         create_use_case: CreatePrestamoUseCase,
         cancelar_use_case: CancelarPrestamoUseCase,
+        renovar_use_case: RenovarPrestamoUseCase,
     ) -> None:
         self.get_all_use_case = get_all_use_case
         self.get_by_id_use_case = get_by_id_use_case
         self.create_use_case = create_use_case
         self.cancelar_use_case = cancelar_use_case
+        self.renovar_use_case = renovar_use_case
 
     def get_all(self, dto: GetAllPrestamosReq) -> GetAllPrestamosRes:
         result = self.get_all_use_case.execute(
@@ -55,6 +58,10 @@ class PrestamoService(PrestamoServiceI):
                 fechaVencimiento=dto.get_fecha_vencimiento(),
             )
         )
+        return PrestamoMapper.to_response(result.prestamo)
+
+    def renovar(self, dto: GetPrestamoByIdReq) -> PrestamoRes:
+        result = self.renovar_use_case.execute(RenovarPrestamoUseCase.Command(token=dto.get_token(), id=dto.get_id()))
         return PrestamoMapper.to_response(result.prestamo)
 
     def cancelar(self, dto: CancelarPrestamoReq) -> PrestamoRes:

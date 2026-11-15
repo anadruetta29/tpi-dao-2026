@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { Rol } from "@/domain/entities/rol";
 import { useAuth } from "@/ui/hooks/use-auth";
+import { BandejaRoute } from "@/ui/routes/bandeja/bandeja-route";
+import { type DestinoBandeja } from "@/ui/routes/bandeja/viewmodel";
 import { SedesRoute } from "@/ui/routes/sedes/sedes-route";
 import { SociosRoute } from "@/ui/routes/socios/socios-route";
 import { UsuariosRoute } from "@/ui/routes/usuarios/usuarios-route";
@@ -15,6 +17,7 @@ import { MultasRoute } from "@/ui/routes/multas/multas-route";
 import { type NavigationGroup } from "@/ui/components/library-navigation/library-navigation";
 
 const modules = [
+    { area: "Operación", label: "Bandeja", Component: BandejaRoute },
     { area: "Administración", label: "Sedes", Component: SedesRoute },
     { area: "Administración", label: "Usuarios", Component: UsuariosRoute, adminOnly: true },
     { area: "Administración", label: "Socios", Component: SociosRoute },
@@ -32,12 +35,20 @@ type ModuleLabel = (typeof modules)[number]["label"];
 
 export function useViewModel() {
     const { session, user, error, isLoading, logout, refreshCurrentUser } = useAuth();
-    const [active, setActive] = useState<ModuleLabel>("Sedes");
+    const [active, setActive] = useState<{ label: ModuleLabel; recordId?: string; prestamoId?: string }>({ label: "Bandeja" });
 
     {/* ===== onActions functions ===== */ }
 
     const onTabClick = (label: ModuleLabel) => {
-        setActive(label);
+        setActive({ label });
+    };
+
+    const openPending = ({ modulo, id }: DestinoBandeja) => {
+        setActive({ label: modulo, recordId: id });
+    };
+
+    const openReturn = (prestamoId: string) => {
+        setActive({ label: "Devoluciones", prestamoId });
     };
 
     const onLogout = async () => {
@@ -55,8 +66,8 @@ export function useViewModel() {
     }, [user?.roleEntity]);
 
     const selectedModule = useMemo(() => {
-        return availableModules.find((module) => module.label === active) ?? availableModules[0];
-    }, [availableModules, active]);
+        return availableModules.find((module) => module.label === active.label) ?? availableModules[0];
+    }, [availableModules, active.label]);
 
     const navigationGroups = useMemo(() => {
         const groups = new Map<string, NavigationGroup>();
@@ -90,6 +101,11 @@ export function useViewModel() {
     return {
         session: user ? session : null,
         Component: selectedModule.Component,
+        label: selectedModule.label,
+        openPending,
+        openReturn,
+        initialRecordId: active.recordId,
+        prestamoInicialId: active.prestamoId,
         area: selectedModule.area,
         navigation: navigationGroups,
         profile: userProfile

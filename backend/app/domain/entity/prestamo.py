@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Optional, Union
+from typing import List, Optional, Union
 from app.domain.entity.estado_prestamo import EstadoPrestamo
 from app.domain.entity.modalidad_prestamo_local import ModalidadPrestamoLocal
 from app.domain.error.error_handler import ErrorHandler
@@ -19,6 +19,9 @@ class Prestamo:
         socio_id: Optional[int] = None,
         sede_id: Optional[int] = None,
         ejemplar_id: Optional[int] = None,
+        ejemplar_ids: Optional[List[int]] = None,
+        ejemplares_devueltos_ids: Optional[List[int]] = None,
+        renovaciones: int = 0,
     ) -> None:
         self.id = id
         self.fechaInicio = fechaInicio
@@ -29,7 +32,20 @@ class Prestamo:
         self.solicitud_id = solicitud_id
         self.socio_id = socio_id
         self.sede_id = sede_id
-        self.ejemplar_id = ejemplar_id
+        self.renovaciones = renovaciones
+        self.ejemplar_ids = list(dict.fromkeys(ejemplar_ids)) if ejemplar_ids else ([ejemplar_id] if ejemplar_id is not None else [])
+        self.ejemplar_id = self.ejemplar_ids[0] if self.ejemplar_ids else None
+        self.ejemplares_devueltos_ids = (
+            list(ejemplares_devueltos_ids or []) if estado != EstadoPrestamo.DEVUELTO else self.ejemplar_ids.copy()
+        )
+
+    def ejemplares_pendientes(self) -> List[int]:
+        return [id for id in self.ejemplar_ids if id not in self.ejemplares_devueltos_ids]
+
+    def registrar_ejemplar_devuelto(self, ejemplar_id: int) -> None:
+        if ejemplar_id not in self.ejemplares_pendientes():
+            raise ErrorHandler(ErrorType.BAD_REQUEST, "El ejemplar no está pendiente de devolución en este préstamo.")
+        self.ejemplares_devueltos_ids.append(ejemplar_id)
 
     def validar_no_devuelto(self) -> None:
         if self.estado == EstadoPrestamo.DEVUELTO:

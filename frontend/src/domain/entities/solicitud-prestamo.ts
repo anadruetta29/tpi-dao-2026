@@ -22,7 +22,9 @@ export class SolicitudPrestamo extends BaseEntity {
         public sedeOrigenId: string = "",
         public sedeDestinoId: string = "",
         public responsableOrigenId: string = "",
-        public responsableDestinoId: string = ""
+        public responsableDestinoId: string = "",
+        public aprobacionCompleta: boolean | null = null,
+        public ejemplaresIds: string[] = ejemplarId ? [ejemplarId] : []
     ) {
         super();
         this.tipoName = this.tipo.name;
@@ -61,7 +63,9 @@ export class SolicitudPrestamo extends BaseEntity {
             String(obj.sedeOrigenId ?? obj.sede_origen_id ?? ""),
             String(obj.sedeDestinoId ?? obj.sede_destino_id ?? ""),
             String(obj.responsableOrigenId ?? obj.responsable_origen_id ?? ""),
-            String(obj.responsableDestinoId ?? obj.responsable_destino_id ?? "")
+            String(obj.responsableDestinoId ?? obj.responsable_destino_id ?? ""),
+            obj.aprobacionCompleta ?? obj.aprobacion_completa ?? null,
+            (obj.ejemplaresIds ?? obj.ejemplar_ids)?.map(String)
         );
     }
 

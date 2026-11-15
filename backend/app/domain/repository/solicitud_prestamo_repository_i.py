@@ -13,5 +13,6 @@ class SolicitudPrestamoRepositoryI(BaseRepositoryI[SolicitudPrestamo]):
         tipo: Optional[TipoPrestamo] = None,
         estado: Optional[EstadoSolicitud] = None,
         sede_id: Optional[int] = None,
+        sede_recepcionista_id: Optional[int] = None,
     ) -> List[SolicitudPrestamo]:
         pass

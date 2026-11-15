@@ -6,12 +6,10 @@ from app.application.strategy.devolucion_ejemplar.core.devolucion_ejemplar_strat
 from app.application.strategy.ejemplar_estado.core.ejemplar_estado_state_factory import (
     EjemplarEstadoStateFactory,
 )
-from app.application.strategy.reserva_estado.core.reserva_estado_state_factory import (
-    ReservaEstadoStateFactory,
-)
+from app.application.use_case.reserva.asignar_reserva_use_case import asignar_reserva
 from app.domain.entity.ejemplar import Ejemplar
 from app.domain.entity.estado_ejemplar import EstadoEjemplar
-from app.domain.entity.estado_reserva import EstadoReserva
+
 from app.domain.entity.prestamo import Prestamo
 from app.domain.repository.ejemplar_repository_i import EjemplarRepositoryI
 from app.domain.repository.multa_repository_i import MultaRepositoryI
@@ -30,9 +28,10 @@ class DevolucionDisponibleStrategy(DevolucionEjemplarStrategy):
         reserva_repository: Optional[ReservaRepositoryI] = None,
         multa_repository: Optional[MultaRepositoryI] = None,
         socio_repository: Optional[SocioRepositoryI] = None,
+        fecha_atraso: Optional[date] = None,
     ) -> None:
         self._verificar_entrega_tardia(
-            prestamo, fecha_devolucion, multa_repository, socio_repository
+            prestamo, fecha_atraso or fecha_devolucion, multa_repository, socio_repository
         )
 
         if ejemplar is None or ejemplar.id is None:
@@ -42,21 +41,7 @@ class DevolucionDisponibleStrategy(DevolucionEjemplarStrategy):
             ejemplar, EstadoEjemplar.DISPONIBLE
         )
 
-        if reserva_repository is not None and ejemplar.libro_id is not None:
-            reservas_activas = reserva_repository.get_all_filtered(
-                libro_id=ejemplar.libro_id,
-                estado=EstadoReserva.ACTIVA,
-            )
-            reserva = next((
-                item for item in reservas_activas
-                if item.id is not None
-                and item.sede_id in (None, ejemplar.sede_id)
-                and item.ejemplar_id in (None, ejemplar.id)
-            ), None)
-            if reserva is not None:
-                ReservaEstadoStateFactory().get_state(reserva.estado).atender(reserva)
-                reserva.ejemplar_id = ejemplar.id
-                reserva_repository.update(reserva.id, reserva)
-                ejemplar.reservar()
+        if reserva_repository is not None:
+            asignar_reserva(ejemplar, reserva_repository, fecha_devolucion)
 
         ejemplar_repository.update(ejemplar.id, ejemplar)

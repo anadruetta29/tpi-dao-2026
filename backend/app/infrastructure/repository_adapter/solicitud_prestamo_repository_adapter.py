@@ -23,7 +23,10 @@ class SolicitudPrestamoRepositoryAdapter(
         tipo: Optional[TipoPrestamo] = None,
         estado: Optional[EstadoSolicitud] = None,
         sede_id: Optional[int] = None,
+        sede_recepcionista_id: Optional[int] = None,
     ) -> List[SolicitudPrestamo]:
         return SolicitudPrestamoEntityMapper.to_domain_list(
-            self.repository.find_all_filtered(tipo=tipo, estado=estado, sede_id=sede_id)
+            self.repository.find_all_filtered(
+                tipo=tipo, estado=estado, sede_id=sede_id, sede_recepcionista_id=sede_recepcionista_id,
+            )
         )

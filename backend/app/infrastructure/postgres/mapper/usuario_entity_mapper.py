@@ -14,6 +14,7 @@ class UsuarioEntityMapper:
             password=model.password,
             activo=model.activo,
             role=model.role,
+            sede_id=model.sede_id,
         )
 
     @staticmethod
@@ -30,4 +31,5 @@ class UsuarioEntityMapper:
             password=entity.password,
             activo=entity.activo,
             role=entity.role,
+            sede_id=entity.sede_id,
         )
