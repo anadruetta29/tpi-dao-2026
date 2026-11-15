@@ -33,7 +33,6 @@ class GetAllPrestamosUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         prestamos = self.prestamo_repository.get_all_filtered(

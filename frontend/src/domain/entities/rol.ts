@@ -2,7 +2,6 @@ import { BaseEntity } from "./base-entity";
 
 export class Rol extends BaseEntity {
     public static readonly RECEPCIONISTA = new Rol("RECEPCIONISTA", "Recepcionista");
-    public static readonly MODERADOR = new Rol("MODERADOR", "Moderador");
     public static readonly ADMIN = new Rol("ADMIN", "Administrador");
 
     // ======== Constructor ======== //
@@ -29,7 +28,6 @@ export class Rol extends BaseEntity {
     public static values(): Rol[] {
         return [
             Rol.RECEPCIONISTA,
-            Rol.MODERADOR,
             Rol.ADMIN
         ];
     }

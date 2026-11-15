@@ -33,7 +33,6 @@ class GetAllSociosUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         socios = self.socio_repository.get_all_filtered(

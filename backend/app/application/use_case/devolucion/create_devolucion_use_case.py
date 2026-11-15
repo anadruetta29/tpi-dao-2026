@@ -69,7 +69,6 @@ class CreateDevolucionUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         if command.prestamo_id is None:

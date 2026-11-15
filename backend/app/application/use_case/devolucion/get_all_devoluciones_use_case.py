@@ -29,7 +29,6 @@ class GetAllDevolucionesUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         devoluciones = self.devolucion_repository.get_all()

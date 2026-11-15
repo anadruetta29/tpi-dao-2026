@@ -32,7 +32,6 @@ class GetAllLibrosUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         libros = self.libro_repository.get_all_filtered(

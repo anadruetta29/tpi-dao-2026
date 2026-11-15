@@ -34,7 +34,6 @@ class GetAllReservasUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         reservas = self.reserva_repository.get_all_filtered(

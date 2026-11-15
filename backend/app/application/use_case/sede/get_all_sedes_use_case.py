@@ -31,7 +31,6 @@ class GetAllSedesUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         sedes = self.sede_repository.get_all_filtered(estado=command.estado)

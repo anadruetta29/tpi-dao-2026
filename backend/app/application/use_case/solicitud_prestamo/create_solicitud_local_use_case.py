@@ -54,7 +54,6 @@ class CreateSolicitudLocalUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         if command.socio_id is None or command.ejemplar_id is None or command.sede_origen_id is None:

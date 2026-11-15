@@ -33,7 +33,6 @@ class GetAllEjemplaresUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         ejemplares = self.ejemplar_repository.get_all_filtered(

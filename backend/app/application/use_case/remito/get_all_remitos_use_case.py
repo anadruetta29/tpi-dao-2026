@@ -33,7 +33,6 @@ class GetAllRemitosUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         remitos = self.remito_repository.get_all_filtered(

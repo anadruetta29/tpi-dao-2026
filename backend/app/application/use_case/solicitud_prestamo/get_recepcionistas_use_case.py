@@ -20,5 +20,5 @@ class GetRecepcionistasUseCase:
         recepcionistas: list[Usuario]
 
     def execute(self, command: Command) -> Result:
-        AuthHelper.authenticate(command.token, self.repository, Rol.ADMIN, Rol.MODERADOR, Rol.RECEPCIONISTA)
+        AuthHelper.authenticate(command.token, self.repository, Rol.ADMIN, Rol.RECEPCIONISTA)
         return self.Result(self.repository.get_all_filtered(role=Rol.RECEPCIONISTA, activo=True))

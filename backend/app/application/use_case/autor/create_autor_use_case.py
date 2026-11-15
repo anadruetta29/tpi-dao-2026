@@ -33,7 +33,6 @@ class CreateAutorUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         if not command.nombre or not command.apellido:

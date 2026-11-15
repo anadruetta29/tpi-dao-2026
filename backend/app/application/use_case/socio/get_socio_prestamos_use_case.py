@@ -36,7 +36,6 @@ class GetSocioPrestamosUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         if command.id is None:

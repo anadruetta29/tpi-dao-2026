@@ -34,7 +34,6 @@ class GetAllSolicitudesPrestamoUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         solicitudes = self.solicitud_repository.get_all_filtered(
