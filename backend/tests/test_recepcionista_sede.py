@@ -89,15 +89,24 @@ class RecepcionistaSedeTest(unittest.TestCase):
             GetAllSolicitudesPrestamoUseCase(self.solicitudes, self.usuarios).execute(
                 GetAllSolicitudesPrestamoUseCase.Command(token="tok", sede_id=99)
             )
-            self.solicitudes.get_all_filtered.assert_called_with(tipo=None, estado=None, sede_id=2)
+            self.solicitudes.get_all_filtered.assert_called_with(
+                tipo=None, estado=None, sede_id=99, sede_recepcionista_id=2
+            )
 
             GetAllPrestamosUseCase(self.prestamos, self.usuarios).execute(
                 GetAllPrestamosUseCase.Command(token="tok", sede_id=99)
             )
-            self.prestamos.get_all_filtered.assert_called_with(socio_id=None, sede_id=2, estado=None)
+            self.prestamos.get_all_filtered.assert_called_with(
+                socio_id=None, sede_id=99, estado=None, sede_recepcionista_id=2
+            )
+
+            res_reservas = GetAllReservasUseCase(self.reservas, self.usuarios).execute(
+                GetAllReservasUseCase.Command(token="tok", sede_id=99)
+            )
+            self.assertEqual(res_reservas.reservas, [])
 
             GetAllReservasUseCase(self.reservas, self.usuarios).execute(
-                GetAllReservasUseCase.Command(token="tok", sede_id=99)
+                GetAllReservasUseCase.Command(token="tok", sede_id=None)
             )
             self.reservas.get_all_filtered.assert_called_with(libro_id=None, socio_id=None, sede_id=2, estado=None)
 
@@ -113,30 +122,35 @@ class RecepcionistaSedeTest(unittest.TestCase):
     def test_recepcionista_solo_accede_a_detalle_de_su_sede(self):
         with patch("app.core.helper.auth_helper.AuthHelper.authenticate", return_value=self.recepcionista):
             self.solicitudes.get_by_id.return_value = SolicitudPrestamo(id=1, sede_origen_id=1, sede_destino_id=2)
-            res_sol = GetSolicitudPrestamoByIdUseCase(self.solicitudes, self.usuarios).execute(
+            res_sol = GetSolicitudPrestamoByIdUseCase(
+                self.solicitudes, self.usuarios, self.prestamos, Mock()
+            ).execute(
                 GetSolicitudPrestamoByIdUseCase.Command(token="tok", id=1)
             )
             self.assertEqual(res_sol.solicitud.id, 1)
 
             self.solicitudes.get_by_id.return_value = SolicitudPrestamo(id=2, sede_origen_id=1, sede_destino_id=3)
             with self.assertRaises(ErrorHandler) as err_sol:
-                GetSolicitudPrestamoByIdUseCase(self.solicitudes, self.usuarios).execute(
+                GetSolicitudPrestamoByIdUseCase(
+                    self.solicitudes, self.usuarios, self.prestamos, Mock()
+                ).execute(
                     GetSolicitudPrestamoByIdUseCase.Command(token="tok", id=2)
                 )
-            self.assertEqual(err_sol.exception.code, "FORBIDDEN")
+            self.assertEqual(err_sol.exception.code, "SOLICITUD_NOT_FOUND")
 
             self.prestamos.get_by_id.return_value = Prestamo(id=1, sede_id=2)
             res_pre = GetPrestamoByIdUseCase(self.prestamos, self.usuarios).execute(
                 GetPrestamoByIdUseCase.Command(token="tok", id=1)
             )
             self.assertEqual(res_pre.prestamo.id, 1)
+            self.prestamos.get_by_id.assert_called_with(1, sede_recepcionista_id=2)
 
-            self.prestamos.get_by_id.return_value = Prestamo(id=2, sede_id=3)
+            self.prestamos.get_by_id.return_value = None
             with self.assertRaises(ErrorHandler) as err_pre:
                 GetPrestamoByIdUseCase(self.prestamos, self.usuarios).execute(
                     GetPrestamoByIdUseCase.Command(token="tok", id=2)
                 )
-            self.assertEqual(err_pre.exception.code, "FORBIDDEN")
+            self.assertEqual(err_pre.exception.code, "PRESTAMO_NOT_FOUND")
 
             self.reservas.get_by_id.return_value = Reserva(id=1, sede_id=2)
             res_res = GetReservaByIdUseCase(self.reservas, self.usuarios).execute(
@@ -149,4 +163,4 @@ class RecepcionistaSedeTest(unittest.TestCase):
                 GetReservaByIdUseCase(self.reservas, self.usuarios).execute(
                     GetReservaByIdUseCase.Command(token="tok", id=2)
                 )
-            self.assertEqual(err_res.exception.code, "FORBIDDEN")
+            self.assertEqual(err_res.exception.code, "RESERVA_NOT_FOUND")

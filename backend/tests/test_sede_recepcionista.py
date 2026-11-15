@@ -38,4 +38,4 @@ class SedeRecepcionistaTest(unittest.TestCase):
         self.usuarios.get_by_id.return_value = Usuario(id=1, role=Rol.RECEPCIONISTA, sede_id=3)
         data = ("token", 1, None, None, None, None, None)
         self.assertEqual(use_case.execute(use_case.Command(*data, role=None)).usuario.sede_id, 3)
-        self.assertIsNone(use_case.execute(use_case.Command(*data, role=Rol.MODERADOR)).usuario.sede_id)
+        self.assertIsNone(use_case.execute(use_case.Command(*data, role=Rol.ADMIN)).usuario.sede_id)

@@ -20,12 +20,12 @@ class GestionarAvisosUseCase:
         self.transaction = transaction
 
     def listar(self, token: Optional[str]) -> List[Aviso]:
-        usuario = AuthHelper.authenticate(token, self.usuarios, Rol.ADMIN, Rol.MODERADOR, Rol.RECEPCIONISTA)
+        usuario = AuthHelper.authenticate(token, self.usuarios, Rol.ADMIN, Rol.RECEPCIONISTA)
         return self.avisos.listar(usuario.id, usuario.sede_recepcionista())
 
     def marcar_leido(self, token: Optional[str], id: int) -> Aviso:
         with self.transaction():
-            usuario = AuthHelper.authenticate(token, self.usuarios, Rol.ADMIN, Rol.MODERADOR, Rol.RECEPCIONISTA)
+            usuario = AuthHelper.authenticate(token, self.usuarios, Rol.ADMIN, Rol.RECEPCIONISTA)
             aviso = self.avisos.marcar_leido(id, usuario.id, usuario.sede_recepcionista())
             if aviso is None:
                 raise ErrorHandler(ErrorType.NOT_FOUND, "Aviso no encontrado.")

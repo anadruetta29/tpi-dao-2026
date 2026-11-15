@@ -43,7 +43,7 @@ class RenovarPrestamoUseCase:
     def execute(self, command: Command) -> Result:
         with self.transaction():
             usuario = AuthHelper.authenticate(
-                command.token, self.usuario_repository, Rol.ADMIN, Rol.MODERADOR, Rol.RECEPCIONISTA,
+                command.token, self.usuario_repository, Rol.ADMIN, Rol.RECEPCIONISTA,
             )
             prestamo = self.prestamo_repository.get_by_id_for_update(command.id)
             if prestamo is None:
