@@ -29,7 +29,6 @@ class GetAllDevolucionesUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         sede_id = user.sede_recepcionista()

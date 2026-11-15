@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { type Session } from "@/domain/entities/session";
+import { Rol } from "@/domain/entities/rol";
 import { EstadoReserva, type Reserva } from "@/domain/entities/reserva";
 import { EstadoEjemplar } from "@/domain/entities/ejemplar";
 import { EstadoSede } from "@/domain/entities/sede";
@@ -18,6 +19,7 @@ const nextStates = [
 ].map((estado) => estado.toOption());
 
 export function useViewModel(session: Session, initialRecordId?: string) {
+    const isRecepcionista = session.user?.role === Rol.RECEPCIONISTA;
     const catalog = useSelectorCatalog(session, "libros", "socios", "sedes", "ejemplares");
     const filterLibro = useSelector("libroId", "Libro", "Buscá por título", false);
     const filterSocio = useSelector("socioId", "Socio", "Buscá por nombre o documento", false);
@@ -34,9 +36,10 @@ export function useViewModel(session: Session, initialRecordId?: string) {
         return getAllReservasAction({
             session,
             ...filters,
+            sedeId: isRecepcionista ? session.user?.sedeId : filters.sedeId,
             estado: filters.estado ? EstadoReserva.fromString(filters.estado) : undefined
         });
-    }, [session]);
+    }, [session, isRecepcionista]);
 
     const fetchReservaDetail = useCallback((id: string) => {
         return getReservaByIdAction({ id, session });
@@ -144,7 +147,7 @@ export function useViewModel(session: Session, initialRecordId?: string) {
     const filterFields: Field[] = [
         filterLibro.field(catalog?.libros ?? null),
         filterSocio.field(catalog?.socios ?? null),
-        filterSede.field(catalog?.sedes ?? null),
+        ...(isRecepcionista ? [] : [filterSede.field(catalog?.sedes ?? null)]),
         { name: "estado", label: "Estado", options: allOptions(EstadoReserva.toOptions()) }
     ];
 

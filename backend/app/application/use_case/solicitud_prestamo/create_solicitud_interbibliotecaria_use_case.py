@@ -53,7 +53,6 @@ class CreateSolicitudInterbibliotecariaUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         ejemplar_ids = command.ejemplar_ids or ([command.ejemplar_id] if command.ejemplar_id is not None else [])

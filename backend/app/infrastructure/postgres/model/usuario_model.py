@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Enum as SQLEnum
+from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, Enum as SQLEnum
 from app.infrastructure.database import Base
 from app.domain.entity.rol import Rol
 

@@ -41,7 +41,6 @@ class CreateEjemplarUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         if not command.codigo or command.libro_id is None or command.sede_id is None:

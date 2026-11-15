@@ -77,7 +77,7 @@ export class UsuarioApiDataSource implements UsuarioDataSourceI {
                     email: dto.email,
                     password: dto.password,
                     role: roleValue,
-                    sede_id: dto.sedeId ? Number(dto.sedeId) : undefined
+                    ...(dto.sedeId ? { sede_id: Number(dto.sedeId) } : {})
                 },
                 dto.session?.accessToken
             );
@@ -106,6 +106,9 @@ export class UsuarioApiDataSource implements UsuarioDataSourceI {
             if (dto.sedeId) payload.sede_id = Number(dto.sedeId);
             if (dto.role !== undefined) {
                 payload.role = dto.role instanceof Rol ? dto.role.value : dto.role;
+            }
+            if (dto.sedeId !== undefined) {
+                payload.sede_id = dto.sedeId ? Number(dto.sedeId) : null;
             }
 
             const response = await this.httpClient.put(

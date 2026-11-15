@@ -36,7 +36,17 @@ class Usuario:
             raise ErrorHandler(ErrorType.FORBIDDEN)
         return self.sede_id
 
+    def resolve_sede_filter(self, requested_sede_id: Optional[int]) -> Optional[int]:
+        if self.role != Rol.RECEPCIONISTA:
+            return requested_sede_id
+        if self.sede_id is None:
+            raise ErrorHandler(ErrorType.FORBIDDEN)
+        return self.sede_id
+
     def validar_sede(self, *sedes_autorizadas: Optional[int]) -> None:
         sede_id = self.sede_recepcionista()
         if sede_id is not None and sede_id not in sedes_autorizadas:
             raise ErrorHandler(ErrorType.FORBIDDEN)
+
+    def validate_sede_access(self, *sede_ids: Optional[int]) -> None:
+        self.validar_sede(*sede_ids)

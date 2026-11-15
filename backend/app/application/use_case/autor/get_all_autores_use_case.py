@@ -29,7 +29,6 @@ class GetAllAutoresUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         autores = self.autor_repository.get_all()

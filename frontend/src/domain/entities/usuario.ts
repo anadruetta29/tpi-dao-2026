@@ -48,7 +48,9 @@ export class Usuario extends BaseEntity {
             obj.password || "",
             typeof obj.activo === "boolean" ? obj.activo : Boolean(obj.activo ?? true),
             role,
-            String(obj.sedeId ?? obj.sede_id ?? "")
+            obj.sede_id !== undefined && obj.sede_id !== null
+                ? String(obj.sede_id)
+                : (obj.sedeId !== undefined && obj.sedeId !== null ? String(obj.sedeId) : "")
         );
     }
 

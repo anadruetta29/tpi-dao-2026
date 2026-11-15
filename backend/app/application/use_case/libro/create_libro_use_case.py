@@ -39,7 +39,6 @@ class CreateLibroUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         if not command.titulo or not command.editorial:

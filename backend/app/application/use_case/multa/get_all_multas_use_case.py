@@ -32,7 +32,6 @@ class GetAllMultasUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         multas = self.multa_repository.get_all_filtered(

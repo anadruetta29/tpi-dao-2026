@@ -68,7 +68,6 @@ class CreatePrestamoUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         if command.solicitud_id is None:

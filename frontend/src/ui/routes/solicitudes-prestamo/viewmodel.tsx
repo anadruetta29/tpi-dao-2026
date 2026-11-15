@@ -22,17 +22,18 @@ export function useViewModel(session: Session, initialRecordId?: string) {
     const [tipo, setTipo] = useState(TipoPrestamo.LOCAL);
     const esInterbibliotecaria = tipo === TipoPrestamo.INTERBIBLIOTECARIO;
     const selectors = useSelectoresViewModel(session, esInterbibliotecaria);
+    const isRecepcionista = session.user?.role === Rol.RECEPCIONISTA;
 
     {/* ===== Fetch data ===== */ }
 
     const fetchSolicitudes = useCallback(({ tipo: filterTipo, estado, sedeId }: { tipo: string; estado: string; sedeId: string }) => {
         return getAllSolicitudesPrestamoAction({
             session,
-            sedeId,
+            sedeId: isRecepcionista ? session.user?.sedeId : sedeId,
             tipo: filterTipo ? TipoPrestamo.fromString(filterTipo) : undefined,
             estado: estado ? EstadoSolicitud.fromString(estado) : undefined
         });
-    }, [session]);
+    }, [session, isRecepcionista]);
 
     const fetchSolicitudDetail = useCallback((id: string) => {
         return getSolicitudPrestamoByIdAction({ id, session });
@@ -137,7 +138,7 @@ export function useViewModel(session: Session, initialRecordId?: string) {
     const filterFields: Field[] = [
         { name: "tipo", label: "Tipo", options: allOptions(TipoPrestamo.toOptions()) },
         { name: "estado", label: "Estado", options: allOptions(EstadoSolicitud.toOptions()) },
-        selectors.sedeFilter
+        ...(isRecepcionista ? [] : [selectors.sedeFilter])
     ];
 
     const submitDisabled = !selectors.canSubmit || (esInterbibliotecaria

@@ -37,7 +37,7 @@ class SolicitudInterbibliotecariaTest(unittest.TestCase):
         self.assertIsNone(result.solicitud.socio_id)
 
     def test_rechaza_usuarios_inactivos_o_con_otro_rol(self):
-        for role, activo in [(Rol.MODERADOR, True), (Rol.RECEPCIONISTA, False), (Rol.ADMIN, False)]:
+        for role, activo in [(Rol.RECEPCIONISTA, False), (Rol.ADMIN, False)]:
             self.usuarios.get_by_id.return_value = Usuario(id=7, role=role, activo=activo)
             with self.subTest(role=role, activo=activo), self.assertRaises(ErrorHandler) as error:
                 self.use_case.execute(self.command)

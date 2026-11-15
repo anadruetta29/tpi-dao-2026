@@ -12,7 +12,9 @@ from app.domain.repository.usuario_repository_i import UsuarioRepositoryI
 
 class UpdateUsuarioUseCase:
     def __init__(
-        self, usuario_repository: UsuarioRepositoryI, sede_repository: SedeRepositoryI
+        self,
+        usuario_repository: UsuarioRepositoryI,
+        sede_repository: Optional[SedeRepositoryI] = None,
     ) -> None:
         self.usuario_repository = usuario_repository
         self.sede_repository = sede_repository
@@ -49,7 +51,7 @@ class UpdateUsuarioUseCase:
             sede_id = command.sede_id if command.sede_id is not None else usuario.sede_id
             if sede_id is None:
                 raise ErrorHandler(ErrorType.MISSING_REQUIRED_FIELDS, "Seleccioná la sede del recepcionista.")
-            if self.sede_repository.get_by_id(sede_id) is None:
+            if self.sede_repository is not None and self.sede_repository.get_by_id(sede_id) is None:
                 raise ErrorHandler(ErrorType.SEDE_NOT_FOUND)
 
         if command.nombre is not None:

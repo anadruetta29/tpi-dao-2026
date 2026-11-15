@@ -16,6 +16,7 @@ function dateKey(value?: string | Date | null) {
 
 export function useViewModel(session: Session, initialRecordId?: string) {
     const today = localDateISO();
+    const isRecepcionista = session.user?.role === Rol.RECEPCIONISTA;
 
     const catalog = useSelectorCatalog(session, "sedes", "socios");
     const socio = useSelector("socioId", "Socio", "Buscá por nombre o documento", false);
@@ -24,9 +25,14 @@ export function useViewModel(session: Session, initialRecordId?: string) {
     {/* ===== Fetch data ===== */ }
 
     const fetchPrestamos = useCallback(async ({ socioId, sedeId, estado }: { socioId: string; sedeId: string; estado: string }) => {
-        const result = await getAllPrestamosAction({ session, socio_id: socioId, sede_id: sedeId, estado });
+        const result = await getAllPrestamosAction({
+            session,
+            socio_id: socioId,
+            sede_id: isRecepcionista ? session.user?.sedeId : sedeId,
+            estado
+        });
         return pickData(result, (data) => data.prestamos);
-    }, [session]);
+    }, [session, isRecepcionista]);
 
     const fetchPrestamoDetail = useCallback(async (id: string) => {
         const result = await getPrestamoByIdAction(id, session);
@@ -74,7 +80,7 @@ export function useViewModel(session: Session, initialRecordId?: string) {
 
     const filterFields: Field[] = [
         socio.field(catalog?.socios ?? null),
-        sede.field(catalog?.sedes ?? null),
+        ...(isRecepcionista ? [] : [sede.field(catalog?.sedes ?? null)]),
         { name: "estado", label: "Estado", options: allOptions(EstadoPrestamo.toOptions()) }
     ];
 

@@ -12,7 +12,6 @@ skinparam noteBorderColor #DarkGoldenRod
 
 enum Rol {
     RECEPCIONISTA
-    MODERADOR
     ADMIN
 }
 

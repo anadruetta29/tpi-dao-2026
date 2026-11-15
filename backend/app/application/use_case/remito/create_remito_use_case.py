@@ -56,7 +56,10 @@ class CreateRemitoUseCase:
     def execute(self, command: Command) -> Result:
         with self.transaction():
             user = AuthHelper.authenticate(
-                command.token, self.usuario_repository, Rol.ADMIN, Rol.MODERADOR, Rol.RECEPCIONISTA,
+                command.token,
+                self.usuario_repository,
+                Rol.ADMIN,
+                Rol.RECEPCIONISTA,
             )
             return CreateRemitoUseCase.Result(remito=self._emitir(command, user))
 

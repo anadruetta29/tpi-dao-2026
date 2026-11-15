@@ -17,7 +17,6 @@ function userFields(sedes: { value: string; label: string }[], user?: Usuario): 
     if (user?.sedeId && !sedes.some(({ value }) => value === user.sedeId)) {
         sedeOptions.push({ value: user.sedeId, label: user.sedeId });
     }
-
     return [
         { name: "nombre", placeholder: "Ej. Ana", label: "Nombre", defaultValue: user?.nombre, required: true },
         { name: "apellido", placeholder: "Ej. Pérez", label: "Apellido", defaultValue: user?.apellido, required: true },
@@ -38,7 +37,6 @@ const userData = (field: ReadField) => ({
 export function useViewModel(session: Session) {
     const catalog = useSelectorCatalog(session, "sedes");
     const sedes = catalog.sedes?.data ?? [];
-
     {/* ===== Fetch data ===== */ }
 
     const fetchUsuarios = useCallback(async ({ role, activo }: { role: string; activo: string }) => {

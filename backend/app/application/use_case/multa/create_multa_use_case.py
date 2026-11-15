@@ -56,7 +56,6 @@ class CreateMultaUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         if command.socio_id is None or command.motivo is None:

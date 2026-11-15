@@ -55,7 +55,6 @@ class CreateReservaUseCase:
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
-            Rol.MODERADOR,
             Rol.RECEPCIONISTA,
         )
         if command.socio_id is None or (command.libro_id is None and command.ejemplar_id is None):
