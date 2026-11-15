@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Rol } from "@/domain/entities/rol";
 import { useAuth } from "@/ui/hooks/use-auth";
 import { SedesRoute } from "@/ui/routes/sedes/sedes-route";
@@ -28,36 +28,73 @@ const modules = [
     { area: "Logística", label: "Remitos", Component: RemitosRoute }
 ] as const;
 
+type ModuleLabel = (typeof modules)[number]["label"];
+
 export function useViewModel() {
     const { session, user, error, isLoading, logout, refreshCurrentUser } = useAuth();
-    const [active, setActive] = useState<(typeof modules)[number]["label"]>("Sedes");
-    const available = modules.filter((module) => !("adminOnly" in module) || user?.roleEntity === Rol.ADMIN);
-    const selected = available.find((module) => module.label === active) ?? available[0];
-    const groups = new Map<string, NavigationGroup>();
-    for (const { area, label } of available) {
-        let group = groups.get(area);
-        if (!group) {
-            group = { label: area, items: [] };
-            groups.set(area, group);
+    const [active, setActive] = useState<ModuleLabel>("Sedes");
+
+    {/* ===== onActions functions ===== */ }
+
+    const onTabClick = (label: ModuleLabel) => {
+        setActive(label);
+    };
+
+    const onLogout = async () => {
+        logout();
+    };
+
+    const onRefresh = async () => {
+        await refreshCurrentUser();
+    };
+
+    {/* ===== variables ===== */ }
+
+    const availableModules = useMemo(() => {
+        return modules.filter((module) => !("adminOnly" in module) || user?.roleEntity === Rol.ADMIN);
+    }, [user?.roleEntity]);
+
+    const selectedModule = useMemo(() => {
+        return availableModules.find((module) => module.label === active) ?? availableModules[0];
+    }, [availableModules, active]);
+
+    const navigationGroups = useMemo(() => {
+        const groups = new Map<string, NavigationGroup>();
+        for (const { area, label } of availableModules) {
+            let group = groups.get(area);
+            if (!group) {
+                group = { label: area, items: [] };
+                groups.set(area, group);
+            }
+            group.items.push({
+                label,
+                selected: label === selectedModule.label,
+                onClick: () => onTabClick(label)
+            });
         }
-        group.items.push({ label, selected: label === selected.label, onClick: () => setActive(label) });
-    }
+        return [...groups.values()];
+    }, [availableModules, selectedModule.label]);
+
+    const userProfile = user ? {
+        username: `${user.nombre} ${user.apellido}`.trim() || user.email,
+        initials: `${user.nombre.charAt(0)}${user.apellido.charAt(0)}`.toUpperCase() || "U",
+        email: user.email,
+        role: user.roleName,
+        activity: user.activo ? "Activo" : "Inactivo",
+        error,
+        isLoading,
+        onLogout,
+        onRefresh
+    } : null;
 
     return {
         session: user ? session : null,
-        Component: selected.Component,
-        area: selected.area,
-        navigation: [...groups.values()],
-        profile: user && {
-            username: `${user.nombre} ${user.apellido}`.trim() || user.email,
-            initials: `${user.nombre.charAt(0)}${user.apellido.charAt(0)}`.toUpperCase() || "U",
-            email: user.email,
-            role: user.roleName,
-            activity: user.activo ? "Activo" : "Inactivo",
-            error,
-            isLoading,
-            onLogout: logout,
-            onRefresh: () => void refreshCurrentUser()
-        }
+        Component: selectedModule.Component,
+        area: selectedModule.area,
+        navigation: navigationGroups,
+        profile: userProfile
     };
 }
+
+export default useViewModel;
+export { useViewModel as ViewModel };
