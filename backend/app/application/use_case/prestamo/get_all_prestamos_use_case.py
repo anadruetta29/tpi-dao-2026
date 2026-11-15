@@ -29,15 +29,16 @@ class GetAllPrestamosUseCase:
         prestamos: List[Prestamo]
 
     def execute(self, command: Command) -> Result:
-        AuthHelper.authenticate(
+        user = AuthHelper.authenticate(
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
             Rol.RECEPCIONISTA,
         )
+        sede_id = user.resolve_sede_filter(command.sede_id)
         prestamos = self.prestamo_repository.get_all_filtered(
             socio_id=command.socio_id,
-            sede_id=command.sede_id,
+            sede_id=sede_id,
             estado=command.estado,
         )
         return GetAllPrestamosUseCase.Result(prestamos=prestamos)

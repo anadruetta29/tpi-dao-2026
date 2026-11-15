@@ -11,6 +11,7 @@ class UsuarioRes(BaseModel):
     email: Optional[str] = None
     activo: Optional[bool] = None
     role: Optional[Rol] = None
+    sede_id: Optional[int] = None
 
     @staticmethod
     def from_domain(usuario: Usuario) -> "UsuarioRes":
@@ -21,6 +22,7 @@ class UsuarioRes(BaseModel):
             email=usuario.email,
             activo=usuario.activo,
             role=usuario.role,
+            sede_id=usuario.sede_id,
         )
 
 

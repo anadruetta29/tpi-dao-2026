@@ -246,12 +246,13 @@ def get_sede_service(
 
 def get_usuario_service(
     usuario_repo: UsuarioRepositoryI = Depends(get_usuario_repository),
+    sede_repo: SedeRepositoryI = Depends(get_sede_repository),
 ) -> UsuarioServiceI:
     return UsuarioService(
         get_all_use_case=GetAllUsuariosUseCase(usuario_repo),
         get_by_id_use_case=GetUsuarioByIdUseCase(usuario_repo),
-        create_use_case=CreateUsuarioUseCase(usuario_repo),
-        update_use_case=UpdateUsuarioUseCase(usuario_repo),
+        create_use_case=CreateUsuarioUseCase(usuario_repo, sede_repo),
+        update_use_case=UpdateUsuarioUseCase(usuario_repo, sede_repo),
     )
 
 

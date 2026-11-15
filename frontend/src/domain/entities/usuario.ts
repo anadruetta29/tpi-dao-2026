@@ -16,7 +16,8 @@ export class Usuario extends BaseEntity {
         public email: string = "",
         public password: string = "",
         public activo: boolean = true,
-        public role: Rol = Rol.RECEPCIONISTA
+        public role: Rol = Rol.RECEPCIONISTA,
+        public sedeId: string = ""
     ) {
         super();
         this.roleName = this.role.name;
@@ -46,7 +47,10 @@ export class Usuario extends BaseEntity {
             obj.email || "",
             obj.password || "",
             typeof obj.activo === "boolean" ? obj.activo : Boolean(obj.activo ?? true),
-            role
+            role,
+            obj.sede_id !== undefined && obj.sede_id !== null
+                ? String(obj.sede_id)
+                : (obj.sedeId !== undefined && obj.sedeId !== null ? String(obj.sedeId) : "")
         );
     }
 

@@ -30,16 +30,17 @@ class GetAllReservasUseCase:
         reservas: List[Reserva]
 
     def execute(self, command: Command) -> Result:
-        AuthHelper.authenticate(
+        user = AuthHelper.authenticate(
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
             Rol.RECEPCIONISTA,
         )
+        sede_id = user.resolve_sede_filter(command.sede_id)
         reservas = self.reserva_repository.get_all_filtered(
             libro_id=command.libro_id,
             socio_id=command.socio_id,
-            sede_id=command.sede_id,
+            sede_id=sede_id,
             estado=command.estado,
         )
         return GetAllReservasUseCase.Result(reservas=reservas)

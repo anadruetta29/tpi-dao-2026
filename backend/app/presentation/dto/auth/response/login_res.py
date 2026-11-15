@@ -11,6 +11,7 @@ class AuthUserDTO(BaseModel):
     email: Optional[str] = None
     activo: Optional[bool] = None
     role: Optional[Rol] = None
+    sede_id: Optional[int] = None
 
     @staticmethod
     def from_domain(user: Usuario) -> "AuthUserDTO":
@@ -21,6 +22,7 @@ class AuthUserDTO(BaseModel):
             email=user.email,
             activo=user.activo,
             role=user.role,
+            sede_id=user.sede_id,
         )
 
 

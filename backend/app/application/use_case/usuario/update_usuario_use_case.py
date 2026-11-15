@@ -6,12 +6,18 @@ from app.domain.entity.rol import Rol
 from app.domain.entity.usuario import Usuario
 from app.domain.error.error_handler import ErrorHandler
 from app.domain.error.error_type import ErrorType
+from app.domain.repository.sede_repository_i import SedeRepositoryI
 from app.domain.repository.usuario_repository_i import UsuarioRepositoryI
 
 
 class UpdateUsuarioUseCase:
-    def __init__(self, usuario_repository: UsuarioRepositoryI) -> None:
+    def __init__(
+        self,
+        usuario_repository: UsuarioRepositoryI,
+        sede_repository: Optional[SedeRepositoryI] = None,
+    ) -> None:
         self.usuario_repository = usuario_repository
+        self.sede_repository = sede_repository
 
     @dataclass(frozen=True)
     class Command:
@@ -23,6 +29,7 @@ class UpdateUsuarioUseCase:
         password: Optional[str]
         activo: Optional[bool]
         role: Optional[Rol]
+        sede_id: Optional[int] = None
 
     @dataclass(frozen=True)
     class Result:
@@ -53,6 +60,12 @@ class UpdateUsuarioUseCase:
             usuario.activo = command.activo
         if command.role is not None:
             usuario.role = command.role
+        if command.sede_id is not None:
+            if self.sede_repository is not None and self.sede_repository.get_by_id(command.sede_id) is None:
+                raise ErrorHandler(ErrorType.SEDE_NOT_FOUND)
+            usuario.sede_id = command.sede_id
+        if usuario.role == Rol.RECEPCIONISTA and usuario.sede_id is None:
+            raise ErrorHandler(ErrorType.MISSING_REQUIRED_FIELDS)
 
         updated = self.usuario_repository.update(command.id, usuario)
         if updated is None:

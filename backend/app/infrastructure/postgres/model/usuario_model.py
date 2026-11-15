@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, Enum as SQLEnum
+from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, Enum as SQLEnum
 from app.infrastructure.database import Base
 from app.domain.entity.rol import Rol
 
@@ -13,3 +13,4 @@ class UsuarioModel(Base):
     password = Column(String(255), nullable=True)
     activo = Column(Boolean, default=True, nullable=True)
     role = Column(SQLEnum(Rol), nullable=True)
+    sede_id = Column(Integer, ForeignKey("sedes.id"), nullable=True, index=True)

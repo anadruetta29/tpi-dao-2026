@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { type Session } from "@/domain/entities/session";
+import { Rol } from "@/domain/entities/rol";
 import { EstadoPrestamo, ModalidadPrestamoLocal, type Prestamo } from "@/domain/entities/prestamo";
 import { EstadoSolicitud, TipoPrestamo } from "@/domain/entities/solicitud-prestamo";
 import { cancelarPrestamoAction, createPrestamoAction, getAllPrestamosAction, getPrestamoByIdAction } from "@/ui/actions/prestamo/prestamo.actions";
@@ -24,6 +25,7 @@ export function useViewModel(session: Session) {
     const [today, setToday] = useState(localDateISO);
     const [startDate, setStartDate] = useState("");
     const [isInterbibliotecaria, setIsInterbibliotecaria] = useState(false);
+    const isRecepcionista = session.user?.role === Rol.RECEPCIONISTA;
 
     const catalog = useSelectorCatalog(session, "sedes", "socios", "solicitudes", "prestamos");
     const socio = useSelector("socioId", "Socio", "Buscá por nombre o documento", false);
@@ -33,9 +35,14 @@ export function useViewModel(session: Session) {
     {/* ===== Fetch data ===== */ }
 
     const fetchPrestamos = useCallback(async ({ socioId, sedeId, estado }: { socioId: string; sedeId: string; estado: string }) => {
-        const result = await getAllPrestamosAction({ session, socio_id: socioId, sede_id: sedeId, estado });
+        const result = await getAllPrestamosAction({
+            session,
+            socio_id: socioId,
+            sede_id: isRecepcionista ? session.user?.sedeId : sedeId,
+            estado
+        });
         return pickData(result, (data) => data.prestamos);
-    }, [session]);
+    }, [session, isRecepcionista]);
 
     const fetchPrestamoDetail = useCallback(async (id: string) => {
         const result = await getPrestamoByIdAction(id, session);
@@ -118,7 +125,7 @@ export function useViewModel(session: Session) {
 
     const filterFields: Field[] = [
         socio.field(catalog?.socios ?? null),
-        sede.field(catalog?.sedes ?? null),
+        ...(isRecepcionista ? [] : [sede.field(catalog?.sedes ?? null)]),
         { name: "estado", label: "Estado", options: allOptions(EstadoPrestamo.toOptions()) }
     ];
 

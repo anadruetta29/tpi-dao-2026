@@ -28,7 +28,7 @@ class GetPrestamoByIdUseCase:
         prestamo: Prestamo
 
     def execute(self, command: Command) -> Result:
-        AuthHelper.authenticate(
+        user = AuthHelper.authenticate(
             command.token,
             self.usuario_repository,
             Rol.ADMIN,
@@ -40,5 +40,6 @@ class GetPrestamoByIdUseCase:
         prestamo = self.prestamo_repository.get_by_id(command.id)
         if prestamo is None:
             raise ErrorHandler(ErrorType.PRESTAMO_NOT_FOUND)
+        user.validate_sede_access(prestamo.sede_id)
 
         return GetPrestamoByIdUseCase.Result(prestamo=prestamo)

@@ -97,6 +97,7 @@ export interface CreateUsuarioActionParams {
     email: string;
     password: string;
     role: Rol | string;
+    sedeId?: string;
 }
 
 export async function createUsuarioAction(
@@ -117,7 +118,8 @@ export async function createUsuarioAction(
             apellido: params.apellido,
             email: params.email,
             password: params.password,
-            role: params.role
+            role: params.role,
+            sedeId: params.sedeId
         });
 
         return {
@@ -142,6 +144,7 @@ export interface UpdateUsuarioActionParams {
     password?: string;
     activo?: boolean;
     role?: Rol | string;
+    sedeId?: string;
 }
 
 export async function updateUsuarioAction(
@@ -164,7 +167,8 @@ export async function updateUsuarioAction(
             email: params.email,
             password: params.password,
             activo: params.activo,
-            role: params.role
+            role: params.role,
+            sedeId: params.sedeId
         });
 
         return {

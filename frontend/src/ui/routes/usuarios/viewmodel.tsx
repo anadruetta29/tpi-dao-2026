@@ -1,9 +1,10 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { type Session } from "@/domain/entities/session";
 import { Rol, type Usuario } from "@/domain/entities/usuario";
 import { createUsuarioAction, getAllUsuariosAction, getUsuarioByIdAction, updateUsuarioAction } from "@/ui/actions/usuario/usuario.actions";
 import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
+import { useSelectorCatalog } from "@/ui/hooks/use-selector-catalog";
 import { allOptions, info, pickData, type Field, useLibraryRecordsViewModel } from "@/ui/routes/use-library-records-viewmodel";
 
 const activity = [
@@ -11,23 +12,31 @@ const activity = [
     { value: "false", label: "Inactivo" }
 ];
 
-function userFields(user?: Usuario): Field[] {
+function userFields(sedeOptions: Array<{ value: string; label: string }>, user?: Usuario): Field[] {
     return [
         { name: "nombre", placeholder: "Ej. Ana", label: "Nombre", defaultValue: user?.nombre, required: true },
         { name: "apellido", placeholder: "Ej. Pérez", label: "Apellido", defaultValue: user?.apellido, required: true },
         { name: "email", placeholder: "nombre@ejemplo.com", label: "Correo electrónico", type: "email", defaultValue: user?.email, required: true },
         { name: "password", placeholder: "Ingresá una contraseña", label: user ? "Nueva contraseña (opcional)" : "Contraseña", type: "password", autoComplete: "new-password", required: !user },
         { name: "role", label: "Rol", options: Rol.toOptions(), defaultValue: user?.role.value },
+        { name: "sedeId", label: "Sede", options: [{ value: "", label: "Sin sede" }, ...sedeOptions], defaultValue: user?.sedeId ?? "" },
         ...(user ? [{ name: "activo", label: "Estado", options: activity, defaultValue: String(user.activo) }] : [])
     ];
 }
 
 const userData = (field: ReadField) => ({
     ...readFields(field, "nombre", "apellido", "email"),
-    role: Rol.fromString(field("role"))
+    role: Rol.fromString(field("role")),
+    sedeId: field("sedeId")
 });
 
 export function useViewModel(session: Session) {
+    const catalog = useSelectorCatalog(session, "sedes");
+    const sedeOptions = useMemo(() => catalog?.sedes?.data ?? [], [catalog]);
+    const sedeNames = useMemo(
+        () => new Map(sedeOptions.map((item) => [item.value, item.label])),
+        [sedeOptions]
+    );
     {/* ===== Fetch data ===== */ }
 
     const fetchUsuarios = useCallback(async ({ role, activo }: { role: string; activo: string }) => {
@@ -73,11 +82,12 @@ export function useViewModel(session: Session) {
             info("Nombre", `${user.nombre} ${user.apellido}`),
             info("Correo electrónico", user.email),
             info("Rol", user.roleName),
+            info("Sede", user.sedeId ? (sedeNames.get(user.sedeId) ?? user.sedeId) : "Sin sede"),
             info("Estado", user.activo ? "Activo" : "Inactivo")
         ],
         forms: [{
             label: "Modificar usuario",
-            fields: userFields(user),
+            fields: userFields(sedeOptions, user),
             submit: (field: ReadField) => handleUpdateUsuario(user, field)
         }]
     });
@@ -104,7 +114,7 @@ export function useViewModel(session: Session) {
         getLabel: getUsuarioLabel,
         create: {
             label: "Registrar usuario",
-            fields: userFields(),
+            fields: userFields(sedeOptions),
             submit: handleCreateUsuario
         },
         describe: describeUsuario

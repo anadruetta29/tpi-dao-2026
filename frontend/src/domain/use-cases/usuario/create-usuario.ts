@@ -10,6 +10,7 @@ export interface CreateUsuarioCommand {
     email: string;
     password: string;
     role: Rol | string;
+    sedeId?: string;
 }
 
 export interface CreateUsuarioResult {
@@ -33,6 +34,7 @@ export class CreateUsuarioUseCase {
             email: command.email,
             password: command.password,
             role: command.role,
+            sedeId: command.sedeId,
             activo: true
         });
 

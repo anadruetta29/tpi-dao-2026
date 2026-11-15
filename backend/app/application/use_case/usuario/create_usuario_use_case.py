@@ -6,12 +6,18 @@ from app.domain.entity.rol import Rol
 from app.domain.entity.usuario import Usuario
 from app.domain.error.error_handler import ErrorHandler
 from app.domain.error.error_type import ErrorType
+from app.domain.repository.sede_repository_i import SedeRepositoryI
 from app.domain.repository.usuario_repository_i import UsuarioRepositoryI
 
 
 class CreateUsuarioUseCase:
-    def __init__(self, usuario_repository: UsuarioRepositoryI) -> None:
+    def __init__(
+        self,
+        usuario_repository: UsuarioRepositoryI,
+        sede_repository: Optional[SedeRepositoryI] = None,
+    ) -> None:
         self.usuario_repository = usuario_repository
+        self.sede_repository = sede_repository
 
     @dataclass(frozen=True)
     class Command:
@@ -21,6 +27,7 @@ class CreateUsuarioUseCase:
         email: Optional[str]
         password: Optional[str]
         role: Optional[Rol]
+        sede_id: Optional[int] = None
 
     @dataclass(frozen=True)
     class Result:
@@ -35,8 +42,13 @@ class CreateUsuarioUseCase:
             or not command.email
             or not command.password
             or command.role is None
+            or (command.role == Rol.RECEPCIONISTA and command.sede_id is None)
         ):
             raise ErrorHandler(ErrorType.MISSING_REQUIRED_FIELDS)
+
+        if command.sede_id is not None and self.sede_repository is not None:
+            if self.sede_repository.get_by_id(command.sede_id) is None:
+                raise ErrorHandler(ErrorType.SEDE_NOT_FOUND)
 
         if self.usuario_repository.get_by_email(command.email) is not None:
             raise ErrorHandler(ErrorType.USER_ALREADY_EXISTS)
@@ -48,6 +60,7 @@ class CreateUsuarioUseCase:
             password=PasswordHelper.hash(command.password),
             activo=True,
             role=command.role,
+            sede_id=command.sede_id,
         )
         saved = self.usuario_repository.save(usuario)
         return CreateUsuarioUseCase.Result(usuario=saved)

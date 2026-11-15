@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { type Session } from "@/domain/entities/session";
+import { Rol } from "@/domain/entities/rol";
 import { EstadoSolicitud, TipoPrestamo, type SolicitudPrestamo } from "@/domain/entities/solicitud-prestamo";
 import {
     createSolicitudInterbibliotecariaAction,
@@ -23,17 +24,18 @@ function nextStates(estado: EstadoSolicitud) {
 export function useViewModel(session: Session) {
     const [tipo, setTipo] = useState(TipoPrestamo.LOCAL);
     const selectors = useSelectoresViewModel(session);
+    const isRecepcionista = session.user?.role === Rol.RECEPCIONISTA;
 
     {/* ===== Fetch data ===== */ }
 
     const fetchSolicitudes = useCallback(({ tipo: filterTipo, estado, sedeId }: { tipo: string; estado: string; sedeId: string }) => {
         return getAllSolicitudesPrestamoAction({
             session,
-            sedeId,
+            sedeId: isRecepcionista ? session.user?.sedeId : sedeId,
             tipo: filterTipo ? TipoPrestamo.fromString(filterTipo) : undefined,
             estado: estado ? EstadoSolicitud.fromString(estado) : undefined
         });
-    }, [session]);
+    }, [session, isRecepcionista]);
 
     const fetchSolicitudDetail = useCallback((id: string) => {
         return getSolicitudPrestamoByIdAction({ id, session });
@@ -111,7 +113,7 @@ export function useViewModel(session: Session) {
     const filterFields: Field[] = [
         { name: "tipo", label: "Tipo", options: allOptions(TipoPrestamo.toOptions()) },
         { name: "estado", label: "Estado", options: allOptions(EstadoSolicitud.toOptions()) },
-        selectors.sedeFilter
+        ...(isRecepcionista ? [] : [selectors.sedeFilter])
     ];
 
     const submitDisabled = !selectors.canSubmit || (esInterbibliotecaria
