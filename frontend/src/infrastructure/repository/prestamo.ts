@@ -29,6 +29,10 @@ export class PrestamoRepository implements PrestamoRepositoryI {
         return await this.dataSource.createPrestamo(dto);
     }
 
+    public renovarPrestamo(dto: CancelarPrestamoReq): Promise<CancelarPrestamoRes> {
+        return this.dataSource.renovarPrestamo(dto);
+    }
+
     public cancelarPrestamo(dto: CancelarPrestamoReq): Promise<CancelarPrestamoRes> {
         return this.dataSource.cancelarPrestamo(dto);
     }

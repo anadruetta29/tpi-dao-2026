@@ -15,7 +15,6 @@ class AvisoRes(BaseModel):
     socio_id: Optional[int] = None
     reserva_id: Optional[int] = None
     prestamo_id: Optional[int] = None
-    fecha_email: Optional[date] = None
 
 
 class GetAllAvisosRes(BaseModel):

@@ -39,7 +39,3 @@ class PostgresAvisoRepository(BasePostgresRepository[AvisoModel]):
             self.db.add(AvisoLecturaModel(aviso_id=id, usuario_id=usuario_id))
             self.db.flush()
         return model
-
-    def get_ids_sin_email(self) -> List[int]:
-        filas = self.db.query(AvisoModel.id).filter(AvisoModel.fecha_email.is_(None), AvisoModel.socio_id.is_not(None))
-        return [id for (id,) in filas.order_by(AvisoModel.id).all()]

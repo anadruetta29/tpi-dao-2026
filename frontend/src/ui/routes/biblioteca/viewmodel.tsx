@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Rol } from "@/domain/entities/rol";
 import { useAuth } from "@/ui/hooks/use-auth";
 import { BandejaRoute } from "@/ui/routes/bandeja/bandeja-route";
+import { AvisosRoute } from "@/ui/routes/avisos/avisos-route";
 import { type DestinoBandeja } from "@/ui/routes/bandeja/viewmodel";
 import { SedesRoute } from "@/ui/routes/sedes/sedes-route";
 import { SociosRoute } from "@/ui/routes/socios/socios-route";
@@ -18,6 +19,7 @@ import { type NavigationGroup } from "@/ui/components/library-navigation/library
 
 const modules = [
     { area: "Operación", label: "Bandeja", Component: BandejaRoute },
+    { area: "Operación", label: "Avisos", Component: AvisosRoute },
     { area: "Administración", label: "Sedes", Component: SedesRoute },
     { area: "Administración", label: "Usuarios", Component: UsuariosRoute, adminOnly: true },
     { area: "Administración", label: "Socios", Component: SociosRoute },

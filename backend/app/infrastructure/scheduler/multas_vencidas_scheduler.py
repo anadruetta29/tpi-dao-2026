@@ -5,17 +5,12 @@ from datetime import date
 from typing import AsyncIterator
 from fastapi import FastAPI
 from app.application.use_case.multa.registrar_multas_vencidas_use_case import RegistrarMultasVencidasUseCase
-from app.application.use_case.aviso.enviar_avisos_use_case import EnviarAvisosUseCase
 from app.core.bean.dependencies import (
-    get_aviso_repository,
     get_generar_avisos_use_case,
     get_registrar_multas_vencidas_use_case,
-    get_socio_repository,
     get_vencer_reservas_use_case,
 )
-from app.core.config.settings import settings
-from app.infrastructure.database import SessionLocal, atomic_write
-from app.infrastructure.util.enviar_aviso_smtp import enviar_aviso_smtp
+from app.infrastructure.database import SessionLocal
 
 logger = logging.getLogger(__name__)
 
@@ -36,19 +31,9 @@ def _generar_avisos() -> None:
         get_generar_avisos_use_case(db).execute(date.today())
 
 
-def _enviar_avisos() -> None:
-    if not settings.AVISO_SMTP_HOST or not settings.AVISO_SMTP_REMITENTE:
-        return
-    with SessionLocal() as db:
-        EnviarAvisosUseCase(
-            get_aviso_repository(db), get_socio_repository(db),
-            enviar_aviso_smtp, lambda: atomic_write(db),
-        ).execute(date.today())
-
-
 async def _ejecutar_periodicamente() -> None:
     while True:
-        for tarea in (_registrar_multas_vencidas, _vencer_reservas, _generar_avisos, _enviar_avisos):
+        for tarea in (_registrar_multas_vencidas, _vencer_reservas, _generar_avisos):
             try:
                 await asyncio.to_thread(tarea)
             except Exception:

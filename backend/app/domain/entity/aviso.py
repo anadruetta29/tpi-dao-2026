@@ -15,4 +15,3 @@ class Aviso:
     prestamo_id: Optional[int] = None
     id: Optional[int] = None
     leido: bool = False
-    fecha_email: Optional[date] = None

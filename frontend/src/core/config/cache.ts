@@ -24,6 +24,7 @@ export class CacheTags {
         return `ejemplar:${id}`;
     }
     public static readonly RESERVAS = "reservas";
+    public static readonly AVISOS = "avisos";
     public static readonly SOLICITUDES_PRESTAMO = "solicitudes-prestamo";
     public static readonly PRESTAMOS = "prestamos";
     public static prestamoDetail(id: string): string {

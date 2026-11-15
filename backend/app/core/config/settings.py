@@ -7,12 +7,6 @@ class Settings:
     PRESTAMO_DIAS_RENOVACION: int = max(1, int(os.getenv("PRESTAMO_DIAS_RENOVACION", "7")))
     PRESTAMO_MAX_RENOVACIONES: int = max(0, int(os.getenv("PRESTAMO_MAX_RENOVACIONES", "1")))
     AVISO_DIAS_ANTICIPACION: int = max(0, int(os.getenv("AVISO_DIAS_ANTICIPACION", "2")))
-    AVISO_SMTP_HOST: str = os.getenv("AVISO_SMTP_HOST", "")
-    AVISO_SMTP_PORT: int = int(os.getenv("AVISO_SMTP_PORT", "587"))
-    AVISO_SMTP_USUARIO: str = os.getenv("AVISO_SMTP_USUARIO", "")
-    AVISO_SMTP_PASSWORD: str = os.getenv("AVISO_SMTP_PASSWORD", "")
-    AVISO_SMTP_REMITENTE: str = os.getenv("AVISO_SMTP_REMITENTE", "")
-    AVISO_SMTP_STARTTLS: bool = os.getenv("AVISO_SMTP_STARTTLS", "true").lower() == "true"
 
     DB_USER: str = os.getenv("DB_USER", "develop")
     DB_PASSWORD: str = os.getenv("DB_PASSWORD", "develop")

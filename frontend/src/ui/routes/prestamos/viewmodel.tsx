@@ -2,8 +2,8 @@ import { useCallback } from "react";
 import { Rol } from "@/domain/entities/rol";
 import { localDateISO } from "@/ui/forms/handlers/local-date";
 import { type Session } from "@/domain/entities/session";
-import { EstadoPrestamo, type Prestamo } from "@/domain/entities/prestamo";
-import { cancelarPrestamoAction, getAllPrestamosAction, getPrestamoByIdAction } from "@/ui/actions/prestamo/prestamo.actions";
+import { EstadoPrestamo, ModalidadPrestamoLocal, type Prestamo } from "@/domain/entities/prestamo";
+import { cancelarPrestamoAction, getAllPrestamosAction, getPrestamoByIdAction, renovarPrestamoAction } from "@/ui/actions/prestamo/prestamo.actions";
 import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
 import { useSelector } from "@/ui/hooks/use-selector";
@@ -45,32 +45,49 @@ export function useViewModel(session: Session, initialRecordId?: string) {
         return readFields(field, "socioId", "sedeId", "estado");
     };
 
+    const handleRenovarPrestamo = (prestamo: Prestamo) => {
+        return renovarPrestamoAction({ id: prestamo.id, session });
+    };
+
     const handleCancelPrestamo = (prestamo: Prestamo) => {
         return cancelarPrestamoAction({ id: prestamo.id, session });
     };
 
-    const describePrestamo = (prestamo: Prestamo) => ({
-        info: [
-            info("Solicitud", prestamo.solicitudId),
-            info("Socio", prestamo.socioId),
-            info("Ejemplares", prestamo.ejemplaresIds.join(", ")),
-            info("Devueltos", prestamo.ejemplaresDevueltosIds.join(", ")),
-            info("Pendientes", prestamo.ejemplaresIds.filter((id) => !prestamo.ejemplaresDevueltosIds.includes(id)).join(", ")),
-            info("Sede", prestamo.sedeId),
-            info("Estado", prestamo.estadoName),
-            info("Modalidad", prestamo.modalidadName),
-            info("Inicio", prestamo.fechaInicio),
-            info("Vencimiento", prestamo.fechaVencimiento),
-            info("Devolución", prestamo.fechaDevolucion)
-        ],
-        commands: (session.user?.roleEntity !== Rol.RECEPCIONISTA || session.user.sedeId === prestamo.sedeId)
-            && prestamo.estadoEntity === EstadoPrestamo.ACTIVO && prestamo.fechaInicio
-            && dateKey(prestamo.fechaInicio) <= today && today < dateKey(prestamo.fechaVencimiento) ? [{
-                label: "Cancelar anticipadamente",
-                confirm: "Confirmá que recibiste en buen estado todos los ejemplares pendientes. El préstamo se cerrará y se registrarán sus devoluciones.",
-                execute: () => handleCancelPrestamo(prestamo)
-            }] : []
-    });
+    const describePrestamo = (prestamo: Prestamo) => {
+        const mismaSede = session.user?.roleEntity !== Rol.RECEPCIONISTA || session.user.sedeId === prestamo.sedeId;
+        const activo = prestamo.estadoEntity === EstadoPrestamo.ACTIVO;
+        const vencimiento = dateKey(prestamo.fechaVencimiento);
+        return {
+            info: [
+                info("Solicitud", prestamo.solicitudId),
+                info("Socio", prestamo.socioId),
+                info("Ejemplares", prestamo.ejemplaresIds.join(", ")),
+                info("Devueltos", prestamo.ejemplaresDevueltosIds.join(", ")),
+                info("Pendientes", prestamo.ejemplaresIds.filter((id) => !prestamo.ejemplaresDevueltosIds.includes(id)).join(", ")),
+                info("Sede", prestamo.sedeId),
+                info("Estado", prestamo.estadoName),
+                info("Modalidad", prestamo.modalidadName),
+                info("Renovaciones", String(prestamo.renovaciones)),
+                info("Inicio", prestamo.fechaInicio),
+                info("Vencimiento", prestamo.fechaVencimiento),
+                info("Devolución", prestamo.fechaDevolucion)
+            ],
+            commands: [
+                ...(mismaSede && activo && prestamo.modalidadEntity === ModalidadPrestamoLocal.DOMICILIO
+                    && vencimiento && today <= vencimiento ? [{
+                        label: "Renovar préstamo",
+                        confirm: "¿Querés extender el vencimiento de este préstamo?",
+                        execute: () => handleRenovarPrestamo(prestamo)
+                    }] : []),
+                ...(mismaSede && activo && prestamo.fechaInicio
+                    && dateKey(prestamo.fechaInicio) <= today && today < vencimiento ? [{
+                        label: "Cancelar anticipadamente",
+                        confirm: "Confirmá que recibiste en buen estado todos los ejemplares pendientes. El préstamo se cerrará y se registrarán sus devoluciones.",
+                        execute: () => handleCancelPrestamo(prestamo)
+                    }] : [])
+            ]
+        };
+    };
 
     {/* ===== variables ===== */ }
 

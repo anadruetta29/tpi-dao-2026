@@ -8,6 +8,7 @@ import { GetAllPrestamosUseCase } from "@/domain/use-cases/prestamo/get-all-pres
 import { GetPrestamoByIdUseCase } from "@/domain/use-cases/prestamo/get-prestamo-by-id";
 import { CreatePrestamoUseCase } from "@/domain/use-cases/prestamo/create-prestamo";
 import { CancelarPrestamoUseCase, type CancelarPrestamoCommand } from "@/domain/use-cases/prestamo/cancelar-prestamo";
+import { RenovarPrestamoUseCase } from "@/domain/use-cases/prestamo/renovar-prestamo";
 import { PrestamoApiDataSource } from "@/infrastructure/datasource/api/prestamo-api";
 import { AuthStorageDataSource } from "@/infrastructure/datasource/storage/auth-storage";
 import { PrestamoRepository } from "@/infrastructure/repository/prestamo";
@@ -20,6 +21,16 @@ const getAllPrestamosUseCase = new GetAllPrestamosUseCase(prestamoRepository);
 const getPrestamoByIdUseCase = new GetPrestamoByIdUseCase(prestamoRepository);
 const createPrestamoUseCase = new CreatePrestamoUseCase(prestamoRepository);
 const cancelarPrestamoUseCase = new CancelarPrestamoUseCase(prestamoRepository);
+const renovarPrestamoUseCase = new RenovarPrestamoUseCase(prestamoRepository);
+
+export async function renovarPrestamoAction(command: CancelarPrestamoCommand): Promise<ActionState<Prestamo>> {
+    try {
+        const { prestamo } = await renovarPrestamoUseCase.execute(command);
+        return { success: true, data: prestamo, message: SuccessMessages.PRESTAMO_RENOVADO };
+    } catch (error) {
+        return { success: false, error: error instanceof Error ? error.message : ErrorMessages.UNEXPECTED_ERROR };
+    }
+}
 
 export async function cancelarPrestamoAction(command: CancelarPrestamoCommand): Promise<ActionState<Prestamo>> {
     try {

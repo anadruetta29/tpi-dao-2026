@@ -11,5 +11,6 @@ export abstract class PrestamoDataSourceI {
     abstract getAllPrestamos(dto: GetAllPrestamosReq): Promise<GetAllPrestamosRes>;
     abstract getPrestamoById(dto: GetPrestamoByIdReq): Promise<GetPrestamoByIdRes>;
     abstract createPrestamo(dto: CreatePrestamoReq): Promise<CreatePrestamoRes>;
+    abstract renovarPrestamo(dto: CancelarPrestamoReq): Promise<CancelarPrestamoRes>;
     abstract cancelarPrestamo(dto: CancelarPrestamoReq): Promise<CancelarPrestamoRes>;
 }

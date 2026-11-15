@@ -66,7 +66,13 @@ export function useViewModel(session: Session, prestamoInicialId?: string) {
             info("Préstamo", devolucion.prestamoId),
             info("Ejemplar", devolucion.ejemplarId),
             info("Fecha", devolucion.fecha),
-            info("Estado del ejemplar", devolucion.estadoDevueltoName),
+            info("Estado devuelto", devolucion.estadoDevueltoName),
+            info(
+                "Estado actual del ejemplar",
+                devolucion.estadoEjemplar === EstadoEjemplar.RESERVADO
+                    ? "Asignado a una reserva (Reservado)"
+                    : devolucion.estadoEjemplar?.name
+            ),
             info("Observaciones", devolucion.observaciones)
         ]
     });

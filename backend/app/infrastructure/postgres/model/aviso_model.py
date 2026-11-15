@@ -14,7 +14,6 @@ class AvisoModel(Base):
     socio_id = Column(Integer, ForeignKey("socios.id"), nullable=True)
     reserva_id = Column(Integer, ForeignKey("reservas.id"), nullable=True)
     prestamo_id = Column(Integer, ForeignKey("prestamos.id"), nullable=True)
-    fecha_email = Column(Date, nullable=True)
 
 
 class AvisoLecturaModel(Base):

@@ -12,11 +12,8 @@ import { useSelector } from "@/ui/hooks/use-selector";
 import { useSelectorCatalog } from "@/ui/hooks/use-selector-catalog";
 import { allOptions, info, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
 
-const nextStates = [
-    EstadoReserva.ATENDIDA,
-    EstadoReserva.CANCELADA,
-    EstadoReserva.VENCIDA
-].map((estado) => estado.toOption());
+const estadosActiva = [EstadoReserva.CANCELADA].map((estado) => estado.toOption());
+const estadosListaRetiro = [EstadoReserva.RETIRADA, EstadoReserva.CANCELADA].map((estado) => estado.toOption());
 
 export function useViewModel(session: Session, initialRecordId?: string) {
     const isRecepcionista = session.user?.role === Rol.RECEPCIONISTA;
@@ -86,21 +83,30 @@ export function useViewModel(session: Session, initialRecordId?: string) {
         });
     };
 
-    const describeReserva = (reserva: Reserva) => ({
-        info: [
-            info("Fecha", reserva.fecha),
-            info("Estado", reserva.estadoName),
-            info("Socio", reserva.socioId),
-            info("Libro", reserva.libroId),
-            info("Ejemplar", reserva.ejemplarId),
-            info("Sede", reserva.sedeId)
-        ],
-        forms: reserva.estadoEntity === EstadoReserva.ACTIVA ? [{
-            label: "Actualizar estado",
-            fields: [{ name: "estado", label: "Nuevo estado", options: nextStates }],
-            submit: (field: ReadField) => handleUpdateEstado(reserva.id, field)
-        }] : []
-    });
+    const describeReserva = (reserva: Reserva) => {
+        const opcionesEstado = reserva.estadoEntity === EstadoReserva.LISTA_PARA_RETIRO
+            ? estadosListaRetiro
+            : reserva.estadoEntity === EstadoReserva.ACTIVA
+                ? estadosActiva
+                : null;
+        return {
+            info: [
+                info("Fecha", reserva.fecha),
+                info("Estado", reserva.estadoName),
+                info("Límite de retiro", reserva.fechaLimiteRetiro),
+                info("Préstamo generado", reserva.prestamoId),
+                info("Socio", reserva.socioId),
+                info("Libro", reserva.libroId),
+                info("Ejemplar", reserva.ejemplarId),
+                info("Sede", reserva.sedeId)
+            ],
+            forms: opcionesEstado ? [{
+                label: "Actualizar estado",
+                fields: [{ name: "estado", label: "Nuevo estado", options: opcionesEstado }],
+                submit: (field: ReadField) => handleUpdateEstado(reserva.id, field)
+            }] : []
+        };
+    };
 
     {/* ===== variables ===== */ }
 

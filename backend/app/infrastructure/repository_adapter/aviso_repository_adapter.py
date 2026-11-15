@@ -20,9 +20,3 @@ class AvisoRepositoryAdapter(BaseRepositoryAdapter[Aviso, AvisoModel], AvisoRepo
     def marcar_leido(self, id: int, usuario_id: int, sede_id: Optional[int]) -> Optional[Aviso]:
         model = self.repository.marcar_leido(id, usuario_id, sede_id)
         return self.mapper.to_domain(model, True) if model is not None else None
-
-    def get_ids_sin_email(self) -> List[int]:
-        return self.repository.get_ids_sin_email()
-
-    def actualizar_email(self, aviso: Aviso) -> None:
-        self.update(aviso.id, aviso)

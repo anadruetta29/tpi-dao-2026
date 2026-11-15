@@ -65,6 +65,19 @@ export class PrestamoApiDataSource implements PrestamoDataSourceI {
         }
     }
 
+    public async renovarPrestamo(dto: CancelarPrestamoReq): Promise<CancelarPrestamoRes> {
+        try {
+            const response = await this.httpClient.patch(
+                `/prestamos/${encodeURIComponent(dto.id)}/renovacion`, {}, dto.session.accessToken
+            );
+            const prestamo = Prestamo.fromObject(response?.prestamo ?? response);
+            if (!prestamo?.id) throw new Error(ErrorMessages.UNEXPECTED_ERROR);
+            return { prestamo };
+        } catch (error) {
+            throw ErrorHandler.handleError(error);
+        }
+    }
+
     public async cancelarPrestamo(dto: CancelarPrestamoReq): Promise<CancelarPrestamoRes> {
         try {
             const response = await this.httpClient.patch(

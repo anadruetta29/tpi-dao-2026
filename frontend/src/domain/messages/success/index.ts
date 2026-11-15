@@ -22,6 +22,7 @@ export const SuccessMessages = {
     UPDATE_RESERVA_ESTADO_SUCCESS: "Estado de la reserva actualizado correctamente.",
     CREATE_DEVOLUCION_SUCCESS: "Devolución registrada correctamente.",
     PRESTAMO_CREATED: "Préstamo efectivizado correctamente.",
+    PRESTAMO_RENOVADO: "Préstamo renovado correctamente.",
     PRESTAMO_CANCELADO: "Préstamo cerrado y devolución registrada.",
     REMITO_CREATED: "Remito emitido correctamente.",
     REMITO_DESPACHADO: "Despacho registrado correctamente.",
