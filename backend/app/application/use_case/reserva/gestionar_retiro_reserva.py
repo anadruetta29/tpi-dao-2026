@@ -1,6 +1,6 @@
 from datetime import date
 from typing import Optional
-from app.application.state.reserva_estado.core.reserva_estado_state_factory import ReservaEstadoStateFactory
+from app.application.state.reserva.core.reserva_factory import ReservaEstadoStateFactory
 from app.application.strategy.vencimiento_prestamo.core.vencimiento_prestamo_strategy_factory import VencimientoPrestamoStrategyFactory
 from app.application.use_case.reserva.asignar_reserva_use_case import asignar_reserva
 from app.domain.entity.ejemplar import Ejemplar

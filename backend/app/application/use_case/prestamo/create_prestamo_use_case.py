@@ -2,7 +2,7 @@ from contextlib import nullcontext
 from dataclasses import dataclass
 from datetime import date
 from typing import Callable, ContextManager, Optional
-from app.application.state.ejemplar_estado.core.ejemplar_estado_state_factory import (
+from app.application.state.ejemplar.core.ejemplar_factory import (
     EjemplarEstadoStateFactory,
 )
 from app.application.strategy.vencimiento_prestamo.core.vencimiento_prestamo_strategy_factory import (

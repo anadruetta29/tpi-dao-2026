@@ -1,7 +1,7 @@
 from contextlib import nullcontext
 from dataclasses import dataclass
 from typing import Callable, ContextManager, Optional
-from app.application.state.multa_estado.core.multa_estado_state_factory import (
+from app.application.state.multa.core.multa_factory import (
     MultaEstadoStateFactory,
 )
 from app.core.helper.auth_helper import AuthHelper

@@ -3,7 +3,7 @@ from typing import Optional
 from app.application.strategy.devolucion_ejemplar.core.devolucion_ejemplar_strategy import (
     DevolucionEjemplarStrategy,
 )
-from app.application.state.ejemplar_estado.core.ejemplar_estado_state_factory import (
+from app.application.state.ejemplar.core.ejemplar_factory import (
     EjemplarEstadoStateFactory,
 )
 from app.application.use_case.reserva.asignar_reserva_use_case import asignar_reserva

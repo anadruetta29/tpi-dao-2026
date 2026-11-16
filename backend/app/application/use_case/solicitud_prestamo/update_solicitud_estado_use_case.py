@@ -2,7 +2,7 @@ from contextlib import nullcontext
 from dataclasses import dataclass
 from datetime import date
 from typing import Callable, ContextManager, Optional
-from app.application.state.solicitud_estado.core.solicitud_estado_state_factory import (
+from app.application.state.solicitud.core.solicitud_factory import (
     SolicitudEstadoStateFactory,
 )
 from app.application.use_case.prestamo.create_prestamo_use_case import CreatePrestamoUseCase

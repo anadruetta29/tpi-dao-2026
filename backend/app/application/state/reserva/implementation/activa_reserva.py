@@ -1,0 +1,16 @@
+from app.application.state.reserva.core.reserva import (
+    ReservaEstadoState,
+)
+from app.domain.entity.estado_reserva import EstadoReserva
+from app.domain.entity.reserva import Reserva
+
+
+class ActivaReservaState(ReservaEstadoState):
+    def atender(self, reserva: Reserva) -> None:
+        reserva.estado = EstadoReserva.LISTA_PARA_RETIRO
+
+    def cancelar(self, reserva: Reserva) -> None:
+        reserva.estado = EstadoReserva.CANCELADA
+
+    def vencer(self, reserva: Reserva) -> None:
+        reserva.estado = EstadoReserva.VENCIDA

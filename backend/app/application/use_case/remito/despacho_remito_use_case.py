@@ -2,7 +2,7 @@ from contextlib import nullcontext
 from dataclasses import dataclass
 from datetime import date
 from typing import Callable, ContextManager, Optional
-from app.application.state.remito_estado.core.remito_estado_state_factory import (
+from app.application.state.remito.core.remito_factory import (
     RemitoEstadoStateFactory,
 )
 from app.core.helper.auth_helper import AuthHelper

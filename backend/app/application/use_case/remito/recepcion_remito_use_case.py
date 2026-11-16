@@ -2,7 +2,7 @@ from contextlib import nullcontext
 from dataclasses import dataclass, field
 from datetime import date
 from typing import Any, Callable, ContextManager, Dict, List, Optional
-from app.application.state.remito_estado.core.remito_estado_state_factory import (
+from app.application.state.remito.core.remito_factory import (
     RemitoEstadoStateFactory,
 )
 from app.application.use_case.prestamo.create_prestamo_use_case import CreatePrestamoUseCase
