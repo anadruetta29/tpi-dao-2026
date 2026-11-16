@@ -13,7 +13,6 @@ import { getRecepcionistasAction } from "@/ui/actions/solicitud-prestamo/solicit
 import { type SearchOption } from "@/ui/components/library-search-select/library-search-select";
 import { useMultipleSelector, useSelector } from "@/ui/hooks/use-selector";
 import { pickData } from "@/ui/routes/use-library-records-viewmodel";
-import { opcionesSedeOrigen } from "../../../core/utils/sedes-origen";
 
 export function useSelectoresViewModel(
     session: Session,
@@ -91,6 +90,7 @@ export function useSelectoresViewModel(
     {/* ===== onActions functions ===== */ }
 
     const onSelectOrigin = (value: string) => {
+        libro.reset();
         ejemplar.reset();
         recepcionista.reset();
         const usuario = session.user;
@@ -157,33 +157,22 @@ export function useSelectoresViewModel(
         )
     );
     const destinationField = destino.field(eligibleDestinationSedes, "Cargando sedes...", onChangeDestination);
-    const libros = data ? pickData(data.libros, ({ libros: items }) => items.map(({ id, titulo, editorial }) => ({
-        value: id,
-        label: [titulo, editorial].filter(Boolean).join(" · ")
-    }))) : null;
+    const availableLibroIdsInOrigin = new Set((copies?.data ?? []).filter(({ sedeId }) => sedeId === origen.selected).map(({ libroId }) => libroId));
+    const libros = origen.selected && data ? pickData(data.libros, ({ libros: items }) => items.filter(({ id }) => availableLibroIdsInOrigin.has(id)).map(({ id, titulo, editorial }) => ({ value: id, label: [titulo, editorial].filter(Boolean).join(" · ") }))) : null;
 
-    const eligibleSedes = activeSedes && pickData(activeSedes, (items) => interbibliotecaria
-        ? opcionesSedeOrigen(items, copies?.data ?? [], libro.selected, destino.selected,
-            recepcionistaActual ? sedePropia : undefined)
-        : items.filter(({ value }) => !recepcionistaActual || value === sedePropia));
+    const eligibleSedes = activeSedes && pickData(activeSedes, (items) => interbibliotecaria ? items : items.filter(({ value }) => !recepcionistaActual || value === sedePropia));
 
-    const originField = origen.field(
-        interbibliotecaria && libro.selected && copies?.success === false
-            ? { success: false, error: copies.error }
-            : eligibleSedes,
-        "Cargando sedes...",
-        onSelectOrigin
-    );
-
-    if (interbibliotecaria && libro.selected && copies?.success && eligibleSedes?.data?.length === 0) {
-        originField.status = "No hay ejemplares disponibles de este título en las sedes de origen.";
+    const originField = origen.field(eligibleSedes, "Cargando sedes...", onSelectOrigin);
+    const libroField = libro.field(libros, origen.selected ? "Cargando títulos..." : "Seleccioná primero la sede de origen.");
+    if (interbibliotecaria && origen.selected && libros?.success && libros.data?.length === 0) {
+        libroField.status = "No hay ejemplares disponibles en la sede de origen.";
     }
 
     const fields = [
         originField,
         ...(interbibliotecaria ? [
             destinationField,
-            libro.field(libros, "Cargando títulos...")
+            libroField
         ] : []),
         ejemplar.field(
             origen.selected && copies ? pickData(copies, (items) => items.filter(({ sedeId, libroId }) =>
