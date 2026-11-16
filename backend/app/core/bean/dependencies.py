@@ -1,12 +1,14 @@
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
-from app.application.strategy import (
-    CalculoMultaStrategyFactory,
+from app.application.state import (
     EjemplarEstadoStateFactory,
     MultaEstadoStateFactory,
     RemitoEstadoStateFactory,
     SolicitudEstadoStateFactory,
+)
+from app.application.strategy import (
+    CalculoMultaStrategyFactory,
     SolicitudTipoStrategyFactory,
 )
 from app.application.service import (

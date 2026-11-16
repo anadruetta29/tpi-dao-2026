@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 from typing import Optional
-from app.application.strategy.reserva_estado.core.reserva_estado_state_factory import ReservaEstadoStateFactory
+from app.application.state.reserva_estado.core.reserva_estado_state_factory import ReservaEstadoStateFactory
 from app.core.config.settings import settings
 from app.domain.entity.aviso import Aviso
 from app.domain.entity.ejemplar import Ejemplar

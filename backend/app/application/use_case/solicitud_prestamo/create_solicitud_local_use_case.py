@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import List, Optional
-from app.application.strategy.ejemplar_estado.core.ejemplar_estado_state_factory import (
+from app.application.state.ejemplar_estado.core.ejemplar_estado_state_factory import (
     EjemplarEstadoStateFactory,
 )
 from app.application.strategy.solicitud_tipo.core.solicitud_tipo_strategy_factory import (

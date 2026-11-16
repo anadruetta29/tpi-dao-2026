@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Callable, ContextManager, List, Optional
 from uuid import uuid4
-from app.application.strategy.ejemplar_estado.core.ejemplar_estado_state_factory import (
+from app.application.state.ejemplar_estado.core.ejemplar_estado_state_factory import (
     EjemplarEstadoStateFactory,
 )
 from app.core.helper.auth_helper import AuthHelper

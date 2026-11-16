@@ -1,0 +1,7 @@
+from app.application.state.reserva_estado.core.reserva_estado_state import (
+    ReservaEstadoState,
+)
+
+
+class CanceladaReservaState(ReservaEstadoState):
+    pass
