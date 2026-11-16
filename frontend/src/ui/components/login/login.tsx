@@ -1,37 +1,50 @@
+import { type FormEventHandler } from "react";
 import { LibraryBrand } from "@/ui/components/library-brand/library-brand";
 import { LibraryStatus } from "@/ui/components/library-status/library-status";
 import { LoginForm } from "@/ui/components/login-form/login-form";
+import type { LibraryFieldProps } from "@/ui/components/library-field/library-field";
+import type { ThemeView } from "@/ui/layout/viewmodel";
+import { LibraryThemeButton } from "@/ui/components/library-theme-button/library-theme-button";
 import styles from "./style.module.css";
-import type { FormEventHandler } from "react";
 
 type Props = {
-    error: string | null 
+    error: string | null
     isLoading: boolean
+    fields: LibraryFieldProps[]
+    theme: ThemeView
     onSubmit: FormEventHandler<HTMLFormElement>
 }
-export function Login( { error, isLoading, onSubmit}: Props ) {
 
+export function Login({ error, isLoading, fields, onSubmit, theme }: Props) {
     return (
         <main className={styles.page}>
-            <div className={styles.cover}>
-                <LibraryBrand />
-                <div className={styles.art} aria-hidden="true">
-                    <div className={styles.orbit} />
-                    <div className={styles.books}>
-                        <span className={styles.first} /><span className={styles.second} /><span className={styles.third} /><span className={styles.fourth} />
+            <article className={styles.card} aria-labelledby="login-title">
+                <div className={styles.body}>
+                    <div className={styles.brandRow}><LibraryBrand /><LibraryThemeButton {...theme} /></div>
+                    <div className={styles.intro}>
+                        <h1 id="login-title">Iniciá sesión</h1>
+                        <p>Ingresá con tu cuenta de la biblioteca.</p>
+                    </div>
+                    {error && <LibraryStatus kind="error">{error}</LibraryStatus>}
+                    <LoginForm fields={fields} isLoading={isLoading} onSubmit={onSubmit} />
+                </div>
+                <div className={styles.cover} aria-hidden="true">
+                    <div className={styles.art}>
+                        <span className={styles.book} />
+                        <span className={styles.book} />
+                        <span className={styles.book} />
+                        <span className={styles.book} />
                     </div>
                 </div>
-                <p className={styles.tagline}>Gestión de bibliotecas</p>
-            </div>
-            <div className={styles.body}>
-                <div className={styles.mobileBrand}><LibraryBrand /></div>
-                <section aria-labelledby="login-title" className={styles.content}>
-                    <h1 id="login-title">Iniciá sesión</h1>
-                    <p className={styles.hint}>Ingresá con tu cuenta de la biblioteca.</p>
-                    {error && <LibraryStatus kind="error">{error}</LibraryStatus>}
-                    <LoginForm isLoading={isLoading} onSubmit={onSubmit} />
-                </section>
-            </div>
+            </article>
+        </main>
+    );
+}
+
+export function SessionLoading() {
+    return (
+        <main className={styles.page}>
+            <div className={styles.session}><LibraryBrand /><LibraryStatus>Verificando sesión...</LibraryStatus></div>
         </main>
     );
 }

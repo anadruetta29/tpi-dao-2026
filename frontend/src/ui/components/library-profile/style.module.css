@@ -5,33 +5,74 @@
     display: flex;
     align-items: center;
     gap: 0.65rem;
+    min-height: 44px;
     cursor: pointer;
     list-style: none;
-    padding: 0.35rem 0.55rem;
-    border-radius: 9px;
+    padding: 0.3rem 0.55rem 0.3rem 0.35rem;
+    border: 1px solid var(--rosewood);
+    border-radius: var(--radius-control);
 }
 
 .account summary::-webkit-details-marker { display: none; }
-.account summary:hover, .account[open] summary { background: var(--surface-muted); }
-.account summary::after { content: ""; width: 6px; height: 6px; margin: 0 0.25rem 0.25rem; border: solid var(--muted); border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); }
-.avatar { display: grid; flex: 0 0 36px; height: 36px; place-items: center; border-radius: 50%; color: #3046a2; background: #e7ecff; font-size: 0.78rem; font-weight: 750; }
-.name { display: grid; line-height: 1.25; font-size: 0.84rem; min-width: 0; }
-.name small { color: var(--muted); margin-top: 0.2rem; }
-.name strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: min(36vw, 230px); }
+.account summary:hover, .account[open] summary { background: var(--nav-hover); }
+.account summary > svg { flex-shrink: 0; width: 1rem; height: 1rem; color: var(--nav-muted); }
+.account[open] summary > svg { transform: rotate(180deg); }
+.avatar { display: grid; flex: 0 0 36px; width: 36px; height: 36px; place-items: center; border-radius: 7px; color: var(--ink); background: var(--parchment); font-size: 0.8rem; font-weight: 750; }
+.name { display: grid; line-height: 1.2; font-size: 0.88rem; min-width: 0; }
+.name small { color: var(--nav-muted); margin-top: 0.22rem; }
+.name strong, .name small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: clamp(4rem, 21vw, 13rem); }
 
 .panel {
+    --focus: var(--control-line);
     position: absolute;
     z-index: 5;
-    inset: calc(100% + 8px) 0 auto auto;
-    width: min(275px, calc(100vw - 2rem));
-    padding: 0.85rem;
+    inset: calc(100% + 0.6rem) 0 auto auto;
+    width: min(19rem, calc(100vw - 2rem));
+    padding: 0.9rem;
     display: grid;
     gap: 0.55rem;
+    color: var(--ink);
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 12px;
-    box-shadow: 0 18px 45px #17264b22;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-popover);
+}
+.branch { display: flex; align-items: center; gap: 0.5rem; color: var(--muted); overflow-wrap: anywhere; }
+.branch svg { width: 1rem; height: 1rem; flex-shrink: 0; }
+
+.identity {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.3rem 0.1rem 0.75rem;
+    border-bottom: 1px solid var(--line);
+    overflow-wrap: anywhere;
 }
 
-.identity { display: grid; padding: 0.15rem 0.2rem 0.5rem; overflow-wrap: anywhere; }
-.identity span { color: var(--muted); font-size: 0.84rem; }
+.identity > div { display: grid; flex: 1 1 9rem; min-width: 0; }
+.identity > div span { color: var(--muted); font-size: 0.86rem; }
+.activity { padding: 0.1rem 0.5rem; border-radius: 99px; background: var(--surface-muted); font-size: 0.75rem; }
+.panel button { justify-content: start; }
+
+@media (max-width: 360px) {
+    .name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .account:not(:has(summary:focus-visible)) summary > svg { transition: transform var(--motion-popover) var(--ease-out); }
+    .account[open] .panel { animation: var(--motion-reveal) var(--motion-popover) var(--ease-out) both; }
+
+    @supports selector(::details-content) {
+        .account:not(:has(summary:focus-visible))::details-content {
+            transition: content-visibility var(--motion-fast) allow-discrete;
+        }
+
+        .account:not([open]) .panel {
+            pointer-events: none;
+            animation: fade-out var(--motion-fast) var(--ease-out) both;
+        }
+    }
+}
+
+@keyframes fade-out { to { opacity: 0; transform: translateY(-3px); } }

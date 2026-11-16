@@ -32,10 +32,10 @@ async function loadCatalog(session: Session, sources: Set<Source>) {
             value: id, label: [members.get(id), documento].filter(Boolean).join(" · "), estado
         }))),
         libros: libros && pickData(libros, ({ libros: items }) => items.map(({ id, titulo, editorial, añoPublicacion }) => ({
-            value: id, label: [titulo, editorial, añoPublicacion].filter(Boolean).join(" · ")
+            value: id, label: [titulo, editorial, añoPublicacion].filter(Boolean).join(" · "), titulo
         }))),
-        ejemplares: ejemplares && pickData(ejemplares, ({ ejemplares: items }) => items.map(({ id, sedeId, libroId, estado }) => ({
-            value: id, label: [copies.get(id), branches.get(sedeId)].filter(Boolean).join(" · "), sedeId, libroId, estado
+        ejemplares: ejemplares && pickData(ejemplares, ({ ejemplares: items }) => items.map(({ id, codigo, sedeId, libroId, estado }) => ({
+            value: id, label: [copies.get(id), branches.get(sedeId)].filter(Boolean).join(" · "), codigo, sedeId, libroId, estado
         }))),
 prestamos: prestamos && pickData(prestamos, ({ prestamos: items }) => items.map(({ id, ejemplaresIds, ejemplaresDevueltosIds, sedeId, socioId, solicitudId, fechaInicio, estado, estadoName }) => ({
             value: id,

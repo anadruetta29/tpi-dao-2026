@@ -1,10 +1,13 @@
-import { useEffect, useRef, useState, type FormEventHandler } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type FormEventHandler, type MouseEventHandler, type SyntheticEvent } from "react";
 import { type ActionState } from "@/core/types";
 import { ErrorMessages } from "@/domain/messages";
 import { readForm, type ReadField, type ReadFieldValues } from "@/ui/forms/handlers/read-form";
 import { type LibraryFieldProps } from "@/ui/components/library-field/library-field";
+import { moduleIcon, statusBadge, type StatusBadgeView } from "@/ui/components/library-records/viewmodel";
+import type { LibraryIconName } from "@/ui/components/library-icon/library-icon";
+import { useFormFieldsViewModel } from "@/ui/components/library-form/viewmodel";
 
-export type InfoRow = { label: string; value: string };
+export type InfoRow = { label: string; value: string; badge?: StatusBadgeView };
 export type Field = LibraryFieldProps;
 type Query<T> = () => Promise<ActionState<T>>;
 
@@ -16,11 +19,13 @@ export interface FormSpec<T> {
     onOpen?: () => void;
 }
 
-export interface DetailSection {
+export type DetailSection = {
     title: string;
-    entries: { id: string; label: string }[];
     emptyMessage: string;
-}
+} & (
+    | { kind?: "list"; entries: { id: string; label: string; detail?: string; badge?: StatusBadgeView }[] }
+    | { kind: "timeline"; entries: { id: string; label: string; current: boolean; metadata: InfoRow[] }[] }
+);
 
 export interface DetailSpec {
     info: InfoRow[];
@@ -39,6 +44,32 @@ async function resolve<T>(query: Query<T>): Promise<ActionState<T>> {
     }
 }
 
+function useDetailQueriesViewModel() {
+    const extraVersion = useRef(0);
+    const [extraLoading, setExtraLoading] = useState(false);
+    const [extra, setExtra] = useState<ActionState<DetailSection[]> | null>(null);
+
+    const runQuery = async (loadExtra: Query<DetailSection[]>) => {
+        const version = ++extraVersion.current;
+        setExtra(null);
+        setExtraLoading(true);
+        const result = await resolve(loadExtra);
+        if (version !== extraVersion.current) return;
+        setExtra(result);
+        setExtraLoading(false);
+    };
+
+    {/* ===== onActions functions ===== */ }
+
+    const clearExtra = useCallback(() => {
+        extraVersion.current += 1;
+        setExtra(null);
+        setExtraLoading(false);
+    }, []);
+
+    return { extra, extraLoading, clearExtra, runQuery };
+}
+
 export interface RecordsOptions<T extends { id: string }, D, F> {
     title: string;
     initialFilters: F;
@@ -50,11 +81,18 @@ export interface RecordsOptions<T extends { id: string }, D, F> {
     loadDetail?: (id: string) => Promise<ActionState<D>>;
     getLabel: (record: T) => string;
     getMeta?: (record: T) => string;
+    getStatuses?: (record: T) => (string | StatusBadgeView)[];
     describe?: (detail: D) => DetailSpec;
+    describeRecord?: (record: T) => DetailSpec;
     create?: FormSpec<Promise<ActionState<unknown>>>;
+    onSelectRecord?: () => void;
 }
 
 export interface FormView {
+    revision?: number;
+    onClear?: () => void;
+    clearDisabled?: boolean;
+    onChange?: FormEventHandler<HTMLFormElement>;
     submitDisabled?: boolean;
     label: string;
     fields: Field[];
@@ -63,7 +101,9 @@ export interface FormView {
 
 export interface LibraryRecordsView {
     title: string;
+    icon: LibraryIconName;
     filter?: FormView;
+    filterBadge?: StatusBadgeView;
     create?: FormView;
     createLabel?: string;
     toggleCreate: () => void;
@@ -72,7 +112,10 @@ export interface LibraryRecordsView {
     error: string | null;
     isSaving: boolean;
     refresh: () => void;
-    records: { id: string; label: string; meta?: string; selected: boolean; select?: () => void }[];
+    createId: string;
+    confirmation?: { id: string; label: string; message: string; tone: "primary" | "danger"; cancel: (event?: SyntheticEvent) => void; confirm: () => void };
+    records: { id: string; label: string; meta?: string; badges: StatusBadgeView[]; selected: boolean; select?: () => void;
+        clickRow?: MouseEventHandler<HTMLDivElement>; scrollId?: string }[];
     detail?: {
         loading: boolean;
         error: string | null;
@@ -98,6 +141,10 @@ export function info(label: string, value: string | number | Date | null | undef
     return { label, value: value instanceof Date ? value.toISOString().slice(0, 10) : String(value ?? "") || "—" };
 }
 
+export function statusInfo(value: string | null | undefined, tone?: StatusBadgeView["tone"], label = "Estado"): InfoRow {
+    return { ...info(label, value), badge: value ? statusBadge(value, tone) : undefined };
+}
+
 export function allOptions(options: { value: string; label: string }[]): { value: string; label: string }[] {
     return [{ value: "", label: "Todos" }, ...options];
 }
@@ -117,10 +164,33 @@ export function useLibraryRecordsViewModel<T extends { id: string }, D, F>(
     const [isCreating, setIsCreating] = useState(Boolean(options.initiallyOpen));
     const [isSaving, setIsSaving] = useState(false);
     const [feedback, setFeedback] = useState<LibraryRecordsView["feedback"]>(null);
+    const [filterRevision, setFilterRevision] = useState(0);
+    const [filterDraft, setFilterDraft] = useState<Record<string, boolean>>({});
+    const [pending, setPending] = useState<NonNullable<DetailSpec["commands"]>[number] | null>(null);
+    const formFields = useFormFieldsViewModel();
+    const regionId = useId();
+    const dialogId = `${regionId}-confirm`;
 
-    const extraVersion = useRef(0);
-    const [extraLoading, setExtraLoading] = useState(false);
-    const [extra, setExtra] = useState<ActionState<DetailSection[]> | null>(null);
+    useLayoutEffect(() => {
+        if (!pending) return;
+        const dialog = document.getElementById(dialogId) as HTMLDialogElement | null;
+        if (dialog && !dialog.open) dialog.showModal();
+    }, [pending, dialogId]);
+
+    const cancel = (event?: SyntheticEvent) => {
+        event?.preventDefault();
+        (document.getElementById(dialogId) as HTMLDialogElement | null)?.close();
+        setPending(null);
+    };
+
+    const scrollIfOutside = useCallback((node: HTMLElement | null) => {
+        if (!node || !window.matchMedia("(max-width: 860px)").matches) return;
+        const bounds = node.getBoundingClientRect();
+        if (bounds.bottom > 0 && bounds.top >= 0 && bounds.top + 52 <= window.innerHeight) return;
+        node.scrollIntoView({ block: "nearest", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+    }, []);
+
+    const { extra, extraLoading, clearExtra, runQuery } = useDetailQueriesViewModel();
     const saving = useRef(false);
 
     {/* ===== Main useEffects ===== */ }
@@ -148,30 +218,13 @@ export function useLibraryRecordsViewModel<T extends { id: string }, D, F>(
 
     {/* ===== Fetch data ===== */ }
 
-    const runQuery = async (loadExtra: Query<DetailSection[]>) => {
-        const version = ++extraVersion.current;
-        setExtra(null);
-        setExtraLoading(true);
-        const result = await resolve(loadExtra);
-        if (version !== extraVersion.current) return;
-        setExtra(result);
-        setExtraLoading(false);
-    };
-
-    {/* ===== onActions functions ===== */ }
-
-    const clearExtra = () => {
-        extraVersion.current += 1;
-        setExtra(null);
-        setExtraLoading(false);
-    };
-
     const refresh = () => {
         setLoaded(null);
         setRevision((current) => current + 1);
     };
 
     const toggleCreate = () => {
+        formFields.clear();
         if (!isCreating) create?.onOpen?.();
         setIsCreating(!isCreating);
         setSelection(null);
@@ -204,10 +257,10 @@ export function useLibraryRecordsViewModel<T extends { id: string }, D, F>(
         }
     };
 
-    const writeForm = (form: FormSpec<ReturnType<Query<unknown>>>): FormView => {
+    const writeForm = (form: FormSpec<ReturnType<Query<unknown>>>, scope: string): FormView => {
         return {
             label: form.label,
-            fields: form.fields,
+            fields: formFields.fields(form.fields, scope),
             submitDisabled: form.submitDisabled,
             onSubmit: (event) => readForm(event, (field, values) => {
                 if (!form.submitDisabled) void handleSave(() => form.submit(field, values));
@@ -219,11 +272,39 @@ export function useLibraryRecordsViewModel<T extends { id: string }, D, F>(
 
     const list = loaded?.load === load ? loaded.result : null;
     const currentDetail = detail?.selection === selection && detail?.loadDetail === loadDetail ? detail?.result : null;
-    const spec = currentDetail?.data && describe ? describe(currentDetail.data) : undefined;
+    const localRecord = options.describeRecord && selection
+        ? list?.data?.find(({ id }) => id === selection.id)
+        : undefined;
+    const spec = localRecord ? options.describeRecord?.(localRecord) : currentDetail?.data && describe ? describe(currentDetail.data) : undefined;
 
+    const filterApplied = JSON.stringify(filters) !== JSON.stringify(initialFilters);
+    const filterHasDraft = Object.values(filterDraft).some(Boolean) || filter?.fields.some((field) =>
+        field.kind === "search-select" && Boolean(field.query || field.selectedItems?.length));
     const filterView: FormView | undefined = filter ? {
         label: filter.label,
         fields: filter.fields,
+        revision: filterRevision,
+        clearDisabled: !filterApplied && !filterHasDraft,
+        onChange: (event) => {
+            const input = event.target as HTMLInputElement | HTMLSelectElement;
+            const field = filter.fields.find(({ name }) => name === input.name);
+            if (!field || field.kind) return;
+            const defaultValue = field.defaultValue ?? field.options?.[0]?.value ?? "";
+            setFilterDraft((current) => ({ ...current, [field.name]: input.value !== defaultValue }));
+        },
+        onClear: () => {
+            filter.fields.forEach((field) => {
+                if (field.kind === "search-select") field.reset?.();
+            });
+            setFilterRevision((value) => value + 1);
+            setFilterDraft({});
+            if (filterApplied) {
+                setFilters(initialFilters);
+                setSelection(null);
+                clearExtra();
+                refresh();
+            }
+        },
         onSubmit: (event) => readForm(event, (field, values) => {
             const next = filter.submit(field, values);
             setFilters(next);
@@ -233,7 +314,7 @@ export function useLibraryRecordsViewModel<T extends { id: string }, D, F>(
         })
     } : undefined;
 
-    const createView: FormView | undefined = isCreating && create ? writeForm(create) : undefined;
+    const createView: FormView | undefined = isCreating && create ? writeForm(create, "create") : undefined;
     const createLabel = create && (isCreating ? "Cancelar" : create.label);
 
     const rawItems = list?.data ?? [];
@@ -244,32 +325,50 @@ export function useLibraryRecordsViewModel<T extends { id: string }, D, F>(
         ? items.find(({ id }) => id === options.initialRecordId)
         : undefined;
     const ordered = initialRecord ? [initialRecord, ...items.filter((item) => item !== initialRecord)] : items;
-    const records = ordered.map((record) => ({
-        id: record.id,
-        label: getLabel(record),
-        meta: options.getMeta?.(record),
-        selected: selection?.id === record.id,
-        select: loadDetail ? () => {
-            setSelection(selection?.id === record.id ? null : { id: record.id });
-            setIsCreating(false);
-            clearExtra();
-            setFeedback(null);
-        } : undefined
-    }));
+    const createId = `${regionId}-editor`;
+    const initialRowId = initialRecord ? `${regionId}-row` : undefined;
+    useEffect(() => {
+        const target = isCreating ? createId : initialRowId;
+        if (target) scrollIfOutside(document.getElementById(target));
+    }, [isCreating, createId, initialRowId, scrollIfOutside]);
+
+    const selectRecord = (id: string) => {
+        options.onSelectRecord?.();
+        setSelection(selection?.id === id ? null : { id });
+        formFields.clear();
+        setIsCreating(false);
+        clearExtra();
+        setFeedback(null);
+    };
+
+    const records: LibraryRecordsView["records"] = [];
+    for (const record of ordered) {
+        records.push({
+            id: record.id,
+            label: getLabel(record),
+            meta: options.getMeta?.(record),
+            badges: options.getStatuses?.(record).filter(Boolean).map((status) => typeof status === "string" ? statusBadge(status) : status) ?? [],
+            selected: selection?.id === record.id,
+            select: loadDetail || options.describeRecord ? () => selectRecord(record.id) : undefined,
+            clickRow: (loadDetail || options.describeRecord) && !isSaving ? (event) => {
+                if ((event.target as Element).closest("button, a, input") || window.getSelection()?.type === "Range") return;
+                selectRecord(record.id);
+            } : undefined,
+            scrollId: initialRecord === record ? initialRowId : undefined
+        });
+    }
 
     const detailView = selection ? {
-        loading: !currentDetail,
+        loading: options.describeRecord ? !list : !currentDetail,
         error: currentDetail && !currentDetail.success ? currentDetail.error || ErrorMessages.UNEXPECTED_ERROR : null,
         info: spec?.info ?? [],
         sections: spec?.sections ?? [],
-        forms: spec?.forms?.map(writeForm) ?? [],
+        forms: spec?.forms?.map((form) => writeForm(form, `detail:${form.label}`)) ?? [],
         commands: [
-            ...(spec?.commands?.map(({ label, confirm, execute, tone }) => ({
-                label,
-                tone,
-                onClick: () => {
-                    if (window.confirm(confirm)) void handleSave(execute);
-                }
+            ...(spec?.commands?.map((command) => ({
+                label: command.label,
+                tone: command.tone,
+                onClick: () => setPending(command)
             })) ?? []),
             ...(spec?.actions ?? [])
         ],
@@ -284,7 +383,9 @@ export function useLibraryRecordsViewModel<T extends { id: string }, D, F>(
 
     return {
         title,
+        icon: moduleIcon(title),
         filter: filterView,
+        filterBadge: filterApplied ? { label: "Filtro activo", tone: "active" } : undefined,
         create: createView,
         createLabel,
         toggleCreate,
@@ -293,6 +394,15 @@ export function useLibraryRecordsViewModel<T extends { id: string }, D, F>(
         error: list && !list.success ? list.error || ErrorMessages.UNEXPECTED_ERROR : null,
         isSaving,
         refresh,
+        createId,
+        confirmation: pending ? {
+            id: dialogId,
+            label: pending.label,
+            message: pending.confirm,
+            tone: pending.tone ?? "danger",
+            cancel,
+            confirm: () => { cancel(); void handleSave(pending.execute); }
+        } : undefined,
         records,
         detail: detailView
     };

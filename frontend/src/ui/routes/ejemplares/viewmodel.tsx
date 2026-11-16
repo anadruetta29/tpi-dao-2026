@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { Rol } from "@/domain/entities/rol";
 import { type ActionState } from "@/core/types";
 import { EstadoEjemplar, type Ejemplar } from "@/domain/entities/ejemplar";
 import { EstadoSede, type Sede } from "@/domain/entities/sede";
@@ -8,9 +9,10 @@ import { getLibroDisponibilidadAction } from "@/ui/actions/libro/libro.actions";
 import { getAllSedesAction } from "@/ui/actions/sede/sede.actions";
 import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
-import { allOptions, info, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
+import { allOptions, info, statusInfo, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
+import type { SolicitudInterbibliotecariaInicial } from "@/core/types";
 
-export default function ViewModel(session: Session, libroId: string) {
+export default function ViewModel(session: Session, libroId: string, onSolicitar?: (initial: SolicitudInterbibliotecariaInicial) => void) {
     const [sedesResult, setSedesResult] = useState<ActionState<Sede[]> | null>(null);
     const [revision, setRevision] = useState(0);
     const [disponibilidad, setDisponibilidad] = useState<Awaited<ReturnType<typeof getLibroDisponibilidadAction>> | null>(null);
@@ -87,7 +89,7 @@ export default function ViewModel(session: Session, libroId: string) {
             info: [
                 info("Código", ejemplar.codigo),
                 info("Sede", sedeNames.get(ejemplar.sedeId)),
-                info("Estado", ejemplar.estadoName)
+                statusInfo(ejemplar.estadoName)
             ],
             commands: enRevision && puedeGestionarSede
                 ? [
@@ -139,7 +141,7 @@ export default function ViewModel(session: Session, libroId: string) {
     const getEjemplarLabel = (ejemplar: Ejemplar) => ejemplar.codigo;
 
     const getEjemplarMeta = (ejemplar: Ejemplar) => {
-        return [ejemplar.estadoName, sedeNames.get(ejemplar.sedeId) ?? "Sede no disponible"].filter(Boolean).join(" · ");
+        return [sedeNames.get(ejemplar.sedeId) ?? "Sede no disponible"].filter(Boolean).join(" · ");
     };
 
     const filterFields: Field[] = [
@@ -170,6 +172,7 @@ export default function ViewModel(session: Session, libroId: string) {
         },
         getLabel: getEjemplarLabel,
         getMeta: getEjemplarMeta,
+        getStatuses: (ejemplar) => [ejemplar.estadoName],
         create: {
             label: "Registrar ejemplar",
             fields: createFields,
@@ -179,7 +182,27 @@ export default function ViewModel(session: Session, libroId: string) {
         describe: describeEjemplar
     });
 
+    const sedePropia = session.user?.sedeId ?? "";
+    const recepcionista = session.user?.roleEntity === Rol.RECEPCIONISTA;
+    const stock = (disponibilidad?.data?.sedes ?? []).map(({ sedeId, sedeNombre, sedeActiva, disponibles, ejemplares }) => {
+        const ejemplar = ejemplares.find((item) => item.estado === EstadoEjemplar.DISPONIBLE);
+        const canRequest = sedeActiva && disponibles > 0 && (!recepcionista || (sedePropia && sedeId !== sedePropia));
+        const label = sedeNombre || (sedeId ? `Sede ${sedeId}` : "Sin sede asignada");
+        const summary = sedeActiva ? `${disponibles} de ${ejemplares.length} disponibles` : "Sin préstamos habilitados";
+        return {
+            id: sedeId, label, summary, local: Boolean(sedePropia && sedePropia === sedeId),
+            meterLabel: `${label}, ${summary}`, total: ejemplares.length || 1, available: sedeActiva ? disponibles : 0,
+            tone: !sedeActiva ? "inactive" : disponibles > 0 ? "success" : "attention",
+            request: canRequest && ejemplar && onSolicitar ? () => onSolicitar({
+                sedeOrigenId: sedeId,
+                sedeDestinoId: sedePropia !== sedeId ? sedePropia : "",
+                ejemplarId: ejemplar.id
+            }) : undefined
+        };
+    });
+
     return {
+        stock,
         records,
         loadingSedes: sedesResult === null,
         sedesError: sedesResult && !sedesResult.success ? sedesResult.error || "No se pudieron cargar las sedes." : null,

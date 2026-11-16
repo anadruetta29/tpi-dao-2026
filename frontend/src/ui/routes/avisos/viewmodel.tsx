@@ -5,7 +5,7 @@ import { getAllAvisosAction, marcarAvisoLeidoAction } from "@/ui/actions/aviso/a
 import { useSelectorCatalog } from "@/ui/hooks/use-selector-catalog";
 import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
-import { info, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
+import { info, statusInfo, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
 import { estadosLectura, tiposAviso } from "@/core/utils/constants";
 import type { DestinoBandeja } from "@/core/types";
 
@@ -30,7 +30,7 @@ export default function ViewModel(session: Session, onOpen?: (destino: DestinoBa
         info: [
             info("Tipo", aviso.tipoName),
             info("Fecha", aviso.fecha),
-            info("Estado", aviso.leido ? "Leído" : "Pendiente de lectura"),
+            statusInfo(aviso.leido ? "Leído" : "Pendiente de lectura"),
             info("Mensaje", aviso.mensaje),
             info("Sede", sedeNames.get(aviso.sedeId) ?? aviso.sedeId),
             info("Socio", socioNames.get(aviso.socioId) ?? aviso.socioId),
@@ -40,24 +40,19 @@ export default function ViewModel(session: Session, onOpen?: (destino: DestinoBa
         commands: [
             ...(!aviso.leido ? [{
                 label: "Marcar como leído",
+                tone: "primary" as const,
                 confirm: "¿Querés marcar este aviso como leído?",
                 execute: () => marcarAvisoLeidoAction({ id: aviso.id, session })
-            }] : []),
+            }] : [])
+        ],
+        actions: [
             ...(onOpen && aviso.reservaId ? [{
                 label: "Abrir reserva",
-                confirm: "¿Querés abrir la reserva asociada?",
-                execute: async () => {
-                    onOpen({ modulo: "Reservas", id: aviso.reservaId });
-                    return { success: true, data: aviso };
-                }
+                onClick: () => onOpen({ modulo: "Reservas", id: aviso.reservaId })
             }] : []),
             ...(onOpen && aviso.prestamoId ? [{
                 label: "Abrir préstamo",
-                confirm: "¿Querés abrir el préstamo asociado?",
-                execute: async () => {
-                    onOpen({ modulo: "Préstamos", id: aviso.prestamoId });
-                    return { success: true, data: aviso };
-                }
+                onClick: () => onOpen({ modulo: "Préstamos", id: aviso.prestamoId })
             }] : [])
         ]
     });
@@ -77,8 +72,9 @@ export default function ViewModel(session: Session, onOpen?: (destino: DestinoBa
             fields: filterFields,
             submit: handleFilterSubmit
         },
-        getLabel: (aviso) => `${aviso.leido ? "" : "[Nuevo] "}${aviso.tipoName} · ${String(aviso.fecha ?? "").slice(0, 10)}`,
-        describe: describeAviso
+        getLabel: (aviso) => `${aviso.tipoName} · ${String(aviso.fecha ?? "").slice(0, 10)}`,
+        getStatuses: (aviso) => [aviso.leido ? "Leído" : "Nuevo"],
+        describeRecord: describeAviso
     });
 }
 

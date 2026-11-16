@@ -1,5 +1,7 @@
 import { useCallback } from "react";
 import { type Session } from "@/domain/entities/session";
+import type { DestinoBandeja } from "@/core/types";
+import { statusBadge } from "@/ui/components/library-records/viewmodel";
 import { Rol } from "@/domain/entities/rol";
 import { EstadoEnvio } from "@/domain/entities/estado-envio";
 import { EstadoEjemplar, type Ejemplar } from "@/domain/entities/ejemplar";
@@ -19,10 +21,10 @@ import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField, type ReadFieldValues } from "@/ui/forms/handlers/read-form";
 import { useMultipleSelector, useSelector } from "@/ui/hooks/use-selector";
 import { useSelectorCatalog } from "@/ui/hooks/use-selector-catalog";
-import { allOptions, info, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
+import { allOptions, info, statusInfo, pickData, useLibraryRecordsViewModel, type DetailSpec, type Field } from "@/ui/routes/use-library-records-viewmodel";
 import { receptionOptions, seguimientoOptions } from "@/core/utils/constants";
 
-export default function ViewModel(session: Session, initialRecordId?: string) {
+export default function ViewModel(session: Session, initialRecordId?: string, onOpen?: (target: DestinoBandeja) => void) {
     const catalog = useSelectorCatalog(session, "sedes", "ejemplares");
     const filterOrigen = useSelector("sedeOrigenId", "Sede de origen", "Buscá por nombre de sede", false);
     const filterDestino = useSelector("sedeDestinoId", "Sede de destino", "Buscá por nombre de sede", false);
@@ -105,7 +107,7 @@ export default function ViewModel(session: Session, initialRecordId?: string) {
         trace: Awaited<ReturnType<typeof getTrazabilidadRemitoAction>>;
     };
 
-    const describeRemito = ({ remito, ejemplares: copyList, trace }: RemitoDetailData) => {
+    const describeRemito = ({ remito, ejemplares: copyList, trace }: RemitoDetailData): DetailSpec => {
         const estado = trace.data?.historial.at(-1)?.estadoEntity ?? (trace.success ? EstadoEnvio.PENDIENTE : undefined);
         const recepcionista = session.user?.roleEntity === Rol.RECEPCIONISTA;
         const canManageOrigin = !recepcionista || session.user?.sedeId === remito.sedeOrigenId;
@@ -114,8 +116,11 @@ export default function ViewModel(session: Session, initialRecordId?: string) {
         const canDispatch = canManageOrigin && (estado === EstadoEnvio.EMPACADO || estado === EstadoEnvio.PENDIENTE);
         const canReceive = canManageDestination && (estado === EstadoEnvio.EN_TRANSITO
             || estado === EstadoEnvio.DESPACHADO || estado === EstadoEnvio.CON_INCIDENCIA);
+        const detailCopies = new Map(copyList.map((copy) => [copy.id, copy]));
+        const copyIds = new Set([...remito.ejemplaresIds, ...detailCopies.keys()]);
 
         return {
+            actions: onOpen && remito.solicitudId ? [{ label: "Abrir solicitud", onClick: () => onOpen({ modulo: "Solicitudes de préstamo", id: remito.solicitudId }) }] : [],
             info: [
                 info("Número", remito.numero),
                 ...(remito.solicitudId ? [info("Solicitud de préstamo", remito.solicitudId)] : []),
@@ -124,25 +129,38 @@ export default function ViewModel(session: Session, initialRecordId?: string) {
                 info("Emisión", remito.fechaEmision),
                 info("Despacho", remito.fechaDespacho),
                 info("Recepción", remito.fechaRecepcion),
-                info("Estado", estado?.name ?? trace.error),
+                estado ? statusInfo(estado.name) : info("Estado", trace.error),
                 ...(remito.diasTransito !== null ? [info("Días de traslado", remito.diasTransito)] : [])
             ],
             sections: [
                 {
                     title: "Ejemplares incluidos",
                     emptyMessage: "No hay ejemplares asociados.",
-                    entries: copyList.length
-                        ? copyList.map((item) => ({ id: item.id, label: `ID ${item.id} · ${item.codigo} · ${item.estadoName}` }))
-                        : remito.ejemplaresIds.map((id) => ({ id, label: `Ejemplar ${id}` }))
+                    entries: Array.from(copyIds, (id) => {
+                        const detailCopy = detailCopies.get(id);
+                        const catalogCopy = catalogCopies.get(id);
+                        const bookId = detailCopy?.libroId || catalogCopy?.libroId;
+                        const title = (bookId && bookTitles.get(bookId)) || "Título no disponible";
+                        const code = detailCopy?.codigo || catalogCopy?.codigo || `#${id}`;
+                        const copyStatus = detailCopy?.estadoName || catalogCopy?.estado.name;
+                        return { id, label: title, detail: `Ejemplar ${code}`, badge: copyStatus ? statusBadge(copyStatus) : undefined };
+                    })
                 },
                 {
                     title: "Trazabilidad",
+                    kind: "timeline",
                     emptyMessage: trace.error || "Sin movimientos registrados.",
-                    entries: (trace.data?.historial ?? []).map((item) => {
-                        const responsable = item.responsableNombre || (item.responsableId ? `Usuario ${item.responsableId}` : "Sin registrar");
+                    entries: (trace.data?.historial ?? []).map((item, index, history) => {
+                        const responsable = item.responsableNombre || (item.responsableId ? `Usuario ${item.responsableId}` : "");
                         return {
                             id: item.id,
-                            label: `${item.estadoName} · ${responsable} · Inicio: ${info("", item.fechaInicio).value} · Fin: ${info("", item.fechaFin).value}`
+                            label: item.estadoName,
+                            current: index === history.length - 1,
+                            metadata: [
+                                ...(item.fechaInicio ? [info("Inicio", item.fechaInicio)] : []),
+                                ...(item.fechaFin ? [info("Fin", item.fechaFin)] : []),
+                                ...(responsable ? [info("Responsable", responsable)] : [])
+                            ]
                         };
                     })
                 }
@@ -181,6 +199,8 @@ export default function ViewModel(session: Session, initialRecordId?: string) {
         )
     ) : null;
 
+    const catalogCopies = new Map(catalog.ejemplares?.data?.map((copy) => [copy.value, copy]));
+    const bookTitles = new Map(catalog.libros?.data?.map(({ value, titulo }) => [value, titulo]));
     const sedeNames = new Map(catalog?.sedes?.data?.map(({ value, label }) => [value, label]));
     const sedeLabel = (id: string) => sedeNames.get(id) ?? (id ? `Sede ${id}` : "Sin asignar");
 
@@ -191,9 +211,7 @@ export default function ViewModel(session: Session, initialRecordId?: string) {
     const getRemitoMeta = (remito: Remito) => {
         const emision = remito.fechaEmision ? `Emisión ${String(remito.fechaEmision).slice(0, 10)}` : undefined;
         return [
-            remito.estadoActual?.name,
             remito.diasTransito !== null ? `${remito.diasTransito} días` : undefined,
-            remito.estaAtrasado ? "Atrasado" : undefined,
             emision
         ].filter(Boolean).join(" · ");
     };
@@ -226,6 +244,7 @@ export default function ViewModel(session: Session, initialRecordId?: string) {
         },
         getLabel: getRemitoLabel,
         getMeta: getRemitoMeta,
+        getStatuses: (remito) => [remito.estadoActual?.name ?? "", remito.estaAtrasado ? "Atrasado" : ""],
         create: {
             label: "Empaquetar y emitir remito",
             onOpen: onOpenCreate,

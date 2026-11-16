@@ -1,5 +1,7 @@
 import { useCallback } from "react";
 import { type Session } from "@/domain/entities/session";
+import type { DestinoBandeja } from "@/core/types";
+import { statusBadge } from "@/ui/components/library-records/viewmodel";
 import { Rol } from "@/domain/entities/rol";
 import { EstadoReserva, type Reserva } from "@/domain/entities/reserva";
 import { EstadoEjemplar } from "@/domain/entities/ejemplar";
@@ -10,10 +12,10 @@ import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
 import { useSelector } from "@/ui/hooks/use-selector";
 import { useSelectorCatalog } from "@/ui/hooks/use-selector-catalog";
-import { allOptions, info, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
+import { allOptions, info, statusInfo, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
 
 
-export default function ViewModel(session: Session, initialRecordId?: string) {
+export default function ViewModel(session: Session, initialRecordId?: string, onOpen?: (target: DestinoBandeja) => void) {
     const estadosActiva = [EstadoReserva.CANCELADA].map((estado) => estado.toOption());
     const estadosListaRetiro = [EstadoReserva.RETIRADA, EstadoReserva.CANCELADA].map((estado) => estado.toOption());
 
@@ -89,9 +91,10 @@ export default function ViewModel(session: Session, initialRecordId?: string) {
                 ? estadosActiva
                 : null;
         return {
+            actions: onOpen && reserva.prestamoId ? [{ label: "Abrir préstamo", onClick: () => onOpen({ modulo: "Préstamos", id: reserva.prestamoId }) }] : [],
             info: [
                 info("Fecha", reserva.fecha),
-                info("Estado", reserva.estadoName),
+                statusInfo(reserva.estadoName, reserva.estadoEntity === EstadoReserva.ACTIVA ? "active" : undefined),
                 info("Límite de retiro", reserva.fechaLimiteRetiro),
                 info("Préstamo generado", reserva.prestamoId),
                 info("Socio", socioNames.get(reserva.socioId) ?? reserva.socioId),
@@ -151,7 +154,7 @@ export default function ViewModel(session: Session, initialRecordId?: string) {
         const sedeNombre = reserva.sedeId ? (sedeNames.get(reserva.sedeId) ?? `Sede #${reserva.sedeId}`) : undefined;
         const fecha = reserva.fecha ? String(reserva.fecha).slice(0, 10) : undefined;
         const retiro = reserva.fechaLimiteRetiro ? `Retiro hasta ${String(reserva.fechaLimiteRetiro).slice(0, 10)}` : undefined;
-        return [reserva.estadoName, sedeNombre, retiro ?? fecha].filter(Boolean).join(" · ");
+        return [sedeNombre, retiro ?? fecha].filter(Boolean).join(" · ");
     };
 
     const filterFields: Field[] = [
@@ -183,6 +186,7 @@ export default function ViewModel(session: Session, initialRecordId?: string) {
         },
         getLabel: getReservaLabel,
         getMeta: getReservaMeta,
+        getStatuses: (reserva) => [statusBadge(reserva.estadoName, reserva.estadoEntity === EstadoReserva.ACTIVA ? "active" : undefined)],
         create: {
             label: "Registrar reserva",
             onOpen: onOpenCreate,

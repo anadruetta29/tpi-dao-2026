@@ -8,7 +8,7 @@ import { createSolicitudInterbibliotecariaAction, createSolicitudLocalAction, ge
     getSolicitudPrestamoByIdAction, updateSolicitudEstadoAction } from "@/ui/actions/solicitud-prestamo/solicitud-prestamo.actions";
 import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField, type ReadFieldValues } from "@/ui/forms/handlers/read-form";
-import { allOptions, info, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
+import { allOptions, info, statusInfo, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
 import { useSelectoresViewModel } from "./selectores-viewmodel";
 import type { SolicitudInterbibliotecariaInicial } from "@/core/types";
 
@@ -49,7 +49,7 @@ export default function ViewModel(
 
     const onTipoChange = (value: string) => {
         setTipo(TipoPrestamo.fromString(value));
-        selectors.open();
+        selectors.reset();
     };
 
     {/* ===== handlers functions ===== */ }
@@ -104,7 +104,10 @@ export default function ViewModel(
             info: [
                 info("Número", solicitud.numero),
                 info("Tipo", solicitud.tipoName),
-                info("Estado", solicitud.estadoName),
+                statusInfo(solicitud.estadoName),
+                ...(solicitud.aprobacionCompleta === false
+                    ? [statusInfo("Falta aprobación", "attention", "Aprobación")]
+                    : []),
                 ...(solicitud.socioId ? [info("Socio", selectors.socios.get(solicitud.socioId) ?? solicitud.socioId)] : []),
                 info("Ejemplares", solicitud.ejemplaresIds.map((id) => selectors.copyNames.get(id) ?? id).join(", ")),
                 info("Sede de origen", selectors.sedeNames.get(solicitud.sedeOrigenId) ?? solicitud.sedeOrigenId),
@@ -141,7 +144,7 @@ export default function ViewModel(
 
     const getSolicitudMeta = (solicitud: SolicitudPrestamo) => {
         const copias = solicitud.ejemplaresIds.map((id) => selectors.copyNames.get(id) ?? `#${id}`).join(", ");
-        return [solicitud.tipoName, solicitud.estadoName, copias || undefined].filter(Boolean).join(" · ");
+        return [solicitud.tipoName, copias || undefined].filter(Boolean).join(" · ");
     };
 
     const filterFields: Field[] = [
@@ -182,6 +185,7 @@ export default function ViewModel(
         },
         getLabel: getSolicitudLabel,
         getMeta: getSolicitudMeta,
+        getStatuses: (solicitud) => [solicitud.estadoName, solicitud.aprobacionCompleta === false ? "Falta aprobación" : ""],
         create: {
             label: "Registrar solicitud",
             submitDisabled,

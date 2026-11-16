@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { Rol } from "@/domain/entities/rol";
 import { localDateISO } from "@/ui/forms/handlers/local-date";
 import { type Session } from "@/domain/entities/session";
+import { statusBadge } from "@/ui/components/library-records/viewmodel";
 import { EstadoEjemplar } from "@/domain/entities/devolucion";
 import { EstadoPrestamo, ModalidadPrestamoLocal, type Prestamo } from "@/domain/entities/prestamo";
 import { createDevolucionAction } from "@/ui/actions/devolucion/devolucion.actions";
@@ -10,7 +11,7 @@ import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
 import { useSelector } from "@/ui/hooks/use-selector";
 import { useSelectorCatalog } from "@/ui/hooks/use-selector-catalog";
-import { allOptions, info, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
+import { allOptions, info, statusInfo, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
 import dateKey from "@/core/utils/date-key";
 
 export function ViewModel(session: Session, initialRecordId?: string, onDevolver?: (prestamoId: string) => void) {
@@ -79,7 +80,7 @@ export function ViewModel(session: Session, initialRecordId?: string, onDevolver
                 info("Devueltos", joinEjemplares(prestamo.ejemplaresDevueltosIds)),
                 info("Pendientes", joinEjemplares(pendientes)),
                 info("Sede", sedeNames.get(prestamo.sedeId) ?? prestamo.sedeId),
-                info("Estado", prestamo.estadoName),
+                statusInfo(prestamo.estadoName, activo ? "active" : undefined),
                 info("Modalidad", prestamo.modalidadName),
                 info("Renovaciones", String(prestamo.renovaciones)),
                 info("Inicio", prestamo.fechaInicio),
@@ -124,7 +125,6 @@ export function ViewModel(session: Session, initialRecordId?: string, onDevolver
         const sedeNombre = sedeNames.get(prestamo.sedeId) ?? (prestamo.sedeId ? `Sede #${prestamo.sedeId}` : "");
         const vencimiento = dateKey(prestamo.fechaVencimiento);
         return [
-            prestamo.estadoName,
             prestamo.modalidadName,
             sedeNombre,
             vencimiento ? `Vence ${vencimiento}` : undefined
@@ -151,6 +151,7 @@ export function ViewModel(session: Session, initialRecordId?: string, onDevolver
         },
         getLabel: getPrestamoLabel,
         getMeta: getPrestamoMeta,
+        getStatuses: (prestamo) => [statusBadge(prestamo.estadoName, prestamo.estadoEntity === EstadoPrestamo.ACTIVO ? "active" : undefined)],
         describe: describePrestamo
     });
 }

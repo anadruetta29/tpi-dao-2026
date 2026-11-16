@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { type Session } from "@/domain/entities/session";
+import type { DestinoBandeja } from "@/core/types";
 import { Rol } from "@/domain/entities/rol";
 import { localDateISO } from "@/ui/forms/handlers/local-date";
 import { EstadoEjemplar, type Devolucion } from "@/domain/entities/devolucion";
@@ -7,12 +8,12 @@ import { EstadoPrestamo } from "@/domain/entities/prestamo";
 import { createDevolucionAction, getAllDevolucionesAction, getDevolucionByIdAction } from "@/ui/actions/devolucion/devolucion.actions";
 import { useSelector } from "@/ui/hooks/use-selector";
 import { useSelectorCatalog } from "@/ui/hooks/use-selector-catalog";
-import { allOptions, info, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
+import { allOptions, info, statusInfo, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
 import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
 import { estados } from "@/core/utils/constants";
 
-export default function ViewModel(session: Session, prestamoInicialId?: string) {
+export default function ViewModel(session: Session, prestamoInicialId?: string, onOpen?: (target: DestinoBandeja) => void) {
     const catalog = useSelectorCatalog(session, "prestamos", "socios", "ejemplares");
     const ejemplar = useSelector("ejemplarId", "Ejemplar pendiente", "Buscá por título o código");
     const prestamo = useSelector("prestamoId", "Préstamo", "Buscá por libro, ejemplar o socio", true,
@@ -66,16 +67,18 @@ export default function ViewModel(session: Session, prestamoInicialId?: string) 
     const ejemplarNames = new Map((catalog.ejemplares?.data ?? []).map(({ value, label }) => [value, label]));
 
     const describeDevolucion = (devolucion: Devolucion) => ({
+        actions: onOpen && devolucion.prestamoId ? [{ label: "Abrir préstamo", onClick: () => onOpen({ modulo: "Préstamos", id: devolucion.prestamoId }) }] : [],
         info: [
             info("Préstamo", devolucion.prestamoId),
             info("Ejemplar", ejemplarNames.get(devolucion.ejemplarId) ?? devolucion.ejemplarId),
             info("Fecha", devolucion.fecha),
-            info("Estado devuelto", devolucion.estadoDevueltoName),
-            info(
-                "Estado actual del ejemplar",
+            statusInfo(devolucion.estadoDevueltoName, undefined, "Estado devuelto"),
+            statusInfo(
                 devolucion.estadoEjemplar === EstadoEjemplar.RESERVADO
                     ? "Asignado a una reserva (Reservado)"
-                    : devolucion.estadoEjemplar?.name
+                    : devolucion.estadoEjemplar?.name,
+                devolucion.estadoEjemplar === EstadoEjemplar.RESERVADO ? "active" : undefined,
+                "Estado actual del ejemplar"
             ),
             info("Observaciones", devolucion.observaciones)
         ]
@@ -95,7 +98,7 @@ export default function ViewModel(session: Session, prestamoInicialId?: string) 
 
     const getDevolucionLabel = (devolucion: Devolucion) => {
         const copia = devolucion.ejemplarId ? (ejemplarNames.get(devolucion.ejemplarId) ?? `Ejemplar #${devolucion.ejemplarId}`) : undefined;
-        return [copia ?? `Préstamo #${devolucion.prestamoId}`, devolucion.estadoDevueltoName].filter(Boolean).join(" · ");
+        return copia ?? `Préstamo #${devolucion.prestamoId}`;
     };
 
     const getDevolucionMeta = (devolucion: Devolucion) => {
@@ -131,6 +134,7 @@ export default function ViewModel(session: Session, prestamoInicialId?: string) 
         },
         getLabel: getDevolucionLabel,
         getMeta: getDevolucionMeta,
+        getStatuses: (devolucion) => [devolucion.estadoDevueltoName],
         create: {
             label: "Registrar devolución",
             onOpen: onOpenCreate,

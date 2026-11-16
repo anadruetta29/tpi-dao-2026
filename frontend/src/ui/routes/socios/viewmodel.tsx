@@ -1,11 +1,13 @@
 import { useCallback } from "react";
 import { type ActionState } from "@/core/types";
 import { type Session } from "@/domain/entities/session";
+import { statusBadge } from "@/ui/components/library-records/viewmodel";
+import { EstadoPrestamo } from "@/domain/entities/prestamo";
 import { EstadoSocio, type Socio } from "@/domain/entities/socio";
 import { createSocioAction, deleteSocioAction, getAllSociosAction, getSocioByIdAction, getSocioMultasAction, getSocioPrestamosAction, updateSocioAction } from "@/ui/actions/socio/socio.actions";
 import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
-import { allOptions, info, pickData, type DetailSection, type Field, useLibraryRecordsViewModel } from "@/ui/routes/use-library-records-viewmodel";
+import { allOptions, info, statusInfo, pickData, type DetailSection, type Field, useLibraryRecordsViewModel } from "@/ui/routes/use-library-records-viewmodel";
 import socioFields, { socioData } from "@/core/utils/socios";
 
 export function ViewModel(session: Session) {
@@ -30,7 +32,9 @@ export function ViewModel(session: Session) {
             emptyMessage: "El socio no tiene préstamos.",
             entries: prestamos.map((item) => ({
                 id: item.id,
-                label: `Préstamo ${item.id} · ${item.estadoName} · Vence: ${info("", item.fechaVencimiento).value}`
+                label: `Préstamo #${item.id}`,
+                detail: item.fechaVencimiento ? `Vence ${info("", item.fechaVencimiento).value}` : undefined,
+                badge: statusBadge(item.estadoName, item.estadoEntity === EstadoPrestamo.ACTIVO ? "active" : undefined)
             }))
         }]);
     };
@@ -42,7 +46,9 @@ export function ViewModel(session: Session) {
             emptyMessage: "El socio no tiene multas.",
             entries: multas.map((item) => ({
                 id: item.id,
-                label: `Multa ${item.id} · ${item.motivoName} · ${item.estadoName} · $${item.monto}`
+                label: `Multa #${item.id}`,
+                detail: `${item.motivoName} · $${item.monto}`,
+                badge: statusBadge(item.estadoName)
             }))
         }]);
     };
@@ -81,7 +87,7 @@ export function ViewModel(session: Session) {
             info("Documento", socio.documento),
             info("Correo electrónico", socio.email),
             info("Teléfono", socio.telefono),
-            info("Estado", socio.estadoName)
+            statusInfo(socio.estadoName)
         ],
         forms: [{
             label: "Modificar socio",
@@ -115,7 +121,7 @@ export function ViewModel(session: Session) {
     const getSocioLabel = (socio: Socio) => `${socio.nombre} ${socio.apellido}`;
 
     const getSocioMeta = (socio: Socio) => {
-        return [socio.documento ? `DNI ${socio.documento}` : "", socio.estadoName].filter(Boolean).join(" · ");
+        return [socio.documento ? `DNI ${socio.documento}` : ""].filter(Boolean).join(" · ");
     };
 
     const filterFields: Field[] = [
@@ -136,6 +142,7 @@ export function ViewModel(session: Session) {
         },
         getLabel: getSocioLabel,
         getMeta: getSocioMeta,
+        getStatuses: (socio) => [socio.estadoName],
         create: {
             label: "Registrar socio",
             fields: socioFields(),

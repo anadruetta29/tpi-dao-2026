@@ -6,7 +6,7 @@ import { ErrorMessages } from "@/domain/messages";
 import { createSedeAction, deleteSedeAction, getAllSedesAction, getSedeByIdAction, updateSedeAction } from "@/ui/actions/sede/sede.actions";
 import { useAuth } from "@/ui/hooks/use-auth";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
-import { allOptions, info, type Field, useLibraryRecordsViewModel } from "@/ui/routes/use-library-records-viewmodel";
+import { allOptions, info, statusInfo, type Field, useLibraryRecordsViewModel } from "@/ui/routes/use-library-records-viewmodel";
 import { sedeData, sedeFields } from "@/core/utils/sedes";
 
 export default function ViewModel(session: Session) {
@@ -55,7 +55,7 @@ export default function ViewModel(session: Session) {
             info("Teléfono", sede.telefono),
             info("Correo electrónico", sede.email),
             info("Horario de atención", sede.horarioAtencion),
-            info("Estado", sede.estadoName)
+            statusInfo(sede.estadoName)
         ],
         forms: canWrite ? [{
             label: "Modificar sede",
@@ -75,7 +75,7 @@ export default function ViewModel(session: Session) {
 
     const getSedeLabel = (sede: Sede) => sede.nombre;
 
-    const getSedeMeta = (sede: Sede) => [sede.horarioAtencion, sede.estadoName].filter(Boolean).join(" · ");
+    const getSedeMeta = (sede: Sede) => [sede.horarioAtencion].filter(Boolean).join(" · ");
 
     const filterFields: Field[] = [
         { name: "estado", label: "Estado", options: allOptions(EstadoSede.toOptions()) }
@@ -93,6 +93,7 @@ export default function ViewModel(session: Session) {
         loadDetail: fetchSedeDetail,
         getLabel: getSedeLabel,
         getMeta: getSedeMeta,
+        getStatuses: (sede) => [sede.estadoName],
         create: canWrite ? {
             label: "Registrar sede",
             fields: sedeFields(),

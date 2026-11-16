@@ -1,0 +1,26 @@
+.rows { display: grid; gap: 0.15rem; }
+.rows > div {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(1.5rem, 0.14fr) minmax(0, 1fr) minmax(1.65rem, 0.2fr);
+    gap: clamp(0.4rem, 2vw, 0.9rem);
+    align-items: center;
+    min-height: 4.25rem;
+    padding: 0.45rem;
+    border-block-end: 1px solid var(--line);
+    overflow: clip;
+}
+.rows span { height: 0.8rem; border-radius: 4px; background: var(--surface-muted); }
+.rows span:last-child { height: 1.65rem; border-radius: 99px; }
+.summary::after { display: block; width: 65%; height: 0.65rem; margin-block-start: 1rem; border-radius: 4px; background: var(--surface-muted); content: ""; }
+.rows .summary { align-self: start; margin-block-start: 0.85rem; }
+@media (prefers-reduced-motion: no-preference) {
+    .rows > div::after {
+        position: absolute; inset: 0; pointer-events: none; content: "";
+        background: linear-gradient(90deg, transparent 30%, var(--skeleton-glint) 50%, transparent 70%);
+        animation: sweep 1.65s var(--ease-out) infinite;
+    }
+    .rows > div:nth-child(2)::after { animation-delay: 100ms; }
+    .rows > div:nth-child(3)::after { animation-delay: 200ms; }
+}
+@keyframes sweep { from { transform: translateX(-100%); } to { transform: translateX(100%); } }

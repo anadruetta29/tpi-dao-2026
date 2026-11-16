@@ -3,21 +3,27 @@
     align-items: center;
     gap: 0.7rem;
     color: inherit;
-    font-size: 1.24rem;
-    font-weight: 720;
+    font: 400 1.65rem/1.15 var(--serif);
     letter-spacing: -0.035em;
 }
 
 .mark {
     display: flex;
-    flex: 0 0 36px;
-    height: 36px;
+    flex: 0 0 40px;
+    height: 40px;
     justify-content: center;
     align-items: center;
     gap: 3px;
-    border-radius: 9px;
-    background: #dce5fd;
+    border-radius: 10px;
+    background: var(--gold);
+    color: var(--nav);
 }
 
-.mark i { width: 4px; height: 16px; border-radius: 1px; background: #293c7c; }
-.mark i:last-child { height: 14px; transform: rotate(-16deg); margin-inline-start: 2px; }
+.mark i { width: 4px; height: 17px; border-radius: 1px; background: currentColor; }
+.mark i:nth-child(2) { height: 20px; }
+.mark i:last-child { height: 15px; transform: rotate(-16deg); margin-inline-start: 2px; }
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) {
+    .mark i:last-child { transform-origin: center bottom; transition: transform var(--motion-fast) var(--ease-out); }
+    .brand:hover .mark i:last-child { transform: rotate(-23deg); }
+}

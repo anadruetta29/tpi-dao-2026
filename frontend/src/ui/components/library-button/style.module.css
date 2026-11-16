@@ -2,20 +2,40 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.55rem;
-    min-height: 42px;
-    padding: 0.55rem 1rem;
+    gap: 0.5rem;
+    min-height: 44px;
+    max-width: 100%;
+    padding: 0.55rem 0.95rem;
     border: 1px solid transparent;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    font-weight: 650;
+    border-radius: var(--radius-control);
+    font-size: 0.9rem;
+    font-weight: 680;
+    line-height: 1.25;
     text-align: center;
-    transition: background-color 140ms, border-color 140ms;
+    overflow-wrap: anywhere;
 }
 
-.primary { color: white; background: var(--primary); }
-.primary:hover:not(:disabled) { background: var(--primary-hover); }
-.secondary { color: var(--ink); background: var(--surface); border-color: var(--line); }
-.secondary:hover:not(:disabled) { background: var(--primary-soft); border-color: #bcc7f1; }
-.danger { color: var(--danger); background: var(--danger-soft); border-color: #f1cbd2; }
-.danger:hover:not(:disabled) { background: #ffe3e8; }
+.primary { color: var(--on-primary); background: var(--primary); }
+.secondary { color: var(--ink); background: var(--surface); border-color: var(--control-line); }
+.danger { color: var(--danger); background: var(--danger-soft); border-color: var(--danger); }
+
+@media (hover: hover) {
+    .primary:hover:not(:disabled) { background: var(--primary-hover); }
+    .secondary:hover:not(:disabled) { background: var(--primary-soft); }
+    .danger:hover:not(:disabled) { background: var(--danger-hover); }
+}
+
+.button:disabled { color: var(--muted); background: var(--surface-muted); border-color: var(--line); }
+
+@media (prefers-reduced-motion: no-preference) and (pointer: fine) {
+    .button:not(:focus-visible) {
+        transition: transform var(--motion-press) var(--ease-out), background-color var(--motion-fast), border-color var(--motion-fast), box-shadow var(--motion-fast);
+    }
+    .button:not(:disabled):not(:focus-visible):active { transform: scale(0.98); }
+}
+
+.spinner { flex: 0 0 0.9rem; height: 0.9rem; border: 2px solid currentColor; border-inline-end-color: transparent; border-radius: 50%; }
+@media (prefers-reduced-motion: no-preference) {
+    .spinner { animation: spin 800ms linear infinite; }
+}
+@keyframes spin { to { transform: rotate(1turn); } }

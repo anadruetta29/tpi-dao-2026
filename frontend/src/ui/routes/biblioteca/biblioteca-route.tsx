@@ -1,9 +1,10 @@
 import { Layout } from "@/ui/layout/layout";
 import ViewModel from "./viewmodel";
+import type { ThemeView } from "@/ui/layout/viewmodel";
 
-export function BibliotecaRoute() {
+export function BibliotecaRoute({ theme }: { theme: ThemeView }) {
     const {
-        session, Component, label, navigation, area, profile,
+        session, Component, label, navigation, navigationRef, area, branch, profile,
         openPending, openReturn, openInterbibliotecaria,
         initialRecordId, prestamoInicialId, solicitudInicial
     } = ViewModel();
@@ -20,7 +21,7 @@ export function BibliotecaRoute() {
     };
     const pageKey = [session.accessToken, label, initialRecordId, prestamoInicialId, solicitudInicial?.ejemplarId].join(":");
     return (
-        <Layout navigation={navigation} area={area} profile={profile}>
+        <Layout navigation={navigation} navigationRef={navigationRef} area={area} branch={branch} profile={profile} theme={theme}>
             <Component key={pageKey} {...props} />
         </Layout>
     );

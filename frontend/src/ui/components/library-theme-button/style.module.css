@@ -1,0 +1,22 @@
+.button {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    padding: 0;
+    border: 1px solid currentColor;
+    border-radius: var(--radius-control);
+    background: transparent;
+    color: inherit;
+}
+.button:hover { background: color-mix(in srgb, currentColor 12%, transparent); }
+
+@media (prefers-reduced-motion: no-preference) {
+    .button > svg { transition: transform var(--motion-fast) var(--ease-out); }
+    .button:active:not(:focus-visible) > svg { transform: rotate(10deg) scale(0.88); }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) {
+    .button:hover:not(:active) > svg { transform: rotate(-9deg) scale(1.07); }
+}

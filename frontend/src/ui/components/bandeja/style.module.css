@@ -1,68 +1,107 @@
-.module, .groups {
-    display: grid;
-    gap: 1rem;
-}
-
-.heading, .toolbar, .actions {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-}
+.module { display: grid; gap: 1.15rem; min-width: 0; container-type: inline-size; }
 
 .heading {
-    justify-content: space-between;
-    align-items: end;
-}
-
-.heading h1 {
-    margin: 0;
-    font: 400 clamp(2rem, 4vw, 3rem)/1.1 var(--serif);
-}
-
-.heading p {
-    margin: 0.4rem 0 0;
-    color: var(--muted);
-}
-
-.toolbar { align-items: end; }
-
-.groups {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
-    align-items: start;
-}
-
-.panel {
-    min-width: 0;
-    padding: 1.2rem;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--surface);
-    box-shadow: var(--shadow);
-}
-
-.panel h2 {
-    margin: 0 0 0.8rem;
-    font-size: 1rem;
-}
-
-.list {
-    display: grid;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.list li {
+    position: relative;
+    isolation: isolate;
     display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 0.6rem;
-    padding-block: 0.75rem;
-    border-bottom: 1px solid var(--line);
+    gap: 1rem;
+    min-height: clamp(6rem, 10vw, 8rem);
+    padding: var(--panel-inset);
+    border-radius: var(--radius);
+    background: var(--nav);
+    color: var(--nav-text);
 }
 
-.list li:last-child { border: 0; }
-.list strong, .list span { display: block; overflow-wrap: anywhere; }
-.list span { margin-top: 0.2rem; color: var(--muted); font-size: 0.875rem; }
+.heading::before {
+    position: absolute;
+    z-index: -1;
+    inset: 0 0 0 auto;
+    width: min(40%, 20rem);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    background: repeating-linear-gradient(126deg, transparent 0 14px, var(--rosewood) 14px 15px);
+    mask-image: linear-gradient(90deg, transparent, black);
+    content: "";
+}
+
+.emblem {
+    display: grid;
+    flex: 0 0 clamp(2.25rem, 5vw, 3rem);
+    aspect-ratio: 1;
+    place-items: center;
+    border-radius: var(--radius-control);
+    background: var(--parchment);
+    color: var(--ink);
+}
+
+.heading h1 { font: 400 var(--title-size)/1.06 var(--serif); letter-spacing: -0.045em; overflow-wrap: anywhere; }
+.heading p { margin-top: 0.4rem; color: var(--nav-muted); }
+
+.toolbar, .actions { display: flex; align-items: center; flex-wrap: wrap; gap: 0.6rem; }
+.toolbar { align-items: end; padding: 0.85rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.toolbar > div { min-width: min(100%, 12rem); margin-inline-end: auto; }
+.toolbar button svg { width: 1rem; height: 1rem; flex-shrink: 0; }
+
+.board, .desk, .groups { display: grid; gap: 1rem; align-items: start; min-width: 0; }
+.desk { gap: 0; }
+.desk > .panel { margin-block-start: 1rem; }
+.module:has(.quickToggle:focus-visible) .desk {
+    --form-enter-duration: 0ms;
+    --form-exit-duration: 0ms;
+}
+.panel, .search, .quick, .queue { min-width: 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.panel, .search, .quick { display: grid; gap: 0.85rem; padding: 1rem; }
+.quick { border-inline-start: 4px solid var(--rosewood); }
+.search { padding: var(--panel-inset); }
+.search h2, .queue > header { display: flex; align-items: center; gap: 0.65rem; }
+.search h2 svg, .queue > header svg { flex-shrink: 0; color: var(--primary); }
+.panel h2, .search h2, .quick h2, .queue h2 { font-size: 1.03rem; line-height: 1.3; }
+.search form > fieldset { display: grid; }
+.search form > fieldset > div:first-child { grid-template-columns: minmax(0, 1fr); }
+
+.queue { background: var(--surface-muted); padding: 0.65rem; }
+.queue > header { padding: 0.45rem 0.45rem 0.8rem; }
+.queue > div[role="status"] { background: var(--surface); }
+.groups { gap: 0.5rem; }
+
+.groups .panel {
+    gap: 0.35rem;
+    padding: 0.65rem 0.85rem;
+    border-radius: var(--radius-control);
+}
+
+.groups h3 { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; font-size: 0.92rem; line-height: 1.35; }
+.groups h3 span { padding: 0.15rem 0.45rem; border-radius: 99px; background: var(--parchment); font-size: 0.76rem; font-variant-numeric: tabular-nums; }
+.groups h3 + div[role="status"] { padding: 0; border: 0; background: transparent; font-size: 0.84rem; }
+.groups h3 + div[role="status"] > span { display: none; }
+.list { display: grid; list-style: none; padding: 0; margin: 0; }
+
+.list li { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.65rem; padding-block: 0.65rem; border-top: 1px solid var(--line); }
+.list strong, .list p { overflow-wrap: anywhere; }
+.list p, .member p { margin-top: 0.17rem; color: var(--muted); font-size: 0.875rem; }
+.member { display: flex; align-items: center; flex-wrap: wrap; gap: 0.7rem; padding: 0.8rem; border-radius: var(--radius-control); background: var(--surface-muted); overflow-wrap: anywhere; }
+.avatar { display: grid; width: 2.5rem; aspect-ratio: 1; place-items: center; border-radius: 50%; background: var(--parchment); font-weight: 750; }
+.results { padding-inline-start: 0.75rem; border-inline-start: 3px solid var(--rosewood); }
+.results[data-tone="danger"] { border-inline-start-color: var(--danger); }
+.results[data-tone="success"] { border-inline-start-color: var(--success); }
+.results h3 { margin-block-end: 0.55rem; font-size: 0.98rem; }
+
+@container (min-width: 48rem) {
+    .board { grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 1fr); }
+}
+
+@media (max-width: 450px) {
+    .toolbar > div { flex-basis: 100%; }
+    .toolbar > button { flex-grow: 1; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .module .heading { animation: var(--motion-reveal) var(--motion-panel) var(--ease-out) both; }
+    .groups > .panel:nth-child(-n+4) {
+        animation: var(--motion-reveal) var(--motion-fast) var(--ease-out) backwards;
+        animation-delay: var(--queue-delay, 0ms);
+    }
+    .groups > .panel:nth-child(2) { --queue-delay: 20ms; }
+    .groups > .panel:nth-child(3) { --queue-delay: 40ms; }
+    .groups > .panel:nth-child(4) { --queue-delay: 60ms; }
+}

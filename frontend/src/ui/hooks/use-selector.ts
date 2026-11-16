@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { type ActionState } from "@/core/types";
 import { type LibrarySearchSelectProps, type SearchOption } from "@/ui/components/library-search-select/library-search-select";
 
@@ -12,6 +12,8 @@ export function useSelector(name: string, label: string, placeholder: string, re
     const [selection, setSelection] = useState<SearchOption | null>(initialSelection ?? null);
     const [expanded, setExpanded] = useState(false);
     const [active, setActive] = useState(-1);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const reset = () => { setQuery(""); setDebounced(""); setSelection(null); setExpanded(false); setActive(-1); };
 
     useEffect(() => {
         const timeout = setTimeout(() => setDebounced(query), 300);
@@ -20,7 +22,7 @@ export function useSelector(name: string, label: string, placeholder: string, re
 
     return {
         selected: selection?.value ?? "",
-        reset: () => { setQuery(""); setDebounced(""); setSelection(null); setExpanded(false); setActive(-1); },
+        reset,
         field: (result: ActionState<SearchOption[]> | null, pendingMessage = "Cargando opciones...",
             onSelectionChange?: (value: string) => void,
             onPick?: (option: SearchOption) => void): LibrarySearchSelectProps & { kind: "search-select" } => {
@@ -50,6 +52,16 @@ export function useSelector(name: string, label: string, placeholder: string, re
             return {
                 kind: "search-select", name, label, placeholder, query, required,
                 value: selection?.value ?? "", options, status, expanded, activeIndex,
+                unselected: !expanded && Boolean(query.trim()) && !selection,
+                preserveFocus: (event) => event.preventDefault(),
+                inputRef,
+                reset: () => { if (selection) onSelectionChange?.(""); reset(); },
+                clear: query ? () => {
+                    if (selection) onSelectionChange?.("");
+                    reset();
+                    inputRef.current?.focus();
+                    setExpanded(true);
+                } : undefined,
                 onOpen: () => setExpanded(true),
                 onClose: close,
                 onSearch: (text) => {
@@ -75,6 +87,7 @@ export function useSelector(name: string, label: string, placeholder: string, re
                     } else if (event.key === "Enter" && expanded) {
                         event.preventDefault();
                         if (activeIndex >= 0) select(options[activeIndex]);
+                        else if (options.length === 1) select(options[0]);
                     }
                 }
             };

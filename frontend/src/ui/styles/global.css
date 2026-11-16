@@ -9,24 +9,30 @@ body {
     min-height: 100vh;
     background: var(--canvas);
     color: var(--ink);
-    font: 400 0.9375rem/1.55 var(--sans);
+    font: 400 1rem/1.55 var(--sans);
 }
 
 button, input, select { font: inherit; }
 button { cursor: pointer; }
-button:disabled { cursor: wait; opacity: 0.6; }
+button:disabled { cursor: default; }
 
 :focus-visible {
-    outline: 3px solid #5570e7;
+    outline: 2px solid var(--focus);
     outline-offset: 3px;
 }
 
+::selection { color: var(--on-gold); background: var(--gold); }
+
 h1, h2, h3, p, dl, dd { margin: 0; }
-button, input, select, summary { -webkit-tap-highlight-color: transparent; }
+
+@keyframes library-reveal {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
+        animation: none !important;
+        transition: none !important;
     }
 }

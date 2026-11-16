@@ -7,6 +7,7 @@ export function useSessionViewModel(): AuthContextValue {
     const [stored] = useState(getStoredSessionAction);
     const [session, setSession] = useState<typeof stored>(null);
     const [isLoading, setIsLoading] = useState(Boolean(stored));
+    const [isRestoring, setIsRestoring] = useState(Boolean(stored));
     const [error, setError] = useState<string | null>(null);
 
     const request = useRef(0);
@@ -30,6 +31,7 @@ export function useSessionViewModel(): AuthContextValue {
             setError(result.error || "No se pudo obtener el perfil.");
         }
         setIsLoading(false);
+        setIsRestoring(false);
     }, []);
 
     {/* ===== Main useEffects ===== */ }
@@ -55,6 +57,7 @@ export function useSessionViewModel(): AuthContextValue {
         setSession(null);
         setError(null);
         setIsLoading(false);
+        setIsRestoring(false);
     };
 
     const onRefreshCurrentUser = async () => {
@@ -89,6 +92,7 @@ export function useSessionViewModel(): AuthContextValue {
         session,
         user: currentUser,
         isLoading,
+        isRestoring,
         error,
         login: handleLogin,
         logout: onLogout,

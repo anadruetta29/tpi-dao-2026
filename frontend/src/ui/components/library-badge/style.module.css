@@ -1,0 +1,14 @@
+.badge {
+    display: inline-block;
+    padding: 0.1rem 0.55rem;
+    border-radius: 99px;
+    color: var(--ink);
+    background: var(--surface-muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+.badge[data-tone="success"] { color: var(--success); background: var(--success-soft); }
+.badge[data-tone="danger"] { color: var(--danger); background: var(--danger-soft); }
+.badge[data-tone="attention"] { background: var(--parchment); }
+.badge[data-tone="active"] { color: var(--active); background: var(--active-soft); }

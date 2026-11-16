@@ -101,13 +101,17 @@ export function useSelectoresViewModel(
         }
     };
 
-    const onOpen = () => {
+    const reset = () => {
         socio.reset();
         recepcionista.reset();
         origen.reset();
         destino.reset();
         libro.reset();
         ejemplar.reset();
+    };
+
+    const onOpen = () => {
+        reset();
         setRevision((current) => current + 1);
     };
 
@@ -194,6 +198,7 @@ export function useSelectoresViewModel(
 
     return {
         open: onOpen,
+        reset,
         fields,
         socioField,
         recepcionistaField,

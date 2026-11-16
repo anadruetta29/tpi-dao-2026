@@ -1,0 +1,25 @@
+.disclosure { display: grid; grid-template-rows: 0fr; opacity: 0; }
+.clip { min-height: 0; overflow: clip; }
+.content { padding-block-end: var(--form-disclosure-gap, 1rem); }
+.disclosure[data-open="true"] { grid-template-rows: 1fr; opacity: 1; }
+.disclosure[data-open="true"] > .clip { overflow: visible; }
+
+@media (prefers-reduced-motion: no-preference) {
+    .disclosure[data-open="true"] {
+        transition:
+            grid-template-rows var(--form-enter-duration, var(--motion-popover)) var(--ease-out),
+            opacity var(--form-enter-duration, var(--motion-popover)) var(--ease-out);
+    }
+
+    .disclosure[data-open="false"] {
+        transition:
+            grid-template-rows var(--form-exit-duration, 150ms) var(--ease-out),
+            opacity var(--form-exit-duration, 110ms) var(--ease-out);
+    }
+
+    .disclosure[data-open="true"] > .clip {
+        animation: release-clip var(--form-enter-duration, var(--motion-popover)) step-end backwards;
+    }
+}
+
+@keyframes release-clip { from { overflow: clip; } to { overflow: visible; } }

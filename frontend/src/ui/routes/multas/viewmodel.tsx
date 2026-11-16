@@ -1,14 +1,15 @@
 import { useCallback } from "react";
 import { type Session } from "@/domain/entities/session";
+import type { DestinoBandeja } from "@/core/types";
 import { EstadoMulta, MotivoMulta, type Multa } from "@/domain/entities/multa";
 import { anularMultaAction, createMultaAction, getAllMultasAction, getMultaByIdAction, pagarMultaAction } from "@/ui/actions/multa/multa.actions";
 import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
 import { useSelector } from "@/ui/hooks/use-selector";
 import { useSelectorCatalog } from "@/ui/hooks/use-selector-catalog";
-import { allOptions, info, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
+import { allOptions, info, statusInfo, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
 
-export default function ViewModel(session: Session) {
+export default function ViewModel(session: Session, onOpen?: (target: DestinoBandeja) => void) {
     const catalog = useSelectorCatalog(session, "socios", "prestamos");
     const filterSocio = useSelector("socioId", "Socio", "Buscá por nombre o documento", false);
     const socio = useSelector("socioId", "Socio", "Buscá por nombre o documento");
@@ -61,11 +62,12 @@ export default function ViewModel(session: Session) {
     const socioNames = new Map((catalog.socios?.data ?? []).map(({ value, label }) => [value, label]));
 
     const describeMulta = (multa: Multa) => ({
+        actions: onOpen && multa.prestamoId ? [{ label: "Abrir préstamo", onClick: () => onOpen({ modulo: "Préstamos", id: multa.prestamoId }) }] : [],
         info: [
             info("Socio", socioNames.get(multa.socioId) ?? multa.socioId),
             info("Préstamo", multa.prestamoId),
             info("Motivo", multa.motivoName),
-            info("Estado", multa.estadoName),
+            statusInfo(multa.estadoName),
             info("Monto", `$${multa.monto}`),
             info("Emisión", multa.fechaEmision),
             info("Pago", multa.fechaPago)
@@ -95,7 +97,7 @@ export default function ViewModel(session: Session) {
 
     const getMultaMeta = (multa: Multa) => {
         const emision = multa.fechaEmision ? String(multa.fechaEmision).slice(0, 10) : undefined;
-        return [multa.estadoName, multa.motivoName, `Préstamo #${multa.prestamoId}`, emision].filter(Boolean).join(" · ");
+        return [multa.motivoName, `Préstamo #${multa.prestamoId}`, emision].filter(Boolean).join(" · ");
     };
 
     const filterFields: Field[] = [
@@ -123,6 +125,7 @@ export default function ViewModel(session: Session) {
         },
         getLabel: getMultaLabel,
         getMeta: getMultaMeta,
+        getStatuses: (multa) => [multa.estadoName],
         create: {
             label: "Registrar multa",
             onOpen: onOpenCreate,

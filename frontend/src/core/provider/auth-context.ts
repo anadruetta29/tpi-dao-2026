@@ -7,6 +7,7 @@ export interface AuthContextValue {
     session: Session | null;
     user: Usuario | null;
     isLoading: boolean;
+    isRestoring: boolean;
     error: string | null;
     login: (command: LoginCommand) => Promise<boolean>;
     logout: () => void;
