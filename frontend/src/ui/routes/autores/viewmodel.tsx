@@ -6,15 +6,15 @@ import { pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/us
 import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
 
-export function useViewModel(session: Session) {
-    {/* ===== Fetch data ===== */ }
+export default function ViewModel(session: Session) {
+    // ===== Fetch data =====
 
     const fetchAutores = useCallback(async () => {
         const result = await getAllAutoresAction(session);
         return pickData(result, (data) => data.autores);
     }, [session]);
 
-    {/* ===== handlers functions ===== */ }
+    // ===== Handlers functions =====
 
     const handleCreateAutor = (field: ReadField) => {
         return createAutorAction({
@@ -23,7 +23,7 @@ export function useViewModel(session: Session) {
         });
     };
 
-    {/* ===== variables ===== */ }
+    // ===== Variables =====
 
     const getAutorLabel = (autor: Autor) => `${autor.nombre} ${autor.apellido}`;
 
@@ -44,6 +44,3 @@ export function useViewModel(session: Session) {
         }
     });
 }
-
-export default useViewModel;
-export { useViewModel as ViewModel };

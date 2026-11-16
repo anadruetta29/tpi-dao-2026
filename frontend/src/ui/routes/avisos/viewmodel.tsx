@@ -6,20 +6,10 @@ import { type DestinoBandeja } from "@/ui/routes/bandeja/viewmodel";
 import { useSelectorCatalog } from "@/ui/hooks/use-selector-catalog";
 import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
-import { allOptions, info, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
+import { info, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
+import { estadosLectura, tiposAviso } from "@/core/utils/constants";
 
-const tiposAviso = allOptions([
-    { value: "RESERVA_LISTA", label: "Reserva lista" },
-    { value: "PRESTAMO_POR_VENCER", label: "Vencimiento próximo" },
-    { value: "PRESTAMO_ATRASADO", label: "Préstamo atrasado" }
-]);
-
-const estadosLectura = allOptions([
-    { value: "pendiente", label: "Pendientes de lectura" },
-    { value: "leido", label: "Leídos" }
-]);
-
-export function useViewModel(session: Session, onOpen?: (destino: DestinoBandeja) => void) {
+export default function ViewModel(session: Session, onOpen?: (destino: DestinoBandeja) => void) {
     const catalog = useSelectorCatalog(session, "sedes", "socios");
     const sedeNames = new Map((catalog.sedes?.data ?? []).map(({ value, label }) => [value, label]));
     const socioNames = new Map((catalog.socios?.data ?? []).map(({ value, label }) => [value, label]));
@@ -92,5 +82,3 @@ export function useViewModel(session: Session, onOpen?: (destino: DestinoBandeja
     });
 }
 
-export default useViewModel;
-export { useViewModel as ViewModel };
