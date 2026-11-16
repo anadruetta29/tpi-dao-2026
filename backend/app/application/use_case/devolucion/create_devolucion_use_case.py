@@ -21,6 +21,7 @@ from app.domain.repository.multa_repository_i import MultaRepositoryI
 from app.domain.repository.prestamo_repository_i import PrestamoRepositoryI
 from app.domain.repository.reserva_repository_i import ReservaRepositoryI
 from app.domain.repository.socio_repository_i import SocioRepositoryI
+from app.domain.repository.tarifa_multa_repository_i import TarifaMultaRepositoryI
 from app.domain.repository.usuario_repository_i import UsuarioRepositoryI
 
 
@@ -37,6 +38,7 @@ class CreateDevolucionUseCase:
         devolucion_strategy_factory: Optional[DevolucionEjemplarStrategyFactory] = None,
         transaction: Callable[[], ContextManager] = nullcontext,
         aviso_repository: Optional[AvisoRepositoryI] = None,
+        tarifa_multa_repository: Optional[TarifaMultaRepositoryI] = None,
     ) -> None:
         self.devolucion_repository = devolucion_repository
         self.prestamo_repository = prestamo_repository
@@ -46,6 +48,7 @@ class CreateDevolucionUseCase:
         self.multa_repository = multa_repository
         self.socio_repository = socio_repository
         self.aviso_repository = aviso_repository
+        self.tarifa_multa_repository = tarifa_multa_repository
         self.transaction = transaction
         self.devolucion_strategy_factory = (
             devolucion_strategy_factory or DevolucionEjemplarStrategyFactory()
@@ -132,6 +135,7 @@ class CreateDevolucionUseCase:
                 multa_repository=self.multa_repository,
                 socio_repository=self.socio_repository,
                 fecha_atraso=date.today() if prestamo.ejemplares_pendientes() else fecha_dev,
+                tarifa_multa_repository=self.tarifa_multa_repository,
             )
             estado_ejemplar = ejemplar.estado if ejemplar is not None else None
             if (

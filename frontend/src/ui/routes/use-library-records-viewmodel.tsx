@@ -80,6 +80,7 @@ export interface RecordsOptions<T extends { id: string }, D, F> {
     load: (filters: F) => Promise<ActionState<T[]>>;
     loadDetail?: (id: string) => Promise<ActionState<D>>;
     getLabel: (record: T) => string;
+    getDisplayId?: (record: T, index: number) => string;
     getMeta?: (record: T) => string;
     getStatuses?: (record: T) => (string | StatusBadgeView)[];
     describe?: (detail: D) => DetailSpec;
@@ -114,7 +115,7 @@ export interface LibraryRecordsView {
     refresh: () => void;
     createId: string;
     confirmation?: { id: string; label: string; message: string; tone: "primary" | "danger"; cancel: (event?: SyntheticEvent) => void; confirm: () => void };
-    records: { id: string; label: string; meta?: string; badges: StatusBadgeView[]; selected: boolean; select?: () => void;
+    records: { id: string; displayId: string; label: string; meta?: string; badges: StatusBadgeView[]; selected: boolean; select?: () => void;
         clickRow?: MouseEventHandler<HTMLDivElement>; scrollId?: string }[];
     detail?: {
         loading: boolean;
@@ -342,9 +343,10 @@ export function useLibraryRecordsViewModel<T extends { id: string }, D, F>(
     };
 
     const records: LibraryRecordsView["records"] = [];
-    for (const record of ordered) {
+    for (const [index, record] of ordered.entries()) {
         records.push({
             id: record.id,
+            displayId: options.getDisplayId ? options.getDisplayId(record, index) : `#${record.id}`,
             label: getLabel(record),
             meta: options.getMeta?.(record),
             badges: options.getStatuses?.(record).filter(Boolean).map((status) => typeof status === "string" ? statusBadge(status) : status) ?? [],

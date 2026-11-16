@@ -27,6 +27,7 @@ interface InputFieldProps extends CommonFieldProps {
     max?: number | string;
     step?: number | "any";
     autoComplete?: string;
+    disabled?: boolean;
     passwordAction?: { label: string; icon: "eye" | "eyeOff"; pressed: boolean; run: () => void; preserveFocus: MouseEventHandler<HTMLButtonElement> };
 }
 
@@ -61,6 +62,7 @@ export function LibraryField(field: LibraryFieldProps) {
                     required={required} placeholder={field.placeholder} pattern={field.pattern} inputMode={field.inputMode}
                     minLength={field.minLength} maxLength={field.maxLength} title={field.title}
                     onInput={field.onInput} min={field.min} max={field.max} step={field.step} autoComplete={field.autoComplete}
+                    disabled={field.disabled}
                     onChange={(event) => onChange?.(event.target.value)} className={styles.control} />
                     {field.passwordAction && (
                         <button type="button" className={styles.action} aria-label={field.passwordAction.label}

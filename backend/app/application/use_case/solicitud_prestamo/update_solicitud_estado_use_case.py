@@ -110,7 +110,8 @@ class UpdateSolicitudEstadoUseCase:
         if aprueba:
             if interbibliotecario:
                 if recibido_anteriormente:
-                    self.crear_prestamo.efectivizar(updated)
+                    if updated.socio_id is not None:
+                        self.crear_prestamo.efectivizar(updated)
                 else:
                     self.crear_remito.emitir_para_solicitud(updated, user)
             else:

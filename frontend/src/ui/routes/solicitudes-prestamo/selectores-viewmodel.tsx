@@ -62,7 +62,7 @@ export function useSelectoresViewModel(
         void Promise.all([
             getAllSociosAction({ session, estado: EstadoSocio.HABILITADO }),
             getAllSedesAction({ session }),
-            getAllEjemplaresAction({ session, estado: EstadoEjemplar.DISPONIBLE }),
+            getAllEjemplaresAction({ session }),
             getAllLibrosAction({ session }),
             getRecepcionistasAction({ session })
         ]).then(([sociosRes, sedesRes, ejemplaresRes, librosRes, recepcionistasRes]) => {
@@ -116,9 +116,7 @@ export function useSelectoresViewModel(
     };
 
     const onChangeDestination = () => {
-        origen.reset();
         ejemplar.reset();
-        recepcionista.reset();
     };
 
     {/* ===== variables ===== */ }
@@ -136,16 +134,29 @@ export function useSelectoresViewModel(
         .filter(({ estadoEntity }) => estadoEntity === EstadoSede.ACTIVA)
         .map(({ id, nombre }) => ({ value: id, label: nombre }))) : null;
 
-    const copies = data ? pickData(data.ejemplares, ({ ejemplares: copyItems }) => copyItems.map((copy) => ({
+    const allCopies = data ? pickData(data.ejemplares, ({ ejemplares: copyItems }) => copyItems.map((copy) => ({
         value: copy.id,
         sedeId: copy.sedeId,
         libroId: copy.libroId,
+        estadoEntity: copy.estado,
+        title: titles.get(copy.libroId) ?? "",
         label: [titles.get(copy.libroId), copy.codigo].filter(Boolean).join(" · ")
     }))) : null;
 
-    const copyNames = new Map(copies?.data?.map(({ value, label }) => [value, label]));
+    const copies = allCopies ? pickData(allCopies, (items) =>
+        items.filter(({ estadoEntity }) => estadoEntity === EstadoEjemplar.DISPONIBLE)
+    ) : null;
 
-    const destinationField = destino.field(activeSedes, "Cargando sedes...", onChangeDestination);
+    const copyNames = new Map(allCopies?.data?.map(({ value, label }) => [value, label]));
+    const copyTitles = new Map(allCopies?.data?.map(({ value, title }) => [value, title]));
+
+    const eligibleDestinationSedes = activeSedes && pickData(activeSedes, (items) =>
+        items.filter(({ value }) =>
+            value !== origen.selected
+            && (!recepcionistaActual || !origen.selected || origen.selected === sedePropia || value === sedePropia)
+        )
+    );
+    const destinationField = destino.field(eligibleDestinationSedes, "Cargando sedes...", onChangeDestination);
     const libros = data ? pickData(data.libros, ({ libros: items }) => items.map(({ id, titulo, editorial }) => ({
         value: id,
         label: [titulo, editorial].filter(Boolean).join(" · ")
@@ -169,11 +180,11 @@ export function useSelectoresViewModel(
     }
 
     const fields = [
+        originField,
         ...(interbibliotecaria ? [
             destinationField,
             libro.field(libros, "Cargando títulos...")
         ] : []),
-        originField,
         ejemplar.field(
             origen.selected && copies ? pickData(copies, (items) => items.filter(({ sedeId, libroId }) =>
                 sedeId === origen.selected && (!interbibliotecaria || !libro.selected || libroId === libro.selected)
@@ -210,7 +221,8 @@ export function useSelectoresViewModel(
         sedeNames,
         socios,
         recepcionistas,
-        copyNames
+        copyNames,
+        copyTitles
     };
 }
 

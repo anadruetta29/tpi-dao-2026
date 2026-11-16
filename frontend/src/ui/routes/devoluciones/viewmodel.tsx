@@ -15,6 +15,7 @@ import { estados } from "@/core/utils/constants";
 
 export default function ViewModel(session: Session, prestamoInicialId?: string, onOpen?: (target: DestinoBandeja) => void) {
     const catalog = useSelectorCatalog(session, "prestamos", "socios", "ejemplares");
+    const socioFilter = useSelector("socioId", "Socio", "Buscá por nombre o documento", false);
     const ejemplar = useSelector("ejemplarId", "Ejemplar pendiente", "Buscá por título o código");
     const prestamo = useSelector("prestamoId", "Préstamo", "Buscá por libro, ejemplar o socio", true,
         prestamoInicialId ? { value: prestamoInicialId, label: `Préstamo #${prestamoInicialId}` } : undefined
@@ -22,10 +23,10 @@ export default function ViewModel(session: Session, prestamoInicialId?: string, 
 
     {/* ===== Fetch data ===== */ }
 
-    const fetchDevoluciones = useCallback(async ({ prestamoId, estadoDevuelto }: { prestamoId: string; estadoDevuelto: string }) => {
+    const fetchDevoluciones = useCallback(async ({ socioId, estadoDevuelto }: { socioId: string; estadoDevuelto: string }) => {
         return getAllDevolucionesAction({
             session,
-            prestamoId: prestamoId.trim() || undefined,
+            socioId: socioId.trim() || undefined,
             estadoDevuelto: estadoDevuelto || undefined
         });
     }, [session]);
@@ -45,7 +46,7 @@ export default function ViewModel(session: Session, prestamoInicialId?: string, 
     {/* ===== handlers functions ===== */ }
 
     const handleFilterSubmit = (field: ReadField) => {
-        return readFields(field, "prestamoId", "estadoDevuelto");
+        return readFields(field, "socioId", "estadoDevuelto");
     };
 
     const handleCreateDevolucion = async (field: ReadField) => {
@@ -107,7 +108,7 @@ export default function ViewModel(session: Session, prestamoInicialId?: string, 
     };
 
     const filterFields: Field[] = [
-        { name: "prestamoId", label: "Préstamo #", placeholder: "Ej. 12", type: "number" },
+        socioFilter.field(catalog?.socios ?? null),
         { name: "estadoDevuelto", label: "Estado devuelto", options: allOptions(estados) }
     ];
 
@@ -124,7 +125,7 @@ export default function ViewModel(session: Session, prestamoInicialId?: string, 
         title: "Devoluciones",
         newestFirst: true,
         initiallyOpen: Boolean(prestamoInicialId),
-        initialFilters: { prestamoId: "", estadoDevuelto: "" },
+        initialFilters: { socioId: "", estadoDevuelto: "" },
         load: fetchDevoluciones,
         loadDetail: fetchDevolucionDetail,
         filter: {

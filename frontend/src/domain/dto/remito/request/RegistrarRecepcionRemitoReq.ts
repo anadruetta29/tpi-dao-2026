@@ -5,4 +5,5 @@ export interface RegistrarRecepcionRemitoReq {
     id: string;
     fechaRecepcion?: string | null;
     conIncidencia?: boolean;
+    incidencias?: { ejemplar_id: number; estado: string; observacion: string }[];
 }

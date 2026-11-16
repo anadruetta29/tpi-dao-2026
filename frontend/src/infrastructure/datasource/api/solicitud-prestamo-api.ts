@@ -104,7 +104,7 @@ export class SolicitudPrestamoApiDataSource implements SolicitudPrestamoDataSour
             const response = await this.httpClient.post(
                 "/solicitudes-prestamo/interbibliotecario",
                 {
-                    recepcionista_id: Number(dto.recepcionistaId),
+                    recepcionista_id: dto.recepcionistaId ? Number(dto.recepcionistaId) : undefined,
                     ejemplar_id: dto.ejemplarId ? Number(dto.ejemplarId) : undefined,
                     ejemplar_ids: dto.ejemplaresIds?.map(Number),
                     sede_origen_id: Number(dto.sedeOrigenId),

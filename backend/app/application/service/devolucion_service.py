@@ -30,6 +30,7 @@ class DevolucionService(DevolucionServiceI):
                 token=dto.get_token(),
                 prestamo_id=dto.get_prestamo_id(),
                 estado_devuelto=dto.get_estado_devuelto(),
+                socio_id=dto.get_socio_id(),
             )
         )
         return DevolucionMapper.to_get_all_response(result.devoluciones)

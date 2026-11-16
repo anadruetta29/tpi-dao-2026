@@ -1,16 +1,18 @@
 from contextlib import nullcontext
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
-from typing import Callable, ContextManager, Optional
+from typing import Any, Callable, ContextManager, Dict, List, Optional
 from app.application.strategy.remito_estado.core.remito_estado_state_factory import (
     RemitoEstadoStateFactory,
 )
 from app.application.use_case.prestamo.create_prestamo_use_case import CreatePrestamoUseCase
 from app.application.use_case.reserva.asignar_reserva_use_case import asignar_reserva
 from app.core.helper.auth_helper import AuthHelper
+from app.domain.entity.estado_ejemplar import EstadoEjemplar
 from app.domain.entity.estado_envio import EstadoEnvio
 from app.domain.entity.historial_estado_remito import HistorialEstadoRemito
 from app.domain.entity.remito import Remito
+from app.domain.entity.remito_incidencia import RemitoIncidencia
 from app.domain.entity.rol import Rol
 from app.domain.error.error_handler import ErrorHandler
 from app.domain.error.error_type import ErrorType
@@ -49,12 +51,21 @@ class RecepcionRemitoUseCase:
         self.transaction = transaction
         self.remito_state_factory = remito_state_factory or RemitoEstadoStateFactory()
 
+    ESTADOS_INCIDENCIA_PERMITIDOS = {
+        EstadoEjemplar.DISPONIBLE,
+        EstadoEjemplar.EN_REVISION,
+        EstadoEjemplar.DANADO,
+        EstadoEjemplar.EXTRAVIADO,
+        EstadoEjemplar.DESTRUIDO,
+    }
+
     @dataclass(frozen=True)
     class Command:
         token: Optional[str]
         id: Optional[int]
         fechaRecepcion: Optional[date]
         con_incidencia: bool = False
+        incidencias: List[Dict[str, Any]] = field(default_factory=list)
 
     @dataclass(frozen=True)
     class Result:
@@ -79,14 +90,18 @@ class RecepcionRemitoUseCase:
             raise ErrorHandler(ErrorType.REMITO_NOT_FOUND)
 
         user.validar_sede(remito.sede_destino_id)
-        hoy = date.today()
-        fecha_recepcion = command.fechaRecepcion or hoy
+        fecha_recepcion = date.today()
         latest = self.historial_repository.get_latest_by_remito_id(command.id)
-        if fecha_recepcion > hoy or (latest and latest.fechaInicio is not None and fecha_recepcion < latest.fechaInicio):
+        if latest and latest.fechaInicio is not None and fecha_recepcion < latest.fechaInicio:
             raise ErrorHandler(ErrorType.BAD_REQUEST, "La recepción debe registrarse entre el último movimiento y hoy.")
         estado_actual = latest.estado if latest is not None else EstadoEnvio.PENDIENTE
         state = self.remito_state_factory.get_state(estado_actual)
         nuevo_estado = state.recibir(remito, fecha_recepcion, command.con_incidencia)
+
+        incidencias_por_ejemplar: Dict[int, RemitoIncidencia] = {}
+        if nuevo_estado == EstadoEnvio.CON_INCIDENCIA:
+            incidencias_por_ejemplar = self._parse_incidencias(remito, command.incidencias)
+            remito.incidencias = [incidencias_por_ejemplar[ej_id] for ej_id in sorted(remito.ejemplar_ids)]
 
         updated_remito = self.remito_repository.update(command.id, remito)
         if updated_remito is None:
@@ -100,29 +115,97 @@ class RecepcionRemitoUseCase:
             HistorialEstadoRemito.registrar(nuevo_estado, command.id, fecha_recepcion, user, cerrado=True)
         )
 
+        solicitud = None
+        if updated_remito.solicitud_id is not None:
+            solicitud = self.solicitud_repository.get_by_id_for_update(updated_remito.solicitud_id)
+            if solicitud is None:
+                raise ErrorHandler(ErrorType.SOLICITUD_NOT_FOUND)
+
         if nuevo_estado == EstadoEnvio.RECIBIDO:
-            solicitud = None
-            if updated_remito.solicitud_id is not None:
-                solicitud = self.solicitud_repository.get_by_id_for_update(updated_remito.solicitud_id)
-                if solicitud is None:
-                    raise ErrorHandler(ErrorType.SOLICITUD_NOT_FOUND)
             for ej_id in sorted(updated_remito.ejemplar_ids):
-                ejemplar = self.ejemplar_repository.get_by_id_for_update(ej_id)
-                if ejemplar is None:
-                    raise ErrorHandler(ErrorType.EJEMPLAR_NOT_FOUND)
-                ejemplar.recibir_en_sede(updated_remito.sede_destino_id)
-                self.ejemplar_repository.update(ej_id, ejemplar)
-                if (solicitud is None or solicitud.socio_id is None) and self.reserva_repository is not None:
-                    if asignar_reserva(
-                        ejemplar,
-                        self.reserva_repository,
-                        fecha_recepcion,
-                        aviso_repository=self.aviso_repository,
-                    ) is not None:
-                        self.ejemplar_repository.update(ej_id, ejemplar)
+                self._recibir_ejemplar_disponible(ej_id, updated_remito.sede_destino_id, solicitud, fecha_recepcion)
             if solicitud is not None:
-                self.crear_prestamo.efectivizar(solicitud)
+                if solicitud.socio_id is not None:
+                    self.crear_prestamo.efectivizar(solicitud)
+                solicitud.responsable_destino_id = user.id
+                self.solicitud_repository.update(solicitud.id, solicitud)
+        elif nuevo_estado == EstadoEnvio.CON_INCIDENCIA:
+            for ej_id in sorted(updated_remito.ejemplar_ids):
+                incidencia = incidencias_por_ejemplar[ej_id]
+                if incidencia.estado == EstadoEjemplar.DISPONIBLE:
+                    self._recibir_ejemplar_disponible(ej_id, updated_remito.sede_destino_id, solicitud, fecha_recepcion)
+                else:
+                    ejemplar = self.ejemplar_repository.get_by_id_for_update(ej_id)
+                    if ejemplar is None:
+                        raise ErrorHandler(ErrorType.EJEMPLAR_NOT_FOUND)
+                    if incidencia.estado != EstadoEjemplar.EXTRAVIADO and updated_remito.sede_destino_id is not None:
+                        ejemplar.sede_id = updated_remito.sede_destino_id
+                    ejemplar.estado = incidencia.estado
+                    self.ejemplar_repository.update(ej_id, ejemplar)
+            if solicitud is not None:
                 solicitud.responsable_destino_id = user.id
                 self.solicitud_repository.update(solicitud.id, solicitud)
 
         return RecepcionRemitoUseCase.Result(remito=updated_remito)
+
+    def _recibir_ejemplar_disponible(
+        self,
+        ej_id: int,
+        sede_destino_id: Optional[int],
+        solicitud,
+        fecha_recepcion: date,
+    ) -> None:
+        ejemplar = self.ejemplar_repository.get_by_id_for_update(ej_id)
+        if ejemplar is None:
+            raise ErrorHandler(ErrorType.EJEMPLAR_NOT_FOUND)
+        ejemplar.recibir_en_sede(sede_destino_id)
+        self.ejemplar_repository.update(ej_id, ejemplar)
+        if (solicitud is None or solicitud.socio_id is None) and self.reserva_repository is not None:
+            if asignar_reserva(
+                ejemplar,
+                self.reserva_repository,
+                fecha_recepcion,
+                aviso_repository=self.aviso_repository,
+            ) is not None:
+                self.ejemplar_repository.update(ej_id, ejemplar)
+
+    def _parse_incidencias(
+        self, remito: Remito, raw_incidencias: List[Dict[str, Any]]
+    ) -> Dict[int, RemitoIncidencia]:
+        esperados = set(remito.ejemplar_ids or [])
+        if not raw_incidencias:
+            raise ErrorHandler(
+                ErrorType.BAD_REQUEST,
+                "Indicá el estado y la observación de cada ejemplar del remito.",
+            )
+        resultado: Dict[int, RemitoIncidencia] = {}
+        for item in raw_incidencias:
+            raw_id = item.get("ejemplar_id")
+            raw_estado = item.get("estado")
+            observacion = str(item.get("observacion") or "").strip()
+            if raw_id is None or not raw_estado or not observacion:
+                raise ErrorHandler(
+                    ErrorType.BAD_REQUEST,
+                    "Cada ejemplar debe tener estado y observación al recibir con incidencia.",
+                )
+            ej_id = int(raw_id)
+            if ej_id not in esperados or ej_id in resultado:
+                raise ErrorHandler(ErrorType.BAD_REQUEST, "Detalle de incidencia inválido para los ejemplares del remito.")
+            try:
+                estado = EstadoEjemplar(str(raw_estado))
+            except ValueError:
+                raise ErrorHandler(ErrorType.BAD_REQUEST, "Estado de ejemplar inválido para incidencia.")
+            if estado not in self.ESTADOS_INCIDENCIA_PERMITIDOS:
+                raise ErrorHandler(ErrorType.BAD_REQUEST, "Estado de ejemplar no permitido en recepción.")
+            resultado[ej_id] = RemitoIncidencia(
+                remito_id=remito.id,
+                ejemplar_id=ej_id,
+                estado=estado,
+                observacion=observacion,
+            )
+        if set(resultado.keys()) != esperados:
+            raise ErrorHandler(
+                ErrorType.BAD_REQUEST,
+                "Debés informar el estado y la observación de todos los ejemplares del remito.",
+            )
+        return resultado

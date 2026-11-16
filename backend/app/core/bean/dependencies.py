@@ -124,6 +124,14 @@ from app.application.use_case.usuario import (
     GetUsuarioByIdUseCase,
     UpdateUsuarioUseCase,
 )
+from app.application.service.tarifa_multa_service import TarifaMultaService
+from app.application.service.tarifa_multa_service_i import TarifaMultaServiceI
+from app.application.use_case.configuracion.get_all_tarifas_multa_use_case import (
+    GetAllTarifasMultaUseCase,
+)
+from app.application.use_case.configuracion.update_tarifa_multa_use_case import (
+    UpdateTarifaMultaUseCase,
+)
 from app.domain.repository import (
     AutorRepositoryI,
     DevolucionRepositoryI,
@@ -137,6 +145,7 @@ from app.domain.repository import (
     SedeRepositoryI,
     SocioRepositoryI,
     SolicitudPrestamoRepositoryI,
+    TarifaMultaRepositoryI,
     UsuarioRepositoryI,
 )
 from app.infrastructure.database import atomic_write, get_db
@@ -154,6 +163,7 @@ from app.infrastructure.postgres.repository import (
     PostgresSedeRepository,
     PostgresSocioRepository,
     PostgresSolicitudPrestamoRepository,
+    PostgresTarifaMultaRepository,
     PostgresUsuarioRepository,
 )
 from app.infrastructure.repository_adapter import (
@@ -169,6 +179,7 @@ from app.infrastructure.repository_adapter import (
     SedeRepositoryAdapter,
     SocioRepositoryAdapter,
     SolicitudPrestamoRepositoryAdapter,
+    TarifaMultaRepositoryAdapter,
     UsuarioRepositoryAdapter,
 )
 
@@ -230,12 +241,17 @@ def get_multa_repository(db: Session = Depends(get_db)) -> MultaRepositoryI:
     return MultaRepositoryAdapter(PostgresMultaRepository(db))
 
 
+def get_tarifa_multa_repository(db: Session = Depends(get_db)) -> TarifaMultaRepositoryI:
+    return TarifaMultaRepositoryAdapter(PostgresTarifaMultaRepository(db))
+
+
 def get_registrar_multas_vencidas_use_case(db: Session) -> RegistrarMultasVencidasUseCase:
     return RegistrarMultasVencidasUseCase(
         get_prestamo_repository(db),
         get_multa_repository(db),
         get_socio_repository(db),
         transaction=lambda: atomic_write(db),
+        tarifa_multa_repository=get_tarifa_multa_repository(db),
     )
 
 
@@ -431,11 +447,13 @@ def get_create_devolucion_use_case(
     multa_repo: MultaRepositoryI = Depends(get_multa_repository),
     socio_repo: SocioRepositoryI = Depends(get_socio_repository),
     aviso_repo: AvisoRepositoryI = Depends(get_aviso_repository),
+    tarifa_multa_repo: TarifaMultaRepositoryI = Depends(get_tarifa_multa_repository),
 ) -> CreateDevolucionUseCase:
     return CreateDevolucionUseCase(
         devolucion_repo, prestamo_repo, ejemplar_repo, usuario_repo, reserva_repo, multa_repo, socio_repo,
         transaction=lambda: atomic_write(db),
         aviso_repository=aviso_repo,
+        tarifa_multa_repository=tarifa_multa_repo,
     )
 
 
@@ -554,10 +572,11 @@ def get_remito_service(
 def get_devolucion_service(
     devolucion_repo: DevolucionRepositoryI = Depends(get_devolucion_repository),
     usuario_repo: UsuarioRepositoryI = Depends(get_usuario_repository),
+    prestamo_repo: PrestamoRepositoryI = Depends(get_prestamo_repository),
     devolver: CreateDevolucionUseCase = Depends(get_create_devolucion_use_case),
 ) -> DevolucionServiceI:
     return DevolucionService(
-        get_all_use_case=GetAllDevolucionesUseCase(devolucion_repo, usuario_repo),
+        get_all_use_case=GetAllDevolucionesUseCase(devolucion_repo, usuario_repo, prestamo_repo),
         get_by_id_use_case=GetDevolucionByIdUseCase(devolucion_repo, usuario_repo),
         create_use_case=devolver,
     )
@@ -569,6 +588,7 @@ def get_multa_service(
     socio_repo: SocioRepositoryI = Depends(get_socio_repository),
     prestamo_repo: PrestamoRepositoryI = Depends(get_prestamo_repository),
     usuario_repo: UsuarioRepositoryI = Depends(get_usuario_repository),
+    tarifa_multa_repo: TarifaMultaRepositoryI = Depends(get_tarifa_multa_repository),
 ) -> MultaServiceI:
     multa_state_factory = MultaEstadoStateFactory()
 
@@ -583,7 +603,7 @@ def get_multa_service(
             socio_repo,
             prestamo_repo,
             usuario_repo,
-            CalculoMultaStrategyFactory(),
+            CalculoMultaStrategyFactory(tarifa_multa_repo),
             transaction=transaction,
         ),
         pagar_use_case=PagarMultaUseCase(
@@ -591,5 +611,18 @@ def get_multa_service(
         ),
         anular_use_case=AnularMultaUseCase(
             multa_repo, socio_repo, usuario_repo, multa_state_factory, transaction=transaction
+        ),
+    )
+
+
+def get_tarifa_multa_service(
+    db: Session = Depends(get_db),
+    tarifa_multa_repo: TarifaMultaRepositoryI = Depends(get_tarifa_multa_repository),
+    usuario_repo: UsuarioRepositoryI = Depends(get_usuario_repository),
+) -> TarifaMultaServiceI:
+    return TarifaMultaService(
+        get_all_use_case=GetAllTarifasMultaUseCase(tarifa_multa_repo, usuario_repo),
+        update_use_case=UpdateTarifaMultaUseCase(
+            tarifa_multa_repo, usuario_repo, transaction=lambda: atomic_write(db)
         ),
     )

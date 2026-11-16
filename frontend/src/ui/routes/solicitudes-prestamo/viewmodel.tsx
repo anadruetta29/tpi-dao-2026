@@ -21,6 +21,7 @@ export default function ViewModel(
     const nextStates = [EstadoSolicitud.RECHAZADA, EstadoSolicitud.CANCELADA].map((estado) => estado.toOption());
 
     const [tipo, setTipo] = useState(solicitudInicial ? TipoPrestamo.INTERBIBLIOTECARIO : TipoPrestamo.LOCAL);
+    const [modalidadAprobacion, setModalidadAprobacion] = useState(ModalidadPrestamoLocal.DOMICILIO);
     const esInterbibliotecaria = tipo === TipoPrestamo.INTERBIBLIOTECARIO;
     const selectors = useSelectoresViewModel(session, esInterbibliotecaria, solicitudInicial);
     const isRecepcionista = session.user?.role === Rol.RECEPCIONISTA;
@@ -63,8 +64,8 @@ export default function ViewModel(
         return esInterbibliotecaria
             ? createSolicitudInterbibliotecariaAction({
                 ...command,
-                sedeDestinoId: field("sedeDestinoId"),
-                recepcionistaId: field("recepcionistaId")
+                sedeDestinoId: field("sedeDestinoId")
+
             })
             : createSolicitudLocalAction({ ...command, socioId: field("socioId") });
     };
@@ -84,7 +85,7 @@ export default function ViewModel(
             id: solicitud.id,
             estado: EstadoSolicitud.APROBADA,
             modalidad: local ? ModalidadPrestamoLocal.fromString(field("modalidad")) : undefined,
-            fechaVencimiento: local ? field("fechaVencimiento") || undefined : undefined
+            fechaVencimiento: local ? (ModalidadPrestamoLocal.fromString(field("modalidad")) === ModalidadPrestamoLocal.SALA_LECTURA ? localDateISO() : (field("fechaVencimiento") || undefined)) : undefined
         });
     };
 
@@ -97,8 +98,8 @@ export default function ViewModel(
             || session.user.sedeId === solicitud.sedeOrigenId
             || (aprobacionPendiente && !local && session.user.sedeId === solicitud.sedeDestinoId));
         const camposAprobacion: Field[] = local ? [
-            { name: "modalidad", label: "Modalidad", options: ModalidadPrestamoLocal.toOptions() },
-            { name: "fechaVencimiento", placeholder: "Seleccioná la fecha de vencimiento", label: "Fecha de vencimiento", type: "date", defaultValue: localDatePlusDaysISO(7), min: localDateISO() }
+            { name: "modalidad", label: "Modalidad", defaultValue: modalidadAprobacion.value, options: ModalidadPrestamoLocal.toOptions(), onChange: (value) => setModalidadAprobacion(ModalidadPrestamoLocal.fromString(value)) },
+            modalidadAprobacion === ModalidadPrestamoLocal.SALA_LECTURA ? { name: "fechaVencimiento", placeholder: "Vence hoy", label: "Fecha de vencimiento", type: "date", defaultValue: localDateISO(), min: localDateISO(), max: localDateISO(), disabled: true } : { name: "fechaVencimiento", placeholder: "Seleccioná la fecha de vencimiento", label: "Fecha de vencimiento", type: "date", defaultValue: localDatePlusDaysISO(7), min: localDateISO() }
         ] : [];
         return {
             info: [
@@ -109,7 +110,7 @@ export default function ViewModel(
                     ? [statusInfo("Falta aprobación", "attention", "Aprobación")]
                     : []),
                 ...(solicitud.socioId ? [info("Socio", selectors.socios.get(solicitud.socioId) ?? solicitud.socioId)] : []),
-                info("Ejemplares", solicitud.ejemplaresIds.map((id) => selectors.copyNames.get(id) ?? id).join(", ")),
+                info("Ejemplares", solicitud.ejemplaresIds.map((id) => selectors.copyNames.get(id) ?? `#${id}`).join(", ")),
                 info("Sede de origen", selectors.sedeNames.get(solicitud.sedeOrigenId) ?? solicitud.sedeOrigenId),
                 info("Sede de destino", selectors.sedeNames.get(solicitud.sedeDestinoId) ?? solicitud.sedeDestinoId),
                 info(
@@ -143,7 +144,7 @@ export default function ViewModel(
     };
 
     const getSolicitudMeta = (solicitud: SolicitudPrestamo) => {
-        const copias = solicitud.ejemplaresIds.map((id) => selectors.copyNames.get(id) ?? `#${id}`).join(", ");
+        const copias = Array.from(new Set(solicitud.ejemplaresIds.map((id) => selectors.copyTitles.get(id) || selectors.copyNames.get(id) || `#${id}`).filter(Boolean))).join(", ");
         return [solicitud.tipoName, copias || undefined].filter(Boolean).join(" · ");
     };
 
@@ -154,7 +155,7 @@ export default function ViewModel(
     ];
 
     const submitDisabled = !selectors.canSubmit || (esInterbibliotecaria
-        ? !selectors.hasDestination || !selectors.hasRecepcionista
+        ? !selectors.hasDestination
         : !selectors.hasSocio);
 
     const createFields: Field[] = [
@@ -166,8 +167,8 @@ export default function ViewModel(
             onChange: onTipoChange
         },
         ...(esInterbibliotecaria ? [] : [selectors.socioField]),
-        ...selectors.fields,
-        ...(esInterbibliotecaria ? [selectors.recepcionistaField] : [])
+        ...selectors.fields
+
     ];
 
     return useLibraryRecordsViewModel({

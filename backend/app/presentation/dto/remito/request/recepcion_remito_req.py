@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 
 class RecepcionRemitoReq:
@@ -9,11 +9,13 @@ class RecepcionRemitoReq:
         id: Optional[int] = None,
         fechaRecepcion: Optional[date] = None,
         con_incidencia: bool = False,
+        incidencias: Optional[List[Dict[str, Any]]] = None,
     ) -> None:
         self.token = token
         self.id = id
         self.fechaRecepcion = fechaRecepcion
         self.con_incidencia = con_incidencia
+        self.incidencias = incidencias or []
 
     @staticmethod
     def build(
@@ -22,12 +24,13 @@ class RecepcionRemitoReq:
         payload: Optional[Dict[str, Any]] = None,
     ) -> "RecepcionRemitoReq":
         payload = payload or {}
-        raw_fecha = payload.get("fechaRecepcion")
+        raw_incidencias = payload.get("incidencias")
         return RecepcionRemitoReq(
             token=token,
             id=id,
-            fechaRecepcion=date.fromisoformat(str(raw_fecha)) if raw_fecha else date.today(),
+            fechaRecepcion=date.today(),
             con_incidencia=bool(payload.get("con_incidencia", False)),
+            incidencias=raw_incidencias if isinstance(raw_incidencias, list) else [],
         )
 
     def get_token(self) -> Optional[str]:
@@ -41,3 +44,6 @@ class RecepcionRemitoReq:
 
     def get_con_incidencia(self) -> bool:
         return self.con_incidencia
+
+    def get_incidencias(self) -> List[Dict[str, Any]]:
+        return self.incidencias

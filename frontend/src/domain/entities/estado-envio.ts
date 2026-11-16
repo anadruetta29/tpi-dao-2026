@@ -7,7 +7,7 @@ export class EstadoEnvio extends BaseEntity {
     public static readonly DESPACHADO = new EstadoEnvio("DESPACHADO", "Despachado");
     public static readonly EN_TRANSITO = new EstadoEnvio("EN_TRANSITO", "En tránsito");
     public static readonly RECIBIDO = new EstadoEnvio("RECIBIDO", "Recibido");
-    public static readonly CON_INCIDENCIA = new EstadoEnvio("CON_INCIDENCIA", "Con incidencia");
+    public static readonly CON_INCIDENCIA = new EstadoEnvio("CON_INCIDENCIA", "Recibido con incidencia");
 
     // ======== Constructor ======== //
 

@@ -166,6 +166,7 @@ export interface RegistrarRecepcionRemitoActionParams {
     id: string;
     fechaRecepcion?: string | null;
     conIncidencia?: boolean;
+    incidencias?: { ejemplar_id: number; estado: string; observacion: string }[];
 }
 
 export async function registrarRecepcionRemitoAction(
@@ -181,7 +182,8 @@ export async function registrarRecepcionRemitoAction(
             session,
             id: params.id,
             fechaRecepcion: params.fechaRecepcion,
-            conIncidencia: params.conIncidencia
+            conIncidencia: params.conIncidencia,
+            incidencias: params.incidencias
         });
 
         return {

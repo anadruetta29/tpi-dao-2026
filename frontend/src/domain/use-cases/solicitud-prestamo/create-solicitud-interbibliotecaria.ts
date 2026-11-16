@@ -24,9 +24,8 @@ export class CreateSolicitudInterbibliotecariaUseCase {
     }
 
     public async execute(command: CreateSolicitudInterbibliotecariaCommand): Promise<CreateSolicitudInterbibliotecariaResult> {
-        const recepcionistaId = command.recepcionistaId || command.session.user?.id || "";
         const response = await this.solicitudPrestamoRepository.createSolicitudInterbibliotecaria({
-            recepcionistaId,
+            recepcionistaId: command.recepcionistaId || undefined,
             ejemplarId: command.ejemplarId,
             ejemplaresIds: command.ejemplaresIds,
             sedeOrigenId: command.sedeOrigenId,

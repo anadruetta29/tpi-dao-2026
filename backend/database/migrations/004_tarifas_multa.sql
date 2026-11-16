@@ -1,0 +1,15 @@
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS tarifas_multa (
+    motivo VARCHAR(30) PRIMARY KEY,
+    monto DOUBLE PRECISION NOT NULL CHECK (monto > 0)
+);
+
+INSERT INTO tarifas_multa (motivo, monto)
+VALUES
+    ('ENTREGA_TARDIA', 1000.0),
+    ('EXTRAVIO', 15000.0),
+    ('DESTRUCCION', 20000.0)
+ON CONFLICT (motivo) DO NOTHING;
+
+COMMIT;

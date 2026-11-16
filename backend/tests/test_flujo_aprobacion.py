@@ -91,6 +91,7 @@ class FlujoAprobacionTest(unittest.TestCase):
 
     def test_interbibliotecario_se_activa_al_recibir_y_guarda_quien_hizo_cada_movimiento(self):
         self.solicitud.tipo = TipoPrestamo.INTERBIBLIOTECARIO
+        self.solicitud.socio_id = 7
         self.solicitud.sede_destino_id = 4
         self.auth.return_value = Usuario(id=11, role=Rol.RECEPCIONISTA, sede_id=3)
         self.aprobar.execute(self.aprobar.Command("token", 1, EstadoSolicitud.APROBADA))
@@ -104,16 +105,60 @@ class FlujoAprobacionTest(unittest.TestCase):
         with self.assertRaises(ErrorHandler):
             self.recibir.execute(self.recibir.Command("token", 5, None))
         self.auth.return_value = Usuario(id=12, role=Rol.RECEPCIONISTA, sede_id=4)
-        self.recibir.execute(self.recibir.Command("token", 5, None, con_incidencia=True))
-        self.prestamos.save.assert_not_called()
         self.recibir.execute(self.recibir.Command("token", 5, None))
         self.assertEqual(self.prestamos.save.call_args.args[0].sede_id, 4)
         self.assertEqual(self.solicitud.responsable_destino_id, 12)
         self.assertEqual(self.ejemplar.estado, EstadoEjemplar.PRESTADO)
         self.assertEqual([(call.args[0].estado, call.args[0].responsable_id) for call in self.historial.save.call_args_list], [
             (EstadoEnvio.ACEPTADO, 11), (EstadoEnvio.EMPACADO, 11),
-            (EstadoEnvio.EN_TRANSITO, 11), (EstadoEnvio.CON_INCIDENCIA, 12), (EstadoEnvio.RECIBIDO, 12),
+            (EstadoEnvio.EN_TRANSITO, 11), (EstadoEnvio.RECIBIDO, 12),
         ])
+
+    def test_interbibliotecario_sin_socio_no_crea_prestamo_al_recibir(self):
+        self.solicitud.tipo = TipoPrestamo.INTERBIBLIOTECARIO
+        self.solicitud.socio_id = None
+        self.solicitud.sede_destino_id = 4
+        remito = Remito(id=5, sede_origen_id=3, sede_destino_id=4, solicitud_id=1, ejemplar_ids=[2])
+        self.remitos.get_by_id_for_update.return_value = remito
+        self.ejemplar.estado = EstadoEjemplar.EN_TRANSITO
+        from app.domain.entity.historial_estado_remito import HistorialEstadoRemito
+        self.historial.get_latest_by_remito_id.return_value = HistorialEstadoRemito(
+            id=1, estado=EstadoEnvio.EN_TRANSITO, remito_id=5, fechaInicio=date.today()
+        )
+        self.auth.return_value = Usuario(id=12, role=Rol.RECEPCIONISTA, sede_id=4)
+        self.recibir.execute(self.recibir.Command("token", 5, None))
+        self.prestamos.save.assert_not_called()
+        self.assertEqual(self.ejemplar.sede_id, 4)
+        self.assertEqual(self.ejemplar.estado, EstadoEjemplar.DISPONIBLE)
+        self.assertEqual(self.solicitud.responsable_destino_id, 12)
+
+    def test_recepcion_con_incidencia_es_final_y_actualiza_ejemplares(self):
+        self.solicitud.tipo = TipoPrestamo.INTERBIBLIOTECARIO
+        self.solicitud.socio_id = None
+        self.solicitud.sede_destino_id = 4
+        remito = Remito(id=5, sede_origen_id=3, sede_destino_id=4, solicitud_id=1, ejemplar_ids=[2])
+        self.remitos.get_by_id_for_update.return_value = remito
+        self.ejemplar.estado = EstadoEjemplar.EN_TRANSITO
+        from app.domain.entity.historial_estado_remito import HistorialEstadoRemito
+        self.historial.get_latest_by_remito_id.return_value = HistorialEstadoRemito(
+            id=1, estado=EstadoEnvio.EN_TRANSITO, remito_id=5, fechaInicio=date.today()
+        )
+        self.auth.return_value = Usuario(id=12, role=Rol.RECEPCIONISTA, sede_id=4)
+        self.recibir.execute(self.recibir.Command(
+            "token", 5, None, con_incidencia=True,
+            incidencias=[{"ejemplar_id": 2, "estado": "DANADO", "observacion": "Tapa rota"}],
+        ))
+        self.assertEqual(self.ejemplar.estado, EstadoEjemplar.DANADO)
+        self.assertEqual(self.ejemplar.sede_id, 4)
+        self.assertEqual(len(remito.incidencias), 1)
+        self.assertEqual(remito.incidencias[0].observacion, "Tapa rota")
+        self.prestamos.save.assert_not_called()
+
+        self.historial.get_latest_by_remito_id.return_value = HistorialEstadoRemito(
+            id=2, estado=EstadoEnvio.CON_INCIDENCIA, remito_id=5, fechaInicio=date.today()
+        )
+        with self.assertRaises(ErrorHandler):
+            self.recibir.execute(self.recibir.Command("token", 5, None))
 
     def test_recepcion_remito_sin_socio_asigna_reserva_pendiente(self):
         reservas, avisos, usuarios = Mock(), Mock(), Mock()

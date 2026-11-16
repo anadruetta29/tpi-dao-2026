@@ -18,10 +18,10 @@ export function LibraryRecordList({ records, detail, isSaving, renderDetailConte
                 <span>ID</span><span>Descripción</span>
             </div>
             <ul className={styles.list}>
-                {records.map(({ id, label, meta, badges, selected, select, clickRow, scrollId }) => (
+                {records.map(({ id, displayId, label, meta, badges, selected, select, clickRow, scrollId }) => (
                     <li key={id} className={styles.item} data-selected={selected} id={scrollId}>
                         <div className={styles.row} data-clickable={Boolean(clickRow)} onClick={clickRow}>
-                            <span className={styles.id}>#{id}</span>
+                            <span className={styles.id}>{displayId}</span>
                             <div className={styles.summary}>
                                 <strong className={styles.label}>{label}</strong>
                                 {badges.length > 0 && <div className={styles.badges}>{badges.map((badge) => <LibraryBadge key={badge.label} {...badge} />)}</div>}

@@ -108,9 +108,14 @@ class CreatePrestamoUseCase:
 
         fecha_inicio = date.today()
         modalidad = modalidad or ModalidadPrestamoLocal.DOMICILIO
-        fecha_vencimiento = fecha_vencimiento or (
-            self.vencimiento_strategy_factory.get_strategy(modalidad).calcular_vencimiento(fecha_inicio)
-        )
+        if modalidad == ModalidadPrestamoLocal.SALA_LECTURA:
+            if fecha_vencimiento is not None and fecha_vencimiento != fecha_inicio:
+                raise ErrorHandler(ErrorType.BAD_REQUEST, "Los préstamos en sala de lectura vencen en el día.")
+            fecha_vencimiento = fecha_inicio
+        else:
+            fecha_vencimiento = fecha_vencimiento or (
+                self.vencimiento_strategy_factory.get_strategy(modalidad).calcular_vencimiento(fecha_inicio)
+            )
         if fecha_vencimiento < fecha_inicio:
             raise ErrorHandler(ErrorType.PRESTAMO_VENCIMIENTO_ANTERIOR)
 

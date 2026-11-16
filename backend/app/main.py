@@ -5,6 +5,7 @@ from app.infrastructure.scheduler.multas_vencidas_scheduler import multas_vencid
 from app.presentation.controller import (
     auth_router,
     autor_router,
+    configuracion_router,
     devolucion_router,
     ejemplar_router,
     libro_router,
@@ -40,3 +41,4 @@ app.include_router(remito_router)
 app.include_router(devolucion_router)
 app.include_router(multa_router)
 app.include_router(aviso_router)
+app.include_router(configuracion_router)

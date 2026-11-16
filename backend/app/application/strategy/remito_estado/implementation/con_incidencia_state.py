@@ -15,5 +15,4 @@ class ConIncidenciaState(RemitoEstadoState):
     def recibir(
         self, remito: Remito, fecha_recepcion: date, con_incidencia: bool
     ) -> EstadoEnvio:
-        remito.registrar_recepcion(fecha_recepcion)
-        return EstadoEnvio.CON_INCIDENCIA if con_incidencia else EstadoEnvio.RECIBIDO
+        raise ErrorHandler(ErrorType.INVALID_STATE_TRANSITION)

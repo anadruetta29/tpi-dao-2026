@@ -57,22 +57,33 @@ class CreateSolicitudInterbibliotecariaUseCase:
         )
         ejemplar_ids = command.ejemplar_ids or ([command.ejemplar_id] if command.ejemplar_id is not None else [])
         if (
-            command.recepcionista_id is None
-            or not ejemplar_ids
+            not ejemplar_ids
             or command.sede_origen_id is None
             or command.sede_destino_id is None
         ):
             raise ErrorHandler(ErrorType.MISSING_REQUIRED_FIELDS)
 
         user.validar_sede(command.sede_origen_id, command.sede_destino_id)
-        recepcionista = self.usuario_repository.get_by_id(command.recepcionista_id)
-        if (
-            recepcionista is None
-            or not recepcionista.activo
-            or recepcionista.role not in (Rol.RECEPCIONISTA, Rol.ADMIN)
-            or (recepcionista.role == Rol.RECEPCIONISTA and recepcionista.sede_id != command.sede_origen_id)
-        ):
-            raise ErrorHandler(ErrorType.RECEPCIONISTA_INVALIDO, "Seleccioná un recepcionista activo de la sede de origen.")
+        if command.recepcionista_id is not None:
+            recepcionista = self.usuario_repository.get_by_id(command.recepcionista_id)
+            if (
+                recepcionista is None
+                or not recepcionista.activo
+                or recepcionista.role not in (Rol.RECEPCIONISTA, Rol.ADMIN)
+                or (recepcionista.role == Rol.RECEPCIONISTA and recepcionista.sede_id != command.sede_origen_id)
+            ):
+                raise ErrorHandler(ErrorType.RECEPCIONISTA_INVALIDO, "Seleccioná un recepcionista activo de la sede de origen.")
+        else:
+            candidatos = [
+                u for u in self.usuario_repository.get_all_filtered(role=Rol.RECEPCIONISTA, activo=True)
+                if u.sede_id == command.sede_origen_id
+            ]
+            if not candidatos:
+                raise ErrorHandler(
+                    ErrorType.RECEPCIONISTA_INVALIDO,
+                    "La sede de origen no tiene un recepcionista activo asignado.",
+                )
+            recepcionista = sorted(candidatos, key=lambda u: u.id or 0)[0]
 
         strategy = self.solicitud_tipo_factory.get_strategy(TipoPrestamo.INTERBIBLIOTECARIO)
         sede_destino_id = strategy.validar_sedes(
@@ -91,7 +102,7 @@ class CreateSolicitudInterbibliotecariaUseCase:
             ejemplar_id=ejemplar_ids[0],
             sede_origen_id=command.sede_origen_id,
             sede_destino_id=sede_destino_id,
-            responsable_origen_id=command.recepcionista_id,
+            responsable_origen_id=recepcionista.id,
         )
         solicitud.ejemplar_ids = ejemplar_ids
         saved = self.solicitud_repository.save(solicitud)

@@ -15,8 +15,9 @@ class DevolucionMapper:
         token: Optional[str],
         prestamo_id: Optional[int] = None,
         estado_devuelto: Optional[EstadoEjemplar] = None,
+        socio_id: Optional[int] = None,
     ) -> GetAllDevolucionesReq:
-        return GetAllDevolucionesReq.build(token, prestamo_id, estado_devuelto)
+        return GetAllDevolucionesReq.build(token, prestamo_id, estado_devuelto, socio_id)
 
     @staticmethod
     def to_get_all_response(devoluciones: List[Devolucion]) -> GetAllDevolucionesRes:

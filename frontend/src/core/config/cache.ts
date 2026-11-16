@@ -32,6 +32,7 @@ export class CacheTags {
     }
     public static readonly DEVOLUCIONES = "devoluciones";
     public static readonly MULTAS = "multas";
+    public static readonly CONFIGURACION_MULTAS = "configuracion:multas";
     public static multaDetail(id: string): string {
         return `multa:${id}`;
     }

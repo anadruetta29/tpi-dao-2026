@@ -146,6 +146,7 @@ export class RemitoApiDataSource implements RemitoDataSourceI {
             const payload: Record<string, any> = {};
             if (dto.fechaRecepcion) payload.fechaRecepcion = dto.fechaRecepcion;
             if (dto.conIncidencia !== undefined) payload.con_incidencia = dto.conIncidencia;
+            if (dto.incidencias?.length) payload.incidencias = dto.incidencias;
 
             const response = await this.httpClient.patch(
                 `/remitos/${dto.id}/recepcion`,

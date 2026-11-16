@@ -26,6 +26,7 @@ const paths = {
     refresh: "M20 10a8 8 0 0 0-14-4L3 9m0-5v5h5m-4 5a8 8 0 0 0 14 4l3-3m0 5v-5h-5",
     eye: "M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6Zm13 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z",
     eyeOff: "M3 3l18 18M9 6a10 10 0 0 1 3 0c6 0 10 6 10 6a16 16 0 0 1-3 3M6 8a16 16 0 0 0-4 4s4 6 10 6a11 11 0 0 0 4-1",
+    sliders: "M4 6h16M4 12h16M4 18h16M9 4v4m6 2v4m-4 2v4",
 };
 
 export type LibraryIconName = keyof typeof paths;

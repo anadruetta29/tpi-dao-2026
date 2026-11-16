@@ -1,9 +1,25 @@
 from datetime import date
 from typing import List, Optional, Union
 from pydantic import BaseModel
+from app.domain.entity.estado_ejemplar import EstadoEjemplar
 from app.domain.entity.estado_envio import EstadoEnvio
 from app.domain.entity.historial_estado_remito import HistorialEstadoRemito
 from app.domain.entity.remito import Remito
+from app.domain.entity.remito_incidencia import RemitoIncidencia
+
+
+class RemitoIncidenciaRes(BaseModel):
+    ejemplar_id: int
+    estado: EstadoEjemplar
+    observacion: str
+
+    @staticmethod
+    def from_domain(item: RemitoIncidencia) -> "RemitoIncidenciaRes":
+        return RemitoIncidenciaRes(
+            ejemplar_id=item.ejemplar_id or 0,
+            estado=item.estado or EstadoEjemplar.EN_REVISION,
+            observacion=item.observacion,
+        )
 
 
 class RemitoRes(BaseModel):
@@ -18,6 +34,7 @@ class RemitoRes(BaseModel):
     solicitud_id: Optional[int] = None
     estado_actual: Optional[EstadoEnvio] = None
     dias_transito: Optional[int] = None
+    incidencias: List[RemitoIncidenciaRes] = []
 
     @staticmethod
     def from_domain(remito: Remito) -> "RemitoRes":
@@ -33,6 +50,7 @@ class RemitoRes(BaseModel):
             solicitud_id=remito.solicitud_id,
             estado_actual=remito.estado_actual,
             dias_transito=remito.dias_transito(),
+            incidencias=[RemitoIncidenciaRes.from_domain(inc) for inc in (remito.incidencias or [])],
         )
 
 

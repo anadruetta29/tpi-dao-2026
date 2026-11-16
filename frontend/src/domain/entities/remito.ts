@@ -3,6 +3,12 @@ import { EstadoEnvio } from "./estado-envio";
 
 export const DIAS_PARA_ATRASO_REMITO = 3;
 
+export interface RemitoIncidencia {
+    ejemplarId: string;
+    estado: string;
+    observacion: string;
+}
+
 export class Remito extends BaseEntity {
 
     // ======== Constructor ======== //
@@ -18,7 +24,8 @@ export class Remito extends BaseEntity {
         public ejemplaresIds: string[] = [],
         public solicitudId: string = "",
         public estadoActual: EstadoEnvio | null = null,
-        public diasTransito: number | null = null
+        public diasTransito: number | null = null,
+        public incidencias: RemitoIncidencia[] = []
     ) {
         super();
     }
@@ -50,7 +57,12 @@ export class Remito extends BaseEntity {
             (obj.ejemplaresIds ?? obj.ejemplar_ids ?? []).map(String),
             String(obj.solicitudId ?? obj.solicitud_id ?? ""),
             estado ? EstadoEnvio.fromObject(estado) : null,
-            typeof dias === "number" ? dias : null
+            typeof dias === "number" ? dias : null,
+            Array.isArray(obj.incidencias) ? obj.incidencias.map((inc: any) => ({
+                ejemplarId: String(inc.ejemplarId ?? inc.ejemplar_id ?? ""),
+                estado: String(inc.estado ?? ""),
+                observacion: String(inc.observacion ?? "")
+            })) : []
         );
     }
 

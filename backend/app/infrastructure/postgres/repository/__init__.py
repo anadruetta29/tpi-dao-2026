@@ -10,6 +10,7 @@ from app.infrastructure.postgres.repository.postgres_ejemplar_repository import 
 from app.infrastructure.postgres.repository.postgres_historial_estado_remito_repository import PostgresHistorialEstadoRemitoRepository
 from app.infrastructure.postgres.repository.postgres_libro_repository import PostgresLibroRepository
 from app.infrastructure.postgres.repository.postgres_multa_repository import PostgresMultaRepository
+from app.infrastructure.postgres.repository.postgres_tarifa_multa_repository import PostgresTarifaMultaRepository
 from app.infrastructure.postgres.repository.postgres_prestamo_repository import PostgresPrestamoRepository
 from app.infrastructure.postgres.repository.postgres_remito_repository import PostgresRemitoRepository
 from app.infrastructure.postgres.repository.postgres_reserva_repository import PostgresReservaRepository
@@ -58,4 +59,5 @@ __all__ = [
     "PostgresHistorialEstadoRemitoRepository",
     "PostgresDevolucionRepository",
     "PostgresMultaRepository",
+    "PostgresTarifaMultaRepository",
 ]

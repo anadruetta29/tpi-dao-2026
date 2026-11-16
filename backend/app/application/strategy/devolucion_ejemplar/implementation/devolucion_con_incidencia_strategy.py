@@ -14,6 +14,7 @@ from app.domain.repository.ejemplar_repository_i import EjemplarRepositoryI
 from app.domain.repository.multa_repository_i import MultaRepositoryI
 from app.domain.repository.reserva_repository_i import ReservaRepositoryI
 from app.domain.repository.socio_repository_i import SocioRepositoryI
+from app.domain.repository.tarifa_multa_repository_i import TarifaMultaRepositoryI
 
 
 _MOTIVO_POR_ESTADO: Dict[EstadoEjemplar, MotivoMulta] = {
@@ -34,9 +35,10 @@ class DevolucionConIncidenciaStrategy(DevolucionEjemplarStrategy):
         multa_repository: Optional[MultaRepositoryI] = None,
         socio_repository: Optional[SocioRepositoryI] = None,
         fecha_atraso: Optional[date] = None,
+        tarifa_multa_repository: Optional[TarifaMultaRepositoryI] = None,
     ) -> None:
         self._verificar_entrega_tardia(
-            prestamo, fecha_atraso or fecha_devolucion, multa_repository, socio_repository
+            prestamo, fecha_atraso or fecha_devolucion, multa_repository, socio_repository, tarifa_multa_repository
         )
 
         if ejemplar is not None and ejemplar.id is not None:
@@ -55,4 +57,5 @@ class DevolucionConIncidenciaStrategy(DevolucionEjemplarStrategy):
                 dias_atraso=1,
                 multa_repository=multa_repository,
                 socio_repository=socio_repository,
+                tarifa_multa_repository=tarifa_multa_repository,
             )

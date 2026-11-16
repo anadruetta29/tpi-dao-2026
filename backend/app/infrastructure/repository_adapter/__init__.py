@@ -16,6 +16,7 @@ from app.infrastructure.repository_adapter.historial_estado_remito_repository_ad
 )
 from app.infrastructure.repository_adapter.devolucion_repository_adapter import DevolucionRepositoryAdapter
 from app.infrastructure.repository_adapter.multa_repository_adapter import MultaRepositoryAdapter
+from app.infrastructure.repository_adapter.tarifa_multa_repository_adapter import TarifaMultaRepositoryAdapter
 
 __all__ = [
     "BaseRepositoryAdapter",
@@ -32,4 +33,5 @@ __all__ = [
     "HistorialEstadoRemitoRepositoryAdapter",
     "DevolucionRepositoryAdapter",
     "MultaRepositoryAdapter",
+    "TarifaMultaRepositoryAdapter",
 ]

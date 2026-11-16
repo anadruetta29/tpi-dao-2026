@@ -10,6 +10,7 @@ from app.infrastructure.postgres.model.solicitud_prestamo_model import Solicitud
 from app.infrastructure.postgres.model.prestamo_model import PrestamoModel
 from app.infrastructure.postgres.model.devolucion_model import DevolucionModel
 from app.infrastructure.postgres.model.multa_model import MultaModel
+from app.infrastructure.postgres.model.tarifa_multa_model import TarifaMultaModel
 from app.infrastructure.postgres.model.remito_model import RemitoModel
 from app.infrastructure.postgres.model.historial_estado_remito_model import HistorialEstadoRemitoModel
 
@@ -27,6 +28,7 @@ __all__ = [
     "PrestamoModel",
     "DevolucionModel",
     "MultaModel",
+    "TarifaMultaModel",
     "RemitoModel",
     "HistorialEstadoRemitoModel",
 ]

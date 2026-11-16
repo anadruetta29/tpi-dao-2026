@@ -12,6 +12,7 @@ from app.domain.repository.remito_repository_i import RemitoRepositoryI
 from app.domain.repository.historial_estado_remito_repository_i import HistorialEstadoRemitoRepositoryI
 from app.domain.repository.devolucion_repository_i import DevolucionRepositoryI
 from app.domain.repository.multa_repository_i import MultaRepositoryI
+from app.domain.repository.tarifa_multa_repository_i import TarifaMultaRepositoryI
 
 __all__ = [
     "BaseRepositoryI",
@@ -28,4 +29,5 @@ __all__ = [
     "HistorialEstadoRemitoRepositoryI",
     "DevolucionRepositoryI",
     "MultaRepositoryI",
+    "TarifaMultaRepositoryI",
 ]

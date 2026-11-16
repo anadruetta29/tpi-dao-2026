@@ -69,7 +69,7 @@ class DespachoRemitoUseCase:
             raise ErrorHandler(ErrorType.REMITO_NOT_FOUND)
 
         user.validar_sede(remito.sede_origen_id)
-        fecha = command.fechaDespacho or date.today()
+        fecha = date.today() if not empaque else (command.fechaDespacho or date.today())
         latest = self.historial_repository.get_latest_by_remito_id(command.id)
         estado_actual = latest.estado if latest is not None else EstadoEnvio.PENDIENTE
         state = self.remito_state_factory.get_state(estado_actual)

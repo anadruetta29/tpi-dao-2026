@@ -5,6 +5,7 @@ import { type Devolucion } from "@/domain/entities/devolucion";
 export interface GetAllDevolucionesCommand {
     session: Session;
     prestamoId?: string;
+    socioId?: string;
     estadoDevuelto?: string;
 }
 
@@ -24,6 +25,7 @@ export class GetAllDevolucionesUseCase {
         const response = await this.devolucionRepository.getAllDevoluciones({
             session: command.session,
             prestamoId: command.prestamoId,
+            socioId: command.socioId,
             estadoDevuelto: command.estadoDevuelto
         });
 

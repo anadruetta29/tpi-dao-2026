@@ -22,6 +22,7 @@ export class DevolucionApiDataSource implements DevolucionDataSourceI {
         try {
             const params: Record<string, string | number> = {};
             if (dto.prestamoId) params.prestamo_id = Number(dto.prestamoId);
+            if (dto.socioId) params.socio_id = Number(dto.socioId);
             if (dto.estadoDevuelto) params.estado_devuelto = dto.estadoDevuelto;
 
             const response = await this.httpClient.get(

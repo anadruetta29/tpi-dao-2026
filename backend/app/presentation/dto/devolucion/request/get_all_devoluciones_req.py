@@ -8,21 +8,25 @@ class GetAllDevolucionesReq:
         token: Optional[str] = None,
         prestamo_id: Optional[int] = None,
         estado_devuelto: Optional[EstadoEjemplar] = None,
+        socio_id: Optional[int] = None,
     ) -> None:
         self.token = token
         self.prestamo_id = prestamo_id
         self.estado_devuelto = estado_devuelto
+        self.socio_id = socio_id
 
     @staticmethod
     def build(
         token: Optional[str],
         prestamo_id: Optional[int] = None,
         estado_devuelto: Optional[EstadoEjemplar] = None,
+        socio_id: Optional[int] = None,
     ) -> "GetAllDevolucionesReq":
         return GetAllDevolucionesReq(
             token=token,
             prestamo_id=prestamo_id,
             estado_devuelto=estado_devuelto,
+            socio_id=socio_id,
         )
 
     def get_token(self) -> Optional[str]:
@@ -33,3 +37,6 @@ class GetAllDevolucionesReq:
 
     def get_estado_devuelto(self) -> Optional[EstadoEjemplar]:
         return self.estado_devuelto
+
+    def get_socio_id(self) -> Optional[int]:
+        return self.socio_id

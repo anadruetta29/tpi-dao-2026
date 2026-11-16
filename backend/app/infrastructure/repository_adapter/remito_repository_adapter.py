@@ -4,7 +4,7 @@ from app.domain.entity.remito import Remito
 from app.domain.repository.remito_repository_i import RemitoRepositoryI
 from app.infrastructure.postgres.mapper.remito_entity_mapper import RemitoEntityMapper
 from app.infrastructure.postgres.model.ejemplar_model import EjemplarModel
-from app.infrastructure.postgres.model.remito_model import RemitoModel
+from app.infrastructure.postgres.model.remito_model import RemitoIncidenciaModel, RemitoModel
 from app.infrastructure.postgres.repository.postgres_remito_repository import PostgresRemitoRepository
 from app.infrastructure.repository_adapter.base_repository_adapter import BaseRepositoryAdapter
 
@@ -42,3 +42,28 @@ class RemitoRepositoryAdapter(BaseRepositoryAdapter[Remito, RemitoModel], Remito
             )
         saved = self.repository.save(model)
         return RemitoEntityMapper.to_domain(saved)
+
+    def update(self, id: int, entity: Remito) -> Optional[Remito]:
+        existing = self.repository.find_by_id(id)
+        if existing is None:
+            return None
+        existing.numero = entity.numero
+        existing.fechaEmision = entity.fechaEmision
+        existing.fechaDespacho = entity.fechaDespacho
+        existing.fechaRecepcion = entity.fechaRecepcion
+        existing.sede_origen_id = entity.sede_origen_id
+        existing.sede_destino_id = entity.sede_destino_id
+        existing.solicitud_id = entity.solicitud_id
+        if entity.incidencias:
+            existing.incidencias = [
+                RemitoIncidenciaModel(
+                    remito_id=id,
+                    ejemplar_id=inc.ejemplar_id,
+                    estado=inc.estado,
+                    observacion=inc.observacion,
+                )
+                for inc in entity.incidencias
+                if inc.ejemplar_id is not None and inc.estado is not None
+            ]
+        updated = self.repository.update(id, existing)
+        return RemitoEntityMapper.to_domain(updated) if updated is not None else None

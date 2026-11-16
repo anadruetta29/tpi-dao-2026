@@ -19,11 +19,12 @@ class DevolucionController:
     def get_all(
         token: Optional[str] = Header(default=None, alias="Authorization"),
         prestamo_id: Optional[int] = Query(default=None),
+        socio_id: Optional[int] = Query(default=None),
         estado_devuelto: Optional[EstadoEjemplar] = Query(default=None),
         service: DevolucionServiceI = Depends(get_devolucion_service),
     ) -> JSONResponse:
         logger.info("GET /devoluciones called")
-        request = DevolucionMapper.to_get_all_request(token, prestamo_id, estado_devuelto)
+        request = DevolucionMapper.to_get_all_request(token, prestamo_id, estado_devuelto, socio_id)
         response = service.get_all(request)
         return JSONResponse(status_code=200, content=response.model_dump(mode="json"))
 

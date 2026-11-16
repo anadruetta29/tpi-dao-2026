@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { type Session } from "@/domain/entities/session";
 import type { DestinoBandeja } from "@/core/types";
 import { statusBadge } from "@/ui/components/library-records/viewmodel";
@@ -25,6 +25,8 @@ import { allOptions, info, statusInfo, pickData, useLibraryRecordsViewModel, typ
 import { receptionOptions, seguimientoOptions } from "@/core/utils/constants";
 
 export default function ViewModel(session: Session, initialRecordId?: string, onOpen?: (target: DestinoBandeja) => void) {
+    const [recepcionConIncidencia, setRecepcionConIncidencia] = useState(false);
+    const estadosIncidencia = [EstadoEjemplar.DISPONIBLE, EstadoEjemplar.EN_REVISION, EstadoEjemplar.DANADO, EstadoEjemplar.EXTRAVIADO, EstadoEjemplar.DESTRUIDO].map((e) => e.toOption());
     const catalog = useSelectorCatalog(session, "sedes", "ejemplares");
     const filterOrigen = useSelector("sedeOrigenId", "Sede de origen", "Buscá por nombre de sede", false);
     const filterDestino = useSelector("sedeDestinoId", "Sede de destino", "Buscá por nombre de sede", false);
@@ -84,21 +86,14 @@ export default function ViewModel(session: Session, initialRecordId?: string, on
         });
     };
 
-    const handleRegistrarDespacho = (remitoId: string, field: ReadField) => {
-        return registrarDespachoRemitoAction({
-            session,
-            id: remitoId,
-            fechaDespacho: field("fechaDespacho") || undefined
-        });
+    const handleRegistrarDespacho = (remitoId: string) => {
+        return registrarDespachoRemitoAction({ session, id: remitoId });
     };
 
-    const handleRegistrarRecepcion = (remitoId: string, field: ReadField) => {
-        return registrarRecepcionRemitoAction({
-            session,
-            id: remitoId,
-            fechaRecepcion: field("fechaRecepcion") || undefined,
-            conIncidencia: field("conIncidencia") === "true"
-        });
+    const handleRegistrarRecepcion = (remito: Remito, field: ReadField) => {
+        const conIncidencia = field("conIncidencia") === "true";
+        const incidencias = conIncidencia ? remito.ejemplaresIds.map((ejId) => ({ ejemplar_id: Number(ejId), estado: field(`estado_${ejId}`), observacion: field(`observacion_${ejId}`).trim() })) : undefined;
+        return registrarRecepcionRemitoAction({ session, id: remito.id, conIncidencia, incidencias });
     };
 
     type RemitoDetailData = {
@@ -114,8 +109,8 @@ export default function ViewModel(session: Session, initialRecordId?: string, on
         const canManageDestination = !recepcionista || session.user?.sedeId === remito.sedeDestinoId;
         const canPack = canManageOrigin && estado === EstadoEnvio.ACEPTADO;
         const canDispatch = canManageOrigin && (estado === EstadoEnvio.EMPACADO || estado === EstadoEnvio.PENDIENTE);
-        const canReceive = canManageDestination && (estado === EstadoEnvio.EN_TRANSITO
-            || estado === EstadoEnvio.DESPACHADO || estado === EstadoEnvio.CON_INCIDENCIA);
+        const canReceive = canManageDestination && (estado === EstadoEnvio.EN_TRANSITO || estado === EstadoEnvio.DESPACHADO);
+
         const detailCopies = new Map(copyList.map((copy) => [copy.id, copy]));
         const copyIds = new Set([...remito.ejemplaresIds, ...detailCopies.keys()]);
 
@@ -143,7 +138,9 @@ export default function ViewModel(session: Session, initialRecordId?: string, on
                         const title = (bookId && bookTitles.get(bookId)) || "Título no disponible";
                         const code = detailCopy?.codigo || catalogCopy?.codigo || `#${id}`;
                         const copyStatus = detailCopy?.estadoName || catalogCopy?.estado.name;
-                        return { id, label: title, detail: `Ejemplar ${code}`, badge: copyStatus ? statusBadge(copyStatus) : undefined };
+                        const inc = remito.incidencias.find((item) => item.ejemplarId === id);
+                        const detailText = inc ? `Ejemplar ${code} · Incidencia (${EstadoEjemplar.fromString(inc.estado).name}): ${inc.observacion}` : `Ejemplar ${code}`;
+                        return { id, label: title, detail: detailText, badge: copyStatus ? statusBadge(copyStatus) : undefined };
                     })
                 },
                 {
@@ -171,15 +168,25 @@ export default function ViewModel(session: Session, initialRecordId?: string, on
                 submit: () => registrarEmpaqueRemitoAction(remito.id, session)
             }] : canDispatch ? [{
                 label: "Registrar despacho",
-                fields: [{ name: "fechaDespacho", placeholder: "Seleccioná la fecha de despacho", label: "Fecha de despacho", type: "date" }],
-                submit: (field: ReadField) => handleRegistrarDespacho(remito.id, field)
+                fields: [],
+                submit: () => handleRegistrarDespacho(remito.id)
             }] : canReceive ? [{
                 label: "Registrar recepción",
                 fields: [
-                    { name: "fechaRecepcion", placeholder: "Seleccioná la fecha de recepción", label: "Fecha de recepción", type: "date" },
-                    { name: "conIncidencia", label: "Resultado de la recepción", options: receptionOptions }
+
+                    { name: "conIncidencia", label: "Resultado de la recepción", defaultValue: recepcionConIncidencia ? "true" : "false", options: receptionOptions, onChange: (value) => setRecepcionConIncidencia(value === "true") },
+                    ...(recepcionConIncidencia ? Array.from(copyIds).flatMap((ejId) => {
+                        const detailCopy = detailCopies.get(ejId);
+                        const catalogCopy = catalogCopies.get(ejId);
+                        const bookId = detailCopy?.libroId || catalogCopy?.libroId;
+                        const ejLabel = [(bookId && bookTitles.get(bookId)) || "Ejemplar", detailCopy?.codigo || catalogCopy?.codigo || `#${ejId}`].join(" · ");
+                        return [
+                            { name: `estado_${ejId}`, label: `${ejLabel} · Estado`, options: estadosIncidencia },
+                            { name: `observacion_${ejId}`, label: `${ejLabel} · Observación`, placeholder: "Detalle de la incidencia", required: true }
+                        ];
+                    }) : [])
                 ],
-                submit: (field: ReadField) => handleRegistrarRecepcion(remito.id, field)
+                submit: (field: ReadField) => handleRegistrarRecepcion(remito, field)
             }] : []
         };
     };

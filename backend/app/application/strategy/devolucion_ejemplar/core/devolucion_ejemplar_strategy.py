@@ -15,6 +15,7 @@ from app.domain.repository.ejemplar_repository_i import EjemplarRepositoryI
 from app.domain.repository.multa_repository_i import MultaRepositoryI
 from app.domain.repository.reserva_repository_i import ReservaRepositoryI
 from app.domain.repository.socio_repository_i import SocioRepositoryI
+from app.domain.repository.tarifa_multa_repository_i import TarifaMultaRepositoryI
 
 
 class DevolucionEjemplarStrategy(ABC):
@@ -30,6 +31,7 @@ class DevolucionEjemplarStrategy(ABC):
         multa_repository: Optional[MultaRepositoryI] = None,
         socio_repository: Optional[SocioRepositoryI] = None,
         fecha_atraso: Optional[date] = None,
+        tarifa_multa_repository: Optional[TarifaMultaRepositoryI] = None,
     ) -> None:
         pass
 
@@ -42,10 +44,11 @@ class DevolucionEjemplarStrategy(ABC):
         dias_atraso: int,
         multa_repository: Optional[MultaRepositoryI],
         socio_repository: Optional[SocioRepositoryI],
+        tarifa_multa_repository: Optional[TarifaMultaRepositoryI] = None,
     ) -> None:
         if socio_id is None or multa_repository is None:
             return
-        monto = CalculoMultaStrategyFactory().get_strategy(motivo).calcular_monto(
+        monto = CalculoMultaStrategyFactory(tarifa_multa_repository).get_strategy(motivo).calcular_monto(
             dias_atraso=dias_atraso
         )
         socio = socio_repository.get_by_id_for_update(socio_id) if socio_repository is not None else None
@@ -69,8 +72,9 @@ class DevolucionEjemplarStrategy(ABC):
         fecha_devolucion: date,
         multa_repository: Optional[MultaRepositoryI],
         socio_repository: Optional[SocioRepositoryI],
+        tarifa_multa_repository: Optional[TarifaMultaRepositoryI] = None,
     ) -> None:
         if prestamo.fechaVencimiento is not None:
             registrar_multa_por_atraso(
-                prestamo, fecha_devolucion, multa_repository, socio_repository
+                prestamo, fecha_devolucion, multa_repository, socio_repository, tarifa_multa_repository
             )

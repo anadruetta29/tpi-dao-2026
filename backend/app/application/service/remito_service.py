@@ -91,6 +91,7 @@ class RemitoService(RemitoServiceI):
                 id=dto.get_id(),
                 fechaRecepcion=dto.get_fecha_recepcion(),
                 con_incidencia=dto.get_con_incidencia(),
+                incidencias=dto.get_incidencias(),
             )
         )
         return RemitoMapper.to_response(result.remito)

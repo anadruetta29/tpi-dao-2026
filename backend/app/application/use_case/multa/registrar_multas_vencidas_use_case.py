@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 from datetime import date
-from typing import Callable, ContextManager
+from typing import Callable, ContextManager, Optional
 from app.application.use_case.multa.registrar_multa_por_atraso import registrar_multa_por_atraso
 from app.domain.entity.estado_prestamo import EstadoPrestamo
 from app.domain.repository.multa_repository_i import MultaRepositoryI
 from app.domain.repository.prestamo_repository_i import PrestamoRepositoryI
 from app.domain.repository.socio_repository_i import SocioRepositoryI
+from app.domain.repository.tarifa_multa_repository_i import TarifaMultaRepositoryI
 
 
 class RegistrarMultasVencidasUseCase:
@@ -15,11 +16,13 @@ class RegistrarMultasVencidasUseCase:
         multa_repository: MultaRepositoryI,
         socio_repository: SocioRepositoryI,
         transaction: Callable[[], ContextManager],
+        tarifa_multa_repository: Optional[TarifaMultaRepositoryI] = None,
     ) -> None:
         self.prestamo_repository = prestamo_repository
         self.multa_repository = multa_repository
         self.socio_repository = socio_repository
         self.transaction = transaction
+        self.tarifa_multa_repository = tarifa_multa_repository
 
     @dataclass(frozen=True)
     class Command:
@@ -41,7 +44,7 @@ class RegistrarMultasVencidasUseCase:
                     continue
 
                 registrar_multa_por_atraso(
-                    prestamo, command.fecha, self.multa_repository, self.socio_repository
+                    prestamo, command.fecha, self.multa_repository, self.socio_repository, self.tarifa_multa_repository
                 )
                 if prestamo.estado == EstadoPrestamo.ACTIVO:
                     prestamo.estado = EstadoPrestamo.VENCIDO

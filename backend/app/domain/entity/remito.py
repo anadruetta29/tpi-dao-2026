@@ -1,6 +1,7 @@
 from datetime import date
 from typing import List, Optional, Union
 from app.domain.entity.estado_envio import EstadoEnvio
+from app.domain.entity.remito_incidencia import RemitoIncidencia
 
 
 class Remito:
@@ -16,6 +17,7 @@ class Remito:
         ejemplar_ids: Optional[List[int]] = None,
         solicitud_id: Optional[int] = None,
         estado_actual: Optional[EstadoEnvio] = None,
+        incidencias: Optional[List[RemitoIncidencia]] = None,
     ) -> None:
         self.id = id
         self.numero = numero
@@ -27,6 +29,7 @@ class Remito:
         self.ejemplar_ids = ejemplar_ids if ejemplar_ids is not None else []
         self.solicitud_id = solicitud_id
         self.estado_actual = estado_actual
+        self.incidencias = incidencias if incidencias is not None else []
 
     def dias_transito(self, hoy: Optional[date] = None) -> Optional[int]:
         if self.fechaDespacho is None:
