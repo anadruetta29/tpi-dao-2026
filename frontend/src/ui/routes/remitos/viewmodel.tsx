@@ -4,7 +4,7 @@ import { Rol } from "@/domain/entities/rol";
 import { EstadoEnvio } from "@/domain/entities/estado-envio";
 import { EstadoEjemplar, type Ejemplar } from "@/domain/entities/ejemplar";
 import { EstadoSede } from "@/domain/entities/sede";
-import { DIAS_PARA_ATRASO_REMITO, type Remito } from "@/domain/entities/remito";
+import { type Remito } from "@/domain/entities/remito";
 import { filtrarRemitosPorSeguimiento } from "@/domain/filters/remito-filters";
 import {
     createRemitoAction,
@@ -20,19 +20,9 @@ import { type ReadField, type ReadFieldValues } from "@/ui/forms/handlers/read-f
 import { useMultipleSelector, useSelector } from "@/ui/hooks/use-selector";
 import { useSelectorCatalog } from "@/ui/hooks/use-selector-catalog";
 import { allOptions, info, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
+import { receptionOptions, seguimientoOptions } from "@/core/utils/constants";
 
-const receptionOptions = [
-    { value: "false", label: "Sin incidencias" },
-    { value: "true", label: "Con incidencia" }
-];
-
-const seguimientoOptions = allOptions([
-    { value: "pendientes", label: "Pendientes" },
-    { value: "atrasados", label: `Atrasados (${DIAS_PARA_ATRASO_REMITO} días o más)` },
-    { value: "incidencias", label: "Incidencias sin resolver" }
-]);
-
-export function useViewModel(session: Session, initialRecordId?: string) {
+export default function ViewModel(session: Session, initialRecordId?: string) {
     const catalog = useSelectorCatalog(session, "sedes", "ejemplares");
     const filterOrigen = useSelector("sedeOrigenId", "Sede de origen", "Buscá por nombre de sede", false);
     const filterDestino = useSelector("sedeDestinoId", "Sede de destino", "Buscá por nombre de sede", false);
@@ -247,5 +237,3 @@ export function useViewModel(session: Session, initialRecordId?: string) {
     });
 }
 
-export default useViewModel;
-export { useViewModel as ViewModel };

@@ -1,12 +1,12 @@
 import { Layout } from "@/ui/layout/layout";
-import { useViewModel } from "./viewmodel";
+import ViewModel from "./viewmodel";
 
 export function BibliotecaRoute() {
     const {
         session, Component, label, navigation, area, profile,
         openPending, openReturn, openInterbibliotecaria,
         initialRecordId, prestamoInicialId, solicitudInicial
-    } = useViewModel();
+    } = ViewModel();
     if (!session || !profile) return null;
 
     const props = {

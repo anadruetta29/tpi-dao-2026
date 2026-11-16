@@ -10,7 +10,7 @@ import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
 import { allOptions, info, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
 
-export function useEjemplaresViewModel(session: Session, libroId: string) {
+export default function ViewModel(session: Session, libroId: string) {
     const [sedesResult, setSedesResult] = useState<ActionState<Sede[]> | null>(null);
     const [revision, setRevision] = useState(0);
     const [disponibilidad, setDisponibilidad] = useState<Awaited<ReturnType<typeof getLibroDisponibilidadAction>> | null>(null);
@@ -193,6 +193,3 @@ export function useEjemplaresViewModel(session: Session, libroId: string) {
 function activeOptionsLengthZero(options: unknown[]): boolean {
     return options.length === 0;
 }
-
-export default useEjemplaresViewModel;
-export { useEjemplaresViewModel as EjemplaresViewModel };

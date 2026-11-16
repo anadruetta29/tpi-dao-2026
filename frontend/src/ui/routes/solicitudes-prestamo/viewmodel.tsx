@@ -4,26 +4,22 @@ import { ModalidadPrestamoLocal } from "@/domain/entities/modalidad-prestamo-loc
 import { Rol } from "@/domain/entities/rol";
 import { localDateISO, localDatePlusDaysISO } from "@/ui/forms/handlers/local-date";
 import { EstadoSolicitud, TipoPrestamo, type SolicitudPrestamo } from "@/domain/entities/solicitud-prestamo";
-import {
-    createSolicitudInterbibliotecariaAction,
-    createSolicitudLocalAction,
-    getAllSolicitudesPrestamoAction,
-    getSolicitudPrestamoByIdAction,
-    updateSolicitudEstadoAction
-} from "@/ui/actions/solicitud-prestamo/solicitud-prestamo.actions";
+import { createSolicitudInterbibliotecariaAction, createSolicitudLocalAction, getAllSolicitudesPrestamoAction, 
+    getSolicitudPrestamoByIdAction, updateSolicitudEstadoAction } from "@/ui/actions/solicitud-prestamo/solicitud-prestamo.actions";
 import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField, type ReadFieldValues } from "@/ui/forms/handlers/read-form";
 import { allOptions, info, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
-import { type SolicitudInterbibliotecariaInicial } from "@/ui/routes/libros/libro-ejemplares";
 import { useSelectoresViewModel } from "./selectores-viewmodel";
+import type { SolicitudInterbibliotecariaInicial } from "@/core/types";
 
-const nextStates = [EstadoSolicitud.RECHAZADA, EstadoSolicitud.CANCELADA].map((estado) => estado.toOption());
 
-export function useViewModel(
+export default function ViewModel(
     session: Session,
     initialRecordId?: string,
     solicitudInicial?: SolicitudInterbibliotecariaInicial
 ) {
+    const nextStates = [EstadoSolicitud.RECHAZADA, EstadoSolicitud.CANCELADA].map((estado) => estado.toOption());
+
     const [tipo, setTipo] = useState(solicitudInicial ? TipoPrestamo.INTERBIBLIOTECARIO : TipoPrestamo.LOCAL);
     const esInterbibliotecaria = tipo === TipoPrestamo.INTERBIBLIOTECARIO;
     const selectors = useSelectoresViewModel(session, esInterbibliotecaria, solicitudInicial);
@@ -196,6 +192,3 @@ export function useViewModel(
         describe: describeSolicitud
     });
 }
-
-export default useViewModel;
-export { useViewModel as ViewModel };

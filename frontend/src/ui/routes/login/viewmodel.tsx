@@ -2,7 +2,7 @@ import { useMemo, useState, type FormEventHandler } from "react";
 import { useAuth } from "@/ui/hooks/use-auth";
 import { readForm } from "@/ui/forms/handlers/read-form";
 
-export function useViewModel() {
+export default function ViewModel() {
     const { login, isLoading, error } = useAuth();
     const [localError, setLocalError] = useState<string | null>(null);
 
@@ -34,5 +34,4 @@ export function useViewModel() {
     };
 }
 
-export default useViewModel;
-export { useViewModel as ViewModel };
+

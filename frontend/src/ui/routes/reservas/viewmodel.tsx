@@ -12,10 +12,11 @@ import { useSelector } from "@/ui/hooks/use-selector";
 import { useSelectorCatalog } from "@/ui/hooks/use-selector-catalog";
 import { allOptions, info, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
 
-const estadosActiva = [EstadoReserva.CANCELADA].map((estado) => estado.toOption());
-const estadosListaRetiro = [EstadoReserva.RETIRADA, EstadoReserva.CANCELADA].map((estado) => estado.toOption());
 
-export function useViewModel(session: Session, initialRecordId?: string) {
+export default function ViewModel(session: Session, initialRecordId?: string) {
+    const estadosActiva = [EstadoReserva.CANCELADA].map((estado) => estado.toOption());
+    const estadosListaRetiro = [EstadoReserva.RETIRADA, EstadoReserva.CANCELADA].map((estado) => estado.toOption());
+
     const isRecepcionista = session.user?.role === Rol.RECEPCIONISTA;
     const catalog = useSelectorCatalog(session, "libros", "socios", "sedes", "ejemplares");
     const filterLibro = useSelector("libroId", "Libro", "Buscá por título", false);
@@ -192,6 +193,3 @@ export function useViewModel(session: Session, initialRecordId?: string) {
         describe: describeReserva
     });
 }
-
-export default useViewModel;
-export { useViewModel as ViewModel };

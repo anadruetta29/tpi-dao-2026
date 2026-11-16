@@ -10,16 +10,9 @@ import { useSelectorCatalog } from "@/ui/hooks/use-selector-catalog";
 import { allOptions, info, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
 import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
+import { estados } from "@/core/utils/constants";
 
-const estados = [
-    EstadoEjemplar.DISPONIBLE,
-    EstadoEjemplar.DANADO,
-    EstadoEjemplar.EXTRAVIADO,
-    EstadoEjemplar.DESTRUIDO,
-    EstadoEjemplar.EN_REVISION
-].map((estado) => estado.toOption());
-
-export function useViewModel(session: Session, prestamoInicialId?: string) {
+export default function ViewModel(session: Session, prestamoInicialId?: string) {
     const catalog = useSelectorCatalog(session, "prestamos", "socios", "ejemplares");
     const ejemplar = useSelector("ejemplarId", "Ejemplar pendiente", "Buscá por título o código");
     const prestamo = useSelector("prestamoId", "Préstamo", "Buscá por libro, ejemplar o socio", true,
@@ -148,6 +141,3 @@ export function useViewModel(session: Session, prestamoInicialId?: string) {
         describe: describeDevolucion
     });
 }
-
-export default useViewModel;
-export { useViewModel as ViewModel };

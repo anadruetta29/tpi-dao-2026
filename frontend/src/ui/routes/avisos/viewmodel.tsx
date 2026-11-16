@@ -2,12 +2,12 @@ import { useCallback } from "react";
 import { type Aviso } from "@/domain/entities/aviso";
 import { type Session } from "@/domain/entities/session";
 import { getAllAvisosAction, marcarAvisoLeidoAction } from "@/ui/actions/aviso/aviso.actions";
-import { type DestinoBandeja } from "@/ui/routes/bandeja/viewmodel";
 import { useSelectorCatalog } from "@/ui/hooks/use-selector-catalog";
 import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
 import { info, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
 import { estadosLectura, tiposAviso } from "@/core/utils/constants";
+import type { DestinoBandeja } from "@/core/types";
 
 export default function ViewModel(session: Session, onOpen?: (destino: DestinoBandeja) => void) {
     const catalog = useSelectorCatalog(session, "sedes", "socios");

@@ -8,7 +8,7 @@ import { useSelector } from "@/ui/hooks/use-selector";
 import { useSelectorCatalog } from "@/ui/hooks/use-selector-catalog";
 import { allOptions, info, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
 
-export function useViewModel(session: Session) {
+export default function ViewModel(session: Session) {
     const catalog = useSelectorCatalog(session, "socios", "prestamos");
     const filterSocio = useSelector("socioId", "Socio", "Buscá por nombre o documento", false);
     const socio = useSelector("socioId", "Socio", "Buscá por nombre o documento");
@@ -134,5 +134,3 @@ export function useViewModel(session: Session) {
     });
 }
 
-export default useViewModel;
-export { useViewModel as ViewModel };

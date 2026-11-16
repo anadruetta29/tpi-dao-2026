@@ -1,8 +1,8 @@
 import { type Session } from "@/domain/entities/session";
 import { LibraryRecords } from "@/ui/components/library-records/library-records";
-import { useViewModel } from "./viewmodel";
+import ViewModel from "./viewmodel";
 
 export function ReservasRoute({ session, initialRecordId }: { session: Session; initialRecordId?: string }) {
-    const view = useViewModel(session, initialRecordId);
+    const view = ViewModel(session, initialRecordId);
     return <LibraryRecords view={view} />;
 }

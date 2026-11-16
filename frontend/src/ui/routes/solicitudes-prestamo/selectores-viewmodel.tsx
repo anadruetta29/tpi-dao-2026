@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { type ActionState } from "@/core/types";
+import { type ActionState, type SolicitudInterbibliotecariaInicial } from "@/core/types";
 import { EstadoEjemplar } from "@/domain/entities/ejemplar";
 import { EstadoSede } from "@/domain/entities/sede";
 import { EstadoSocio } from "@/domain/entities/socio";
@@ -12,9 +12,8 @@ import { getAllSociosAction } from "@/ui/actions/socio/socio.actions";
 import { getRecepcionistasAction } from "@/ui/actions/solicitud-prestamo/solicitud-prestamo.actions";
 import { type SearchOption } from "@/ui/components/library-search-select/library-search-select";
 import { useMultipleSelector, useSelector } from "@/ui/hooks/use-selector";
-import { type SolicitudInterbibliotecariaInicial } from "@/ui/routes/libros/libro-ejemplares";
 import { pickData } from "@/ui/routes/use-library-records-viewmodel";
-import { opcionesSedeOrigen } from "./sedes-origen";
+import { opcionesSedeOrigen } from "../../../core/utils/sedes-origen";
 
 export function useSelectoresViewModel(
     session: Session,

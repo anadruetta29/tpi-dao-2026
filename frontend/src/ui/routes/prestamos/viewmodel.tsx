@@ -11,12 +11,9 @@ import { type ReadField } from "@/ui/forms/handlers/read-form";
 import { useSelector } from "@/ui/hooks/use-selector";
 import { useSelectorCatalog } from "@/ui/hooks/use-selector-catalog";
 import { allOptions, info, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
+import dateKey from "@/core/utils/date-key";
 
-function dateKey(value?: string | Date | null) {
-    return value instanceof Date ? value.toISOString().slice(0, 10) : value?.slice(0, 10) ?? "";
-}
-
-export function useViewModel(session: Session, initialRecordId?: string, onDevolver?: (prestamoId: string) => void) {
+export function ViewModel(session: Session, initialRecordId?: string, onDevolver?: (prestamoId: string) => void) {
     const today = localDateISO();
     const isRecepcionista = session.user?.role === Rol.RECEPCIONISTA;
 
@@ -158,5 +155,3 @@ export function useViewModel(session: Session, initialRecordId?: string, onDevol
     });
 }
 
-export default useViewModel;
-export { useViewModel as ViewModel };

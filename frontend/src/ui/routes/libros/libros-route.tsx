@@ -1,18 +1,23 @@
 import { type Session } from "@/domain/entities/session";
 import { LibraryRecords } from "@/ui/components/library-records/library-records";
-import { useViewModel } from "./viewmodel";
-import { LibroEjemplares, type SolicitudInterbibliotecariaInicial } from "./libro-ejemplares";
+import type { SolicitudInterbibliotecariaInicial } from "@/core/types";
+import { EjemplaresRoute } from "../ejemplares/ejemplares-route";
+import ViewModel from "./viewmodel";
 
-export function LibrosRoute({ session, onSolicitarInterbibliotecaria }: {
+export function LibrosRoute({
+    session,
+    onSolicitarInterbibliotecaria
+}: {
     session: Session;
     onSolicitarInterbibliotecaria?: (inicial: SolicitudInterbibliotecariaInicial) => void;
 }) {
-    const view = useViewModel(session);
+    const view = ViewModel(session);
+
     return (
         <LibraryRecords
             view={view}
             renderDetailContent={(id) => (
-                <LibroEjemplares
+                <EjemplaresRoute
                     key={id}
                     session={session}
                     libroId={id}

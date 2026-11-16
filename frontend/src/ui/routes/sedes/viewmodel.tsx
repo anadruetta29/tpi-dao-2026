@@ -5,42 +5,11 @@ import { EstadoSede, type Sede } from "@/domain/entities/sede";
 import { ErrorMessages } from "@/domain/messages";
 import { createSedeAction, deleteSedeAction, getAllSedesAction, getSedeByIdAction, updateSedeAction } from "@/ui/actions/sede/sede.actions";
 import { useAuth } from "@/ui/hooks/use-auth";
-import { readFields } from "@/ui/forms/handlers/record-fields";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
 import { allOptions, info, type Field, useLibraryRecordsViewModel } from "@/ui/routes/use-library-records-viewmodel";
-import { onTimeInput } from "./horario-input";
+import { sedeData, sedeFields } from "@/core/utils/sedes";
 
-const horaPattern = "(?:[01][0-9]|2[0-3]):[0-5][0-9]";
-const rangoHorario = new RegExp(`^(${horaPattern})\\s*-\\s*(${horaPattern})$`);
-
-const timeField = {
-    pattern: horaPattern,
-    required: true,
-    inputMode: "numeric",
-    onInput: onTimeInput
-} as const;
-
-function sedeFields(sede?: Sede): Field[] {
-    const horario = rangoHorario.exec(sede?.horarioAtencion.trim() ?? "");
-    return [
-        { name: "nombre", placeholder: "Ej. Biblioteca Central", label: "Nombre", defaultValue: sede?.nombre, required: true },
-        { name: "telefono", placeholder: "Ej. 11 5555 1234", label: "Teléfono", type: "tel", defaultValue: sede?.telefono, required: true },
-        { name: "email", placeholder: "sede@ejemplo.com", label: "Correo electrónico", type: "email", defaultValue: sede?.email, required: true },
-        { ...timeField, name: "apertura", placeholder: "Ingresá la hora de apertura", label: "Apertura", defaultValue: horario?.[1] },
-        { ...timeField, name: "cierre", placeholder: "Ingresá la hora de cierre", label: "Cierre", defaultValue: horario?.[2] }
-    ];
-}
-
-function sedeData(field: ReadField) {
-    const apertura = field("apertura");
-    const cierre = field("cierre");
-    const horarioAtencion = `${apertura} - ${cierre}`;
-    if (!rangoHorario.test(horarioAtencion) || apertura >= cierre) return null;
-
-    return { ...readFields(field, "nombre", "telefono", "email"), horarioAtencion };
-}
-
-export function useViewModel(session: Session) {
+export default function ViewModel(session: Session) {
     const { user } = useAuth();
 
     {/* ===== Fetch data ===== */ }
@@ -133,5 +102,3 @@ export function useViewModel(session: Session) {
     });
 }
 
-export default useViewModel;
-export { useViewModel as ViewModel };

@@ -34,7 +34,7 @@ const userData = (field: ReadField) => ({
     sedeId: field("sedeId") || undefined
 });
 
-export function useViewModel(session: Session) {
+export default function ViewModel(session: Session) {
     const catalog = useSelectorCatalog(session, "sedes");
     const sedes = catalog.sedes?.data ?? [];
     {/* ===== Fetch data ===== */ }
@@ -136,6 +136,3 @@ export function useViewModel(session: Session) {
         describe: describeUsuario
     });
 }
-
-export default useViewModel;
-export { useViewModel as ViewModel };

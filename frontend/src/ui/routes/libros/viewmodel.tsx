@@ -1,115 +1,126 @@
-import { useCallback, useEffect, useState } from "react";
-import { type ActionState } from "@/core/types";
+import { useCallback, useState } from "react";
 import { type Session } from "@/domain/entities/session";
 import { type Libro } from "@/domain/entities/libro";
-import { createLibroAction, deleteLibroAction, getAllLibrosAction, getLibroByIdAction, updateLibroAction } from "@/ui/actions/libro/libro.actions";
-import { getAllAutoresAction } from "@/ui/actions/autor/autor.actions";
+import { createLibroAction, deleteLibroAction, getAllLibrosAction, getLibroByIdAction, updateLibroAction} from "@/ui/actions/libro/libro.actions";
 import { type LibraryChoicesProps } from "@/ui/components/library-choices/library-choices";
 import { useMultipleSelector } from "@/ui/hooks/use-selector";
-import { digitsInput } from "@/ui/forms/handlers/input-format";
-import { info, pickData, type Field, useLibraryRecordsViewModel } from "@/ui/routes/use-library-records-viewmodel";
+import { info, pickData, useLibraryRecordsViewModel} from "@/ui/routes/use-library-records-viewmodel";
 import { readFields } from "@/ui/forms/handlers/record-fields";
-import { type ReadField, type ReadFieldValues } from "@/ui/forms/handlers/read-form";
+import { type ReadField, type ReadFieldValues} from "@/ui/forms/handlers/read-form";
+import { bookFields } from "@/core/utils/book-fields";
+import { useAutores } from "@/ui/hooks/use-autores";
+import type { LibroFilters } from "@/core/types";
+import { filterFields } from "@/core/utils/constants";
 
-type Options = { value: string; label: string }[];
+export default function ViewModel(session: Session) {
 
-const onYearInput = digitsInput(4);
+    const bookData = (field: ReadField, autoresIds: string[]) => ({
+        ...readFields(field, "titulo", "editorial", "edicion"),
+        añoPublicacion: Number(field("añoPublicacion")),
+        autoresIds
+    });
 
-function bookFields(authors: Field, currentYear: number, libro?: Libro): Field[] {
-    return [
-        { name: "titulo", placeholder: "Ej. El Aleph", label: "Título", required: true, defaultValue: libro?.titulo },
-        {
-            name: "añoPublicacion",
-            label: "Año de publicación",
-            placeholder: "Ej. 1949",
-            inputMode: "numeric",
-            pattern: "[0-9]{1,4}",
-            title: `Ingresá un año entre 1 y ${currentYear}.`,
-            onInput: (event) => {
-                onYearInput(event);
-                const input = event.currentTarget;
-                const year = Number(input.value);
-                input.setCustomValidity(input.value && (year < 1 || year > currentYear)
-                    ? `Ingresá un año entre 1 y ${currentYear}.`
-                    : "");
-            },
-            required: true,
-            defaultValue: libro?.añoPublicacion ? String(libro.añoPublicacion) : undefined
-        },
-        { name: "editorial", placeholder: "Ej. Losada", label: "Editorial", required: true, defaultValue: libro?.editorial },
-        { name: "edicion", placeholder: "Ej. Primera edición", label: "Edición", required: true, defaultValue: libro?.edicion },
-        authors
-    ];
-}
-
-const bookData = (field: ReadField, autoresIds: string[]) => ({
-    ...readFields(field, "titulo", "editorial", "edicion"),
-    añoPublicacion: Number(field("añoPublicacion")),
-    autoresIds
-});
-
-export function useViewModel(session: Session) {
     const [currentYear] = useState(() => new Date().getFullYear());
-    const [authors, setAuthors] = useState<{ session: Session; result: ActionState<Options> } | null>(null);
-    const [revision, setRevision] = useState(0);
-    const authorSelector = useMultipleSelector("autoresIds", "Autores", "Buscá por nombre o apellido");
 
-    {/* ===== Main useEffects ===== */ }
+    const authorSelector = useMultipleSelector(
+        "autoresIds",
+        "Autores",
+        "Buscá por nombre o apellido"
+    );
 
-    useEffect(() => {
-        let active = true;
-        void getAllAutoresAction(session).then((result) => {
-            if (!active) return;
-            setAuthors({
-                session,
-                result: pickData(result, ({ autores }) => autores.map((autor) => ({
-                    value: autor.id,
-                    label: `${autor.nombre} ${autor.apellido}`.trim()
-                })))
-            });
-        });
-        return () => {
-            active = false;
+    const {
+        authorResult,
+        authorOptions,
+        authorNames,
+        retryAuthors
+    } = useAutores(session);
+
+    // ===== Author field =====
+
+    const buildAuthorField = (
+        selected: string[] = []
+    ): LibraryChoicesProps => {
+        const field: LibraryChoicesProps = {
+            name: "autoresIds",
+            label: "Autores",
+            choices: authorOptions.map((option) => ({
+                ...option,
+                selected: selected.includes(option.value)
+            }))
         };
-    }, [session, revision]);
 
-    {/* ===== Fetch data ===== */ }
+        if (!authorResult) {
+            field.status = {
+                kind: "loading",
+                message: "Cargando autores..."
+            };
+        } else if (!authorResult.success) {
+            field.status = {
+                kind: "error",
+                message: authorResult.error || "No se pudieron cargar los autores."
+            };
+            field.retry = retryAuthors;
+        } else if (authorOptions.length === 0) {
+            field.status = {
+                kind: "empty",
+                message: "Todavía no hay autores. Podés registrarlos en Autores."
+            };
+        }
 
-    const fetchLibros = useCallback(async (filters: { titulo: string; autor: string; editorial: string }) => {
-        const result = await getAllLibrosAction({ session, ...filters });
+        return field;
+    };
+
+    // ===== Fetch data =====
+
+    const fetchLibros = useCallback(async (filters: LibroFilters) => {
+        const result = await getAllLibrosAction({
+            session,
+            ...filters
+        });
+
         return pickData(result, (data) => data.libros);
     }, [session]);
 
     const fetchLibroDetail = useCallback(async (id: string) => {
         const result = await getLibroByIdAction(id, session);
+
         return pickData(result, (data) => data.libro);
     }, [session]);
 
-    {/* ===== onActions functions ===== */ }
-
-    const onRetryAuthors = () => {
-        setAuthors(null);
-        setRevision((current) => current + 1);
-    };
-
-    {/* ===== handlers functions ===== */ }
+    // ===== Handlers =====
 
     const handleFilterSubmit = (field: ReadField) => {
         return readFields(field, "titulo", "autor", "editorial");
     };
 
-    const handleCreateLibro = (field: ReadField, values: ReadFieldValues) => {
+    const handleCreateLibro = (
+        field: ReadField,
+        values: ReadFieldValues
+    ) => {
         return createLibroAction({
             session,
             ...bookData(field, values("autoresIds"))
         });
     };
 
-    const handleUpdateLibro = (libro: Libro, field: ReadField, values: ReadFieldValues) => {
+    const handleUpdateLibro = (
+        libro: Libro,
+        field: ReadField,
+        values: ReadFieldValues
+    ) => {
+        const autoresSeleccionados = values("autoresIds");
+
+        const autoresNoDisponibles = libro.autoresIds.filter(
+            (id) => !authorNames.has(id)
+        );
+
         return updateLibroAction({
             session,
             id: libro.id,
-            ...bookData(field, [...values("autoresIds"), ...libro.autoresIds.filter((id) => !authorNames.has(id))])
+            ...bookData(field, [
+                ...autoresSeleccionados,
+                ...autoresNoDisponibles
+            ])
         });
     };
 
@@ -117,19 +128,34 @@ export function useViewModel(session: Session) {
         return deleteLibroAction(libro.id, session);
     };
 
+    // ===== Book description =====
+
     const describeLibro = (libro: Libro) => ({
         info: [
             info("Título", libro.titulo),
             info("Año de publicación", libro.añoPublicacion || undefined),
             info("Editorial", libro.editorial),
             info("Edición", libro.edicion),
-            info("Autores", libro.autoresIds.map((id) => authorNames.get(id) ?? "Autor no disponible").join(", "))
+            info(
+                "Autores",
+                libro.autoresIds
+                    .map((id) => authorNames.get(id) ?? "Autor no disponible")
+                    .join(", ")
+            )
         ],
         forms: [{
             label: "Modificar libro",
-            fields: bookFields({ kind: "choices", ...buildAuthorField(libro.autoresIds) }, currentYear, libro),
+            fields: bookFields(
+                {
+                    kind: "choices",
+                    ...buildAuthorField(libro.autoresIds)
+                },
+                currentYear,
+                libro
+            ),
             submitDisabled: !authorResult?.success,
-            submit: (field: ReadField, values: ReadFieldValues) => handleUpdateLibro(libro, field, values)
+            submit: (field: ReadField, values: ReadFieldValues) =>
+                handleUpdateLibro(libro, field, values)
         }],
         commands: [{
             label: "Eliminar libro",
@@ -138,45 +164,41 @@ export function useViewModel(session: Session) {
         }]
     });
 
-    {/* ===== variables ===== */ }
-
-    const authorResult = authors?.session === session ? authors.result : null;
-    const authorOptions = authorResult?.data ?? [];
-    const authorNames = new Map(authorOptions.map(({ value, label }) => [value, label]));
-
-    const buildAuthorField = (selected: string[] = []): LibraryChoicesProps => {
-        const field: LibraryChoicesProps = {
-            name: "autoresIds",
-            label: "Autores",
-            choices: authorOptions.map((option) => ({ ...option, selected: selected.includes(option.value) }))
-        };
-        if (!authorResult) {
-            field.status = { kind: "loading", message: "Cargando autores..." };
-        } else if (!authorResult.success) {
-            field.status = { kind: "error", message: authorResult.error || "No se pudieron cargar los autores." };
-            field.retry = onRetryAuthors;
-        } else if (authorOptions.length === 0) {
-            field.status = { kind: "empty", message: "Todavía no hay autores. Podés registrarlos en Autores." };
-        }
-        return field;
-    };
+    // ===== Display data =====
 
     const getLibroLabel = (libro: Libro) => libro.titulo;
 
     const getLibroMeta = (libro: Libro) => {
-        const autores = libro.autoresIds.map((id) => authorNames.get(id)).filter(Boolean).join(", ");
-        return [autores, libro.editorial].filter(Boolean).join(" · ");
+        const autores = libro.autoresIds
+            .map((id) => authorNames.get(id))
+            .filter(Boolean)
+            .join(", ");
+
+        return [autores, libro.editorial]
+            .filter(Boolean)
+            .join(" · ");
     };
 
-    const filterFields: Field[] = [
-        { name: "titulo", placeholder: "Ej. El Aleph", label: "Título" },
-        { name: "autor", placeholder: "Buscá por autor", label: "Autor" },
-        { name: "editorial", placeholder: "Ej. Losada", label: "Editorial" }
-    ];
+    // ===== Create fields =====
+
+    const createFields = bookFields(
+        {
+            ...authorSelector.field(authorResult, "Cargando autores..."),
+            required: false,
+            retry: authorResult?.success === false
+                ? retryAuthors
+                : undefined
+        },
+        currentYear
+    );
 
     return useLibraryRecordsViewModel({
         title: "Libros",
-        initialFilters: { titulo: "", autor: "", editorial: "" },
+        initialFilters: {
+            titulo: "",
+            autor: "",
+            editorial: ""
+        },
         load: fetchLibros,
         loadDetail: fetchLibroDetail,
         filter: {
@@ -189,17 +211,10 @@ export function useViewModel(session: Session) {
         create: {
             label: "Registrar libro",
             onOpen: authorSelector.reset,
-            fields: bookFields({
-                ...authorSelector.field(authorResult, "Cargando autores..."),
-                required: false,
-                retry: authorResult?.success === false ? onRetryAuthors : undefined
-            }, currentYear),
+            fields: createFields,
             submitDisabled: !authorResult?.success,
             submit: handleCreateLibro
         },
         describe: describeLibro
     });
 }
-
-export default useViewModel;
-export { useViewModel as ViewModel };
