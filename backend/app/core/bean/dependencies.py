@@ -51,6 +51,7 @@ from app.application.use_case.ejemplar import (
     GetAllEjemplaresUseCase,
     GetEjemplarByIdUseCase,
     UpdateEjemplarEstadoUseCase,
+    DeleteEjemplarUseCase,
 )
 from app.application.use_case.libro import (
     CreateLibroUseCase,
@@ -334,7 +335,12 @@ def get_libro_service(
         ),
         create_use_case=CreateLibroUseCase(libro_repo, autor_repo, usuario_repo),
         update_use_case=UpdateLibroUseCase(libro_repo, autor_repo, usuario_repo),
-        delete_use_case=DeleteLibroUseCase(libro_repo, usuario_repo),
+        delete_use_case=DeleteLibroUseCase(
+            libro_repo,
+            usuario_repo,
+            ejemplar_repo,
+            EjemplarEstadoStateFactory(),
+        ),
     )
 
 
@@ -362,6 +368,11 @@ def get_ejemplar_service(
             reserva_repo,
             aviso_repo,
             transaction=lambda: atomic_write(db),
+        ),
+        delete_use_case=DeleteEjemplarUseCase(
+            ejemplar_repo,
+            usuario_repo,
+            EjemplarEstadoStateFactory(),
         ),
     )
 
@@ -435,6 +446,11 @@ def get_solicitud_prestamo_service(
             crear_prestamo=crear_prestamo,
             crear_remito=crear_remito,
             transaction=lambda: atomic_write(db),
+        ),
+        delete_use_case=DeleteEjemplarUseCase(
+            ejemplar_repo,
+            usuario_repo,
+            EjemplarEstadoStateFactory(),
         ),
     )
 

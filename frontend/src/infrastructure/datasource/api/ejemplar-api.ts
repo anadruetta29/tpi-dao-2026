@@ -9,6 +9,7 @@ import { type CreateEjemplarReq } from "../../../domain/dto/ejemplar/request/Cre
 import { type CreateEjemplarRes } from "../../../domain/dto/ejemplar/response/CreateEjemplarRes";
 import { type UpdateEjemplarEstadoReq } from "../../../domain/dto/ejemplar/request/UpdateEjemplarEstadoReq";
 import { type UpdateEjemplarEstadoRes } from "../../../domain/dto/ejemplar/response/UpdateEjemplarEstadoRes";
+import { type DeleteEjemplarReq } from "../../../domain/dto/ejemplar/request/DeleteEjemplarReq";
 import { HTTPClient } from "../../../core/adapters/http-client";
 import { CacheTags, withCacheTags } from "../../../core/config/cache";
 import { ErrorHandler } from "@/domain/messages";
@@ -100,6 +101,19 @@ export class EjemplarApiDataSource implements EjemplarDataSourceI {
             return {
                 ejemplar: Ejemplar.fromObject(response?.ejemplar || response)!
             };
+        }
+        catch (error: any) {
+            throw ErrorHandler.handleError(error);
+        }
+    }
+
+    public async deleteEjemplar(dto: DeleteEjemplarReq): Promise<void> {
+        try {
+            await this.httpClient.delete(
+                `/ejemplares/${dto.id}`,
+                {},
+                dto.session?.accessToken
+            );
         }
         catch (error: any) {
             throw ErrorHandler.handleError(error);

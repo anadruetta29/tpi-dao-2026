@@ -1,6 +1,6 @@
 import logging
 from typing import Any, Dict, Optional
-from fastapi import APIRouter, Body, Depends, Header, Query
+from fastapi import APIRouter, Body, Depends, Header, Query, Response
 from fastapi.responses import JSONResponse
 from app.application.service.ejemplar_service_i import EjemplarServiceI
 from app.core.bean.dependencies import get_ejemplar_service
@@ -64,3 +64,15 @@ class EjemplarController:
         request = EjemplarMapper.to_update_estado_request(token, id, payload)
         response = service.update_estado(request)
         return JSONResponse(status_code=200, content=response.model_dump())
+
+    @staticmethod
+    @router.delete("/{id}", status_code=204)
+    def delete(
+        id: int,
+        token: Optional[str] = Header(default=None, alias="Authorization"),
+        service: EjemplarServiceI = Depends(get_ejemplar_service),
+    ) -> Response:
+        logger.info("DELETE /ejemplares/%s called", id)
+        request = EjemplarMapper.to_delete_request(token, id)
+        service.delete(request)
+        return Response(status_code=204)

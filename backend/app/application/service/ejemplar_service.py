@@ -1,6 +1,7 @@
 from app.application.service.ejemplar_service_i import EjemplarServiceI
 from app.application.use_case.ejemplar import (
     CreateEjemplarUseCase,
+    DeleteEjemplarUseCase,
     GetAllEjemplaresUseCase,
     GetEjemplarByIdUseCase,
     UpdateEjemplarEstadoUseCase,
@@ -8,6 +9,7 @@ from app.application.use_case.ejemplar import (
 from app.presentation.dto.ejemplar.mapper import EjemplarMapper
 from app.presentation.dto.ejemplar.request import (
     CreateEjemplarReq,
+    DeleteEjemplarReq,
     GetAllEjemplaresReq,
     GetEjemplarByIdReq,
     UpdateEjemplarEstadoReq,
@@ -22,11 +24,13 @@ class EjemplarService(EjemplarServiceI):
         get_by_id_use_case: GetEjemplarByIdUseCase,
         create_use_case: CreateEjemplarUseCase,
         update_estado_use_case: UpdateEjemplarEstadoUseCase,
+        delete_use_case: DeleteEjemplarUseCase,
     ) -> None:
         self.get_all_use_case = get_all_use_case
         self.get_by_id_use_case = get_by_id_use_case
         self.create_use_case = create_use_case
         self.update_estado_use_case = update_estado_use_case
+        self.delete_use_case = delete_use_case
 
     def get_all(self, dto: GetAllEjemplaresReq) -> GetAllEjemplaresRes:
         result = self.get_all_use_case.execute(
@@ -65,3 +69,8 @@ class EjemplarService(EjemplarServiceI):
             )
         )
         return EjemplarMapper.to_response(result.ejemplar)
+
+    def delete(self, dto: DeleteEjemplarReq) -> None:
+        self.delete_use_case.execute(
+            DeleteEjemplarUseCase.Command(token=dto.get_token(), id=dto.get_id())
+        )

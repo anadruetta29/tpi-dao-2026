@@ -6,10 +6,12 @@ import { type CreateEjemplarReq } from "../dto/ejemplar/request/CreateEjemplarRe
 import { type CreateEjemplarRes } from "../dto/ejemplar/response/CreateEjemplarRes";
 import { type UpdateEjemplarEstadoReq } from "../dto/ejemplar/request/UpdateEjemplarEstadoReq";
 import { type UpdateEjemplarEstadoRes } from "../dto/ejemplar/response/UpdateEjemplarEstadoRes";
+import { type DeleteEjemplarReq } from "../dto/ejemplar/request/DeleteEjemplarReq";
 
 export abstract class EjemplarRepositoryI {
     abstract getAllEjemplares(dto: GetAllEjemplaresReq): Promise<GetAllEjemplaresRes>;
     abstract getEjemplarById(dto: GetEjemplarByIdReq): Promise<GetEjemplarByIdRes>;
     abstract createEjemplar(dto: CreateEjemplarReq): Promise<CreateEjemplarRes>;
     abstract updateEjemplarEstado(dto: UpdateEjemplarEstadoReq): Promise<UpdateEjemplarEstadoRes>;
+    abstract deleteEjemplar(dto: DeleteEjemplarReq): Promise<void>;
 }

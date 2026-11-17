@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from app.presentation.dto.ejemplar.request import (
     CreateEjemplarReq,
+    DeleteEjemplarReq,
     GetAllEjemplaresReq,
     GetEjemplarByIdReq,
     UpdateEjemplarEstadoReq,
@@ -23,4 +24,8 @@ class EjemplarServiceI(ABC):
 
     @abstractmethod
     def update_estado(self, dto: UpdateEjemplarEstadoReq) -> EjemplarRes:
+        pass
+
+    @abstractmethod
+    def delete(self, dto: DeleteEjemplarReq) -> None:
         pass

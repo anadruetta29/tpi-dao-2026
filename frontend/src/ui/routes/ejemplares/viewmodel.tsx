@@ -4,7 +4,7 @@ import { type ActionState } from "@/core/types";
 import { EstadoEjemplar, type Ejemplar } from "@/domain/entities/ejemplar";
 import { EstadoSede, type Sede } from "@/domain/entities/sede";
 import { type Session } from "@/domain/entities/session";
-import { createEjemplarAction, getAllEjemplaresAction, getEjemplarByIdAction, updateEjemplarEstadoAction } from "@/ui/actions/ejemplar/ejemplar.actions";
+import { createEjemplarAction, deleteEjemplarAction, getAllEjemplaresAction, getEjemplarByIdAction, updateEjemplarEstadoAction } from "@/ui/actions/ejemplar/ejemplar.actions";
 import { getLibroDisponibilidadAction } from "@/ui/actions/libro/libro.actions";
 import { getAllSedesAction } from "@/ui/actions/sede/sede.actions";
 import { readFields } from "@/ui/forms/handlers/record-fields";
@@ -83,15 +83,14 @@ export default function ViewModel(session: Session, libroId: string, onSolicitar
         const enRevision =
             ejemplar.estadoEntity === EstadoEjemplar.DANADO ||
             ejemplar.estadoEntity === EstadoEjemplar.EN_REVISION;
+        const eliminable =
+            ejemplar.estadoEntity !== EstadoEjemplar.EN_TRANSITO &&
+            ejemplar.estadoEntity !== EstadoEjemplar.RESERVADO &&
+            ejemplar.estadoEntity !== EstadoEjemplar.PRESTADO;
         const puedeGestionarSede = !session.user?.sedeId || session.user.sedeId === ejemplar.sedeId;
 
-        return {
-            info: [
-                info("Código", ejemplar.codigo),
-                info("Sede", sedeNames.get(ejemplar.sedeId)),
-                statusInfo(ejemplar.estadoName)
-            ],
-            commands: enRevision && puedeGestionarSede
+        const commands = [
+            ...(enRevision && puedeGestionarSede
                 ? [
                     {
                         label: "Marcar disponible",
@@ -121,7 +120,30 @@ export default function ViewModel(session: Session, libroId: string, onSolicitar
                         }
                     }
                 ]
-                : undefined
+                : []),
+            ...(eliminable && puedeGestionarSede
+                ? [
+                    {
+                        label: "Eliminar ejemplar",
+                        tone: "danger" as const,
+                        confirm: `¿Querés eliminar el ejemplar «${ejemplar.codigo}»?`,
+                        execute: async () => {
+                            const result = await deleteEjemplarAction(ejemplar.id, session);
+                            if (result.success) refreshDisponibilidad();
+                            return result;
+                        }
+                    }
+                ]
+                : [])
+        ];
+
+        return {
+            info: [
+                info("Código", ejemplar.codigo),
+                info("Sede", sedeNames.get(ejemplar.sedeId)),
+                statusInfo(ejemplar.estadoName)
+            ],
+            commands: commands.length > 0 ? commands : undefined
         };
     };
 
