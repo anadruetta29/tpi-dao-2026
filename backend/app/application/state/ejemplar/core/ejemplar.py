@@ -21,6 +21,16 @@ class EjemplarEstadoState(ABC):
     def puede_resolver_revision(self) -> bool:
         return False
 
+    def puede_eliminarse(self) -> bool:
+        return True
+
+    def validar_eliminacion(
+        self,
+        mensaje: str = "No se puede eliminar un ejemplar prestado, reservado o en tránsito.",
+    ) -> None:
+        if not self.puede_eliminarse():
+            raise ErrorHandler(ErrorType.CONFLICT, mensaje)
+
     def validar_prestamo(self, ejemplar: Ejemplar) -> None:
         if not self.puede_prestarse():
             raise ErrorHandler(ErrorType.EJEMPLAR_NOT_AVAILABLE)

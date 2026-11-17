@@ -1,6 +1,10 @@
 from typing import Any, Dict, List, Optional
 from app.domain.entity.autor import Autor
-from app.presentation.dto.autor.request import CreateAutorReq, GetAllAutoresReq
+from app.presentation.dto.autor.request import (
+    CreateAutorReq,
+    GetAllAutoresReq,
+    UpdateAutorReq,
+)
 from app.presentation.dto.autor.response import AutorRes, GetAllAutoresRes
 
 
@@ -16,6 +20,12 @@ class AutorMapper:
     @staticmethod
     def to_create_request(token: Optional[str], payload: Dict[str, Any]) -> CreateAutorReq:
         return CreateAutorReq.build(token, payload)
+
+    @staticmethod
+    def to_update_request(
+        token: Optional[str], id: int, payload: Dict[str, Any]
+    ) -> UpdateAutorReq:
+        return UpdateAutorReq.build(token, id, payload)
 
     @staticmethod
     def to_response(autor: Autor) -> AutorRes:

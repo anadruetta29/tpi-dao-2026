@@ -8,6 +8,7 @@ import { type CreateEjemplarReq } from "@/domain/dto/ejemplar/request/CreateEjem
 import { type CreateEjemplarRes } from "@/domain/dto/ejemplar/response/CreateEjemplarRes";
 import { type UpdateEjemplarEstadoReq } from "@/domain/dto/ejemplar/request/UpdateEjemplarEstadoReq";
 import { type UpdateEjemplarEstadoRes } from "@/domain/dto/ejemplar/response/UpdateEjemplarEstadoRes";
+import { type DeleteEjemplarReq } from "@/domain/dto/ejemplar/request/DeleteEjemplarReq";
 
 export class EjemplarRepository implements EjemplarRepositoryI {
 
@@ -31,6 +32,10 @@ export class EjemplarRepository implements EjemplarRepositoryI {
 
     public async updateEjemplarEstado(dto: UpdateEjemplarEstadoReq): Promise<UpdateEjemplarEstadoRes> {
         return await this.dataSource.updateEjemplarEstado(dto);
+    }
+
+    public async deleteEjemplar(dto: DeleteEjemplarReq): Promise<void> {
+        return await this.dataSource.deleteEjemplar(dto);
     }
 
 }

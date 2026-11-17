@@ -9,3 +9,6 @@ class PrestadoState(EjemplarEstadoState):
 
     def puede_devolverse(self) -> bool:
         return True
+
+    def puede_eliminarse(self) -> bool:
+        return False

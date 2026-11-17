@@ -6,6 +6,7 @@ import { ErrorMessages, SuccessMessages } from "@/domain/messages";
 import { GetAllEjemplaresUseCase } from "@/domain/use-cases/ejemplar/get-all-ejemplares";
 import { GetEjemplarByIdUseCase } from "@/domain/use-cases/ejemplar/get-ejemplar-by-id";
 import { CreateEjemplarUseCase } from "@/domain/use-cases/ejemplar/create-ejemplar";
+import { DeleteEjemplarUseCase } from "@/domain/use-cases/ejemplar/delete-ejemplar";
 import { UpdateEjemplarEstadoUseCase } from "@/domain/use-cases/ejemplar/update-ejemplar-estado";
 import { EjemplarApiDataSource } from "@/infrastructure/datasource/api/ejemplar-api";
 import { AuthStorageDataSource } from "@/infrastructure/datasource/storage/auth-storage";
@@ -19,6 +20,7 @@ const getAllEjemplaresUseCase = new GetAllEjemplaresUseCase(ejemplarRepository);
 const getEjemplarByIdUseCase = new GetEjemplarByIdUseCase(ejemplarRepository);
 const createEjemplarUseCase = new CreateEjemplarUseCase(ejemplarRepository);
 const updateEjemplarEstadoUseCase = new UpdateEjemplarEstadoUseCase(ejemplarRepository);
+const deleteEjemplarUseCase = new DeleteEjemplarUseCase(ejemplarRepository);
 
 function resolveSession(customSession?: Session | null): Session | null {
     return customSession ?? authStorageDataSource.getSession();
@@ -128,6 +130,28 @@ export async function updateEjemplarEstadoAction(
             success: true,
             data: result,
             message: "Estado del ejemplar actualizado correctamente."
+        };
+    } catch (error: any) {
+        return { success: false, error: error?.message || ErrorMessages.UNEXPECTED_ERROR };
+    }
+}
+
+export async function deleteEjemplarAction(
+    id: string,
+    customSession?: Session | null
+): Promise<ActionState<null>> {
+    try {
+        const session = resolveSession(customSession);
+        if (!session?.accessToken) {
+            return { success: false, error: ErrorMessages.AUTH_UNAUTHORIZED };
+        }
+
+        await deleteEjemplarUseCase.execute({ session, id });
+
+        return {
+            success: true,
+            data: null,
+            message: "Ejemplar eliminado correctamente."
         };
     } catch (error: any) {
         return { success: false, error: error?.message || ErrorMessages.UNEXPECTED_ERROR };

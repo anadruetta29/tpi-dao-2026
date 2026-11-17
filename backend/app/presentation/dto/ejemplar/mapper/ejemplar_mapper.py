@@ -3,6 +3,7 @@ from app.domain.entity.ejemplar import Ejemplar
 from app.domain.entity.estado_ejemplar import EstadoEjemplar
 from app.presentation.dto.ejemplar.request import (
     CreateEjemplarReq,
+    DeleteEjemplarReq,
     GetAllEjemplaresReq,
     GetEjemplarByIdReq,
     UpdateEjemplarEstadoReq,
@@ -37,6 +38,10 @@ class EjemplarMapper:
         token: Optional[str], id: int, payload: Dict[str, Any]
     ) -> UpdateEjemplarEstadoReq:
         return UpdateEjemplarEstadoReq.build(token, id, payload)
+
+    @staticmethod
+    def to_delete_request(token: Optional[str], id: int) -> DeleteEjemplarReq:
+        return DeleteEjemplarReq.build(token, id)
 
     @staticmethod
     def to_response(ejemplar: Ejemplar) -> EjemplarRes:

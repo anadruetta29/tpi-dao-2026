@@ -2,10 +2,12 @@ from app.application.use_case.ejemplar.get_all_ejemplares_use_case import GetAll
 from app.application.use_case.ejemplar.get_ejemplar_by_id_use_case import GetEjemplarByIdUseCase
 from app.application.use_case.ejemplar.create_ejemplar_use_case import CreateEjemplarUseCase
 from app.application.use_case.ejemplar.update_ejemplar_estado_use_case import UpdateEjemplarEstadoUseCase
+from app.application.use_case.ejemplar.delete_ejemplar_use_case import DeleteEjemplarUseCase
 
 __all__ = [
     "GetAllEjemplaresUseCase",
     "GetEjemplarByIdUseCase",
     "CreateEjemplarUseCase",
     "UpdateEjemplarEstadoUseCase",
+    "DeleteEjemplarUseCase",
 ]
