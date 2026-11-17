@@ -131,9 +131,9 @@ def seed() -> None:
         # 3. Usuarios (Admins y Recepcionistas por sede, más un usuario inactivo)
         usuarios = [
             UsuarioModel(
-                nombre="Adrián",
-                apellido="Tormenta",
-                email="admin@biblioteca.utn.edu.ar",
+                nombre="admin",
+                apellido="admin",
+                email="admin@mail.com",
                 password=pwd_hash,
                 activo=True,
                 role=Rol.ADMIN,
