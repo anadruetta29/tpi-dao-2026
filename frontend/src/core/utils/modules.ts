@@ -12,6 +12,7 @@ import { SociosRoute } from "@/ui/routes/socios/socios-route";
 import { SolicitudesPrestamoRoute } from "@/ui/routes/solicitudes-prestamo/solicitudes-prestamo-route";
 import { UsuariosRoute } from "@/ui/routes/usuarios/usuarios-route";
 import { ConfiguracionRoute } from "@/ui/routes/configuracion/configuracion-route";
+import { ReportesRoute } from "@/ui/routes/reportes/reportes-route";
 
 export const modules = [
     { area: "Operación", label: "Bandeja", Component: BandejaRoute },
@@ -20,6 +21,7 @@ export const modules = [
     { area: "Administración", label: "Usuarios", Component: UsuariosRoute, adminOnly: true },
     { area: "Administración", label: "Socios", Component: SociosRoute },
     { area: "Administración", label: "Configuración", Component: ConfiguracionRoute, adminOnly: true },
+    { area: "Administración", label: "Reportes", Component: ReportesRoute, adminOnly: true },
     { area: "Catálogo", label: "Libros", Component: LibrosRoute },
     { area: "Catálogo", label: "Autores", Component: AutoresRoute },
     { area: "Circulación", label: "Solicitudes de préstamo", Component: SolicitudesPrestamoRoute },

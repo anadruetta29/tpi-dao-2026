@@ -27,6 +27,7 @@ const paths = {
     eye: "M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6Zm13 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z",
     eyeOff: "M3 3l18 18M9 6a10 10 0 0 1 3 0c6 0 10 6 10 6a16 16 0 0 1-3 3M6 8a16 16 0 0 0-4 4s4 6 10 6a11 11 0 0 0 4-1",
     sliders: "M4 6h16M4 12h16M4 18h16M9 4v4m6 2v4m-4 2v4",
+    chartBar: "M3 20h18M6 16v-5m6 5V7m6 9v-8",
 };
 
 export type LibraryIconName = keyof typeof paths;

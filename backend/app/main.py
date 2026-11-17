@@ -12,6 +12,7 @@ from app.presentation.controller import (
     multa_router,
     prestamo_router,
     remito_router,
+    report_router,
     reserva_router,
     sede_router,
     socio_router,
@@ -42,3 +43,4 @@ app.include_router(devolucion_router)
 app.include_router(multa_router)
 app.include_router(aviso_router)
 app.include_router(configuracion_router)
+app.include_router(report_router)

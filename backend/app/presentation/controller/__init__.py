@@ -18,6 +18,7 @@ from app.presentation.controller.devolucion_controller import (
 )
 from app.presentation.controller.multa_controller import MultaController, router as multa_router
 from app.presentation.controller.configuracion_controller import ConfiguracionController, router as configuracion_router
+from app.presentation.controller.report_controller import ReportController, router as report_router
 
 __all__ = [
     "AuthController",
@@ -48,4 +49,6 @@ __all__ = [
     "multa_router",
     "ConfiguracionController",
     "configuracion_router",
+    "ReportController",
+    "report_router",
 ]

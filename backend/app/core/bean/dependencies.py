@@ -28,6 +28,8 @@ from app.application.service import (
     PrestamoServiceI,
     RemitoService,
     RemitoServiceI,
+    ReportService,
+    ReportServiceI,
     ReservaService,
     ReservaServiceI,
     SedeService,
@@ -138,6 +140,12 @@ from app.application.use_case.configuracion.get_all_tarifas_multa_use_case impor
 )
 from app.application.use_case.configuracion.update_tarifa_multa_use_case import (
     UpdateTarifaMultaUseCase,
+)
+from app.application.use_case.report import (
+    GetLibrosInterbibliotecariosReportUseCase,
+    GetLogisticaIncidenciasReportUseCase,
+    GetMovimientoSedesReportUseCase,
+    GetPrestamosVencidosMultasReportUseCase,
 )
 from app.domain.repository import (
     AutorRepositoryI,
@@ -642,5 +650,33 @@ def get_tarifa_multa_service(
         get_all_use_case=GetAllTarifasMultaUseCase(tarifa_multa_repo, usuario_repo),
         update_use_case=UpdateTarifaMultaUseCase(
             tarifa_multa_repo, usuario_repo, transaction=lambda: atomic_write(db)
+        ),
+    )
+
+
+def get_report_service(
+    remito_repo: RemitoRepositoryI = Depends(get_remito_repository),
+    sede_repo: SedeRepositoryI = Depends(get_sede_repository),
+    ejemplar_repo: EjemplarRepositoryI = Depends(get_ejemplar_repository),
+    prestamo_repo: PrestamoRepositoryI = Depends(get_prestamo_repository),
+    multa_repo: MultaRepositoryI = Depends(get_multa_repository),
+    socio_repo: SocioRepositoryI = Depends(get_socio_repository),
+    solicitud_repo: SolicitudPrestamoRepositoryI = Depends(get_solicitud_prestamo_repository),
+    libro_repo: LibroRepositoryI = Depends(get_libro_repository),
+    autor_repo: AutorRepositoryI = Depends(get_autor_repository),
+    usuario_repo: UsuarioRepositoryI = Depends(get_usuario_repository),
+) -> ReportServiceI:
+    return ReportService(
+        movimiento_sedes_use_case=GetMovimientoSedesReportUseCase(
+            remito_repo, sede_repo, usuario_repo
+        ),
+        logistica_incidencias_use_case=GetLogisticaIncidenciasReportUseCase(
+            remito_repo, sede_repo, ejemplar_repo, usuario_repo
+        ),
+        prestamos_vencidos_multas_use_case=GetPrestamosVencidosMultasReportUseCase(
+            prestamo_repo, multa_repo, socio_repo, sede_repo, usuario_repo
+        ),
+        libros_interbibliotecarios_use_case=GetLibrosInterbibliotecariosReportUseCase(
+            solicitud_repo, ejemplar_repo, libro_repo, autor_repo, sede_repo, usuario_repo
         ),
     )

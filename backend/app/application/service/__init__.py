@@ -24,6 +24,8 @@ from app.application.service.devolucion_service_i import DevolucionServiceI
 from app.application.service.devolucion_service import DevolucionService
 from app.application.service.multa_service_i import MultaServiceI
 from app.application.service.multa_service import MultaService
+from app.application.service.report_service_i import ReportServiceI
+from app.application.service.report_service import ReportService
 
 __all__ = [
     "AuthServiceI",
@@ -52,4 +54,6 @@ __all__ = [
     "DevolucionService",
     "MultaServiceI",
     "MultaService",
+    "ReportServiceI",
+    "ReportService",
 ]

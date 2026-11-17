@@ -15,7 +15,7 @@ import type { LibraryIconName } from "@/ui/components/library-icon/library-icon"
 
 const moduleIcons: Partial<Record<string, LibraryIconName>> = {
     Bandeja: "inbox", Avisos: "bell", Sedes: "building", Usuarios: "users", Socios: "card", Configuración: "sliders",
-    Libros: "book", Autores: "feather", "Ejemplares físicos": "shelf", "Solicitudes de préstamo": "clipboard",
+    Reportes: "chartBar", Libros: "book", Autores: "feather", "Ejemplares físicos": "shelf", "Solicitudes de préstamo": "clipboard",
     Préstamos: "book", Reservas: "calendar", Devoluciones: "undo", Multas: "receipt", Remitos: "truck"
 };
 

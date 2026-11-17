@@ -43,6 +43,7 @@ export class CacheTags {
     public static remitoTrazabilidad(id: string): string {
         return `remito:${id}:trazabilidad`;
     }
+    public static readonly REPORTS = "reports";
 }
 
 export function withCacheTags(...tags: Array<string | false | null | undefined>): CacheConfig {
