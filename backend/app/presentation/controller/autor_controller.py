@@ -35,3 +35,16 @@ class AutorController:
         request = AutorMapper.to_create_request(token, payload)
         response = service.create(request)
         return JSONResponse(status_code=201, content=response.model_dump())
+
+    @staticmethod
+    @router.put("/{id}", response_model=AutorRes)
+    def update(
+        id: int,
+        payload: Dict[str, Any] = Body(...),
+        token: Optional[str] = Header(default=None, alias="Authorization"),
+        service: AutorServiceI = Depends(get_autor_service),
+    ) -> JSONResponse:
+        logger.info("PUT /autores/%s called", id)
+        request = AutorMapper.to_update_request(token, id, payload)
+        response = service.update(request)
+        return JSONResponse(status_code=200, content=response.model_dump())

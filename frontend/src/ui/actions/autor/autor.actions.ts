@@ -4,6 +4,7 @@ import { Autor } from "@/domain/entities/autor";
 import { ErrorMessages, SuccessMessages } from "@/domain/messages";
 import { GetAllAutoresUseCase } from "@/domain/use-cases/autor/get-all-autores";
 import { CreateAutorUseCase } from "@/domain/use-cases/autor/create-autor";
+import { UpdateAutorUseCase } from "@/domain/use-cases/autor/update-autor";
 import { AutorApiDataSource } from "@/infrastructure/datasource/api/autor-api";
 import { AuthStorageDataSource } from "@/infrastructure/datasource/storage/auth-storage";
 import { AutorRepository } from "@/infrastructure/repository/autor";
@@ -14,6 +15,7 @@ const autorRepository = new AutorRepository(autorApiDataSource);
 
 const getAllAutoresUseCase = new GetAllAutoresUseCase(autorRepository);
 const createAutorUseCase = new CreateAutorUseCase(autorRepository);
+const updateAutorUseCase = new UpdateAutorUseCase(autorRepository);
 
 function resolveSession(customSession?: Session | null): Session | null {
     return customSession ?? authStorageDataSource.getSession();
@@ -63,5 +65,38 @@ export async function createAutorAction(
         };
     } catch (error: any) {
         return { success: false, error: error?.message || ErrorMessages.AUTOR_CREATE_ERROR };
+    }
+}
+
+export interface UpdateAutorActionParams {
+    session?: Session | null;
+    id: string;
+    nombre: string;
+    apellido: string;
+}
+
+export async function updateAutorAction(
+    params: UpdateAutorActionParams
+): Promise<ActionState<{ id: string; autor?: Autor | null }>> {
+    try {
+        const session = resolveSession(params.session);
+        if (!session?.accessToken) {
+            return { success: false, error: ErrorMessages.AUTH_UNAUTHORIZED };
+        }
+
+        const result = await updateAutorUseCase.execute({
+            session,
+            id: params.id,
+            nombre: params.nombre,
+            apellido: params.apellido
+        });
+
+        return {
+            success: true,
+            data: result,
+            message: "Autor actualizado correctamente."
+        };
+    } catch (error: any) {
+        return { success: false, error: error?.message || ErrorMessages.UNEXPECTED_ERROR };
     }
 }

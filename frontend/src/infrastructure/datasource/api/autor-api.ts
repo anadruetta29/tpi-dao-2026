@@ -4,6 +4,8 @@ import { type GetAllAutoresReq } from "../../../domain/dto/autor/request/GetAllA
 import { type GetAllAutoresRes } from "../../../domain/dto/autor/response/GetAllAutoresRes";
 import { type CreateAutorReq } from "../../../domain/dto/autor/request/CreateAutorReq";
 import { type CreateAutorRes } from "../../../domain/dto/autor/response/CreateAutorRes";
+import { type UpdateAutorReq } from "../../../domain/dto/autor/request/UpdateAutorReq";
+import { type UpdateAutorRes } from "../../../domain/dto/autor/response/UpdateAutorRes";
 import { HTTPClient } from "../../../core/adapters/http-client";
 import { CacheTags, withCacheTags } from "../../../core/config/cache";
 import { ErrorHandler } from "@/domain/messages";
@@ -54,6 +56,29 @@ export class AutorApiDataSource implements AutorDataSourceI {
 
             return {
                 id: String(response?.id || response?.autor?.id || autor?.id || ""),
+                autor
+            };
+        }
+        catch (error: any) {
+            throw ErrorHandler.handleError(error);
+        }
+    }
+
+    public async updateAutor(dto: UpdateAutorReq): Promise<UpdateAutorRes> {
+        try {
+            const response = await this.httpClient.put(
+                `/autores/${dto.id}`,
+                {
+                    nombre: dto.nombre,
+                    apellido: dto.apellido
+                },
+                dto.session?.accessToken
+            );
+
+            const autor = Autor.fromObject(response?.autor || response);
+
+            return {
+                id: String(response?.id || response?.autor?.id || dto.id),
                 autor
             };
         }

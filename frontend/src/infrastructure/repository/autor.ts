@@ -4,6 +4,8 @@ import { type GetAllAutoresReq } from "@/domain/dto/autor/request/GetAllAutoresR
 import { type GetAllAutoresRes } from "@/domain/dto/autor/response/GetAllAutoresRes";
 import { type CreateAutorReq } from "@/domain/dto/autor/request/CreateAutorReq";
 import { type CreateAutorRes } from "@/domain/dto/autor/response/CreateAutorRes";
+import { type UpdateAutorReq } from "@/domain/dto/autor/request/UpdateAutorReq";
+import { type UpdateAutorRes } from "@/domain/dto/autor/response/UpdateAutorRes";
 
 export class AutorRepository implements AutorRepositoryI {
 
@@ -19,6 +21,10 @@ export class AutorRepository implements AutorRepositoryI {
 
     public async createAutor(dto: CreateAutorReq): Promise<CreateAutorRes> {
         return await this.dataSource.createAutor(dto);
+    }
+
+    public async updateAutor(dto: UpdateAutorReq): Promise<UpdateAutorRes> {
+        return await this.dataSource.updateAutor(dto);
     }
 
 }
