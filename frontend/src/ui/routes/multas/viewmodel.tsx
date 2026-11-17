@@ -4,6 +4,7 @@ import type { DestinoBandeja } from "@/core/types";
 import { EstadoMulta, MotivoMulta, type Multa } from "@/domain/entities/multa";
 import { anularMultaAction, createMultaAction, getAllMultasAction, getMultaByIdAction, pagarMultaAction } from "@/ui/actions/multa/multa.actions";
 import { readFields } from "@/ui/forms/handlers/record-fields";
+import { localDateISO } from "@/ui/forms/handlers/local-date";
 import { type ReadField } from "@/ui/forms/handlers/read-form";
 import { useSelector } from "@/ui/hooks/use-selector";
 import { useSelectorCatalog } from "@/ui/hooks/use-selector-catalog";
@@ -51,8 +52,8 @@ export default function ViewModel(session: Session, onOpen?: (target: DestinoBan
         });
     };
 
-    const handlePagarMulta = (multa: Multa, field: ReadField) => {
-        return pagarMultaAction(multa.id, field("fechaPago"), session);
+    const handlePagarMulta = (multa: Multa) => {
+        return pagarMultaAction(multa.id, localDateISO(), session);
     };
 
     const handleAnularMulta = (multa: Multa) => {
@@ -72,12 +73,12 @@ export default function ViewModel(session: Session, onOpen?: (target: DestinoBan
             info("Emisión", multa.fechaEmision),
             info("Pago", multa.fechaPago)
         ],
-        forms: multa.estadoEntity === EstadoMulta.PENDIENTE ? [{
-            label: "Registrar pago",
-            fields: [{ name: "fechaPago", placeholder: "Seleccioná la fecha de pago", label: "Fecha de pago", type: "date", required: true }],
-            submit: (field: ReadField) => handlePagarMulta(multa, field)
-        }] : [],
         commands: multa.estadoEntity === EstadoMulta.PENDIENTE ? [{
+            label: "Registrar pago",
+            tone: "primary" as const,
+            confirm: `¿Querés registrar el pago de la multa ${multa.id}?`,
+            execute: () => handlePagarMulta(multa)
+        }, {
             label: "Anular multa",
             confirm: `¿Querés anular la multa ${multa.id}?`,
             execute: () => handleAnularMulta(multa)

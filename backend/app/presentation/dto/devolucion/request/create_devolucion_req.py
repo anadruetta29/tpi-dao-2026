@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from app.domain.entity.estado_ejemplar import EstadoEjemplar
 
 
@@ -12,6 +12,7 @@ class CreateDevolucionReq:
         observaciones: Optional[str] = None,
         estadoDevuelto: Optional[EstadoEjemplar] = None,
         ejemplar_id: Optional[int] = None,
+        ejemplar_ids: Optional[List[int]] = None,
     ) -> None:
         self.token = token
         self.prestamo_id = prestamo_id
@@ -19,16 +20,23 @@ class CreateDevolucionReq:
         self.observaciones = observaciones
         self.estadoDevuelto = estadoDevuelto
         self.ejemplar_id = ejemplar_id
+        self.ejemplar_ids = ejemplar_ids or []
 
     @staticmethod
     def build(token: Optional[str], payload: Dict[str, Any]) -> "CreateDevolucionReq":
         payload = payload or {}
         raw_fecha = payload.get("fecha")
         raw_estado = payload.get("estadoDevuelto")
+        raw_ejemplar_ids = payload.get("ejemplar_ids")
         estado = (
             EstadoEjemplar(raw_estado)
             if raw_estado is not None and raw_estado in [e.value for e in EstadoEjemplar]
             else None
+        )
+        ejemplar_ids = (
+            [int(ej_id) for ej_id in raw_ejemplar_ids if ej_id is not None]
+            if isinstance(raw_ejemplar_ids, list)
+            else []
         )
         return CreateDevolucionReq(
             token=token,
@@ -41,6 +49,7 @@ class CreateDevolucionReq:
             ),
             estadoDevuelto=estado,
             ejemplar_id=int(payload["ejemplar_id"]) if payload.get("ejemplar_id") is not None else None,
+            ejemplar_ids=ejemplar_ids,
         )
 
     def get_token(self) -> Optional[str]:
@@ -60,3 +69,6 @@ class CreateDevolucionReq:
 
     def get_ejemplar_id(self) -> Optional[int]:
         return self.ejemplar_id
+
+    def get_ejemplar_ids(self) -> List[int]:
+        return self.ejemplar_ids

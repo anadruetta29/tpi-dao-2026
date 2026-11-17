@@ -53,15 +53,16 @@ class PagarMultaUseCase:
         )
         if command.id is None:
             raise ErrorHandler(ErrorType.MISSING_REQUIRED_FIELDS)
-        if command.fechaPago is None:
-            raise ErrorHandler(ErrorType.MULTA_FECHA_PAGO_REQUERIDA)
+        fecha_pago = command.fechaPago or date.today()
+        if fecha_pago != date.today():
+            raise ErrorHandler(ErrorType.MULTA_FECHA_PAGO_INVALIDA, "La fecha de pago debe ser la fecha actual.")
 
         multa = self.multa_repository.get_by_id_for_update(command.id)
         if multa is None:
             raise ErrorHandler(ErrorType.MULTA_NOT_FOUND)
 
         state = self.multa_state_factory.get_state(multa.estado)
-        state.pagar(multa, command.fechaPago)
+        state.pagar(multa, fecha_pago)
         updated = self.multa_repository.update(command.id, multa)
         if updated is None:
             raise ErrorHandler(ErrorType.MULTA_NOT_FOUND)

@@ -18,6 +18,7 @@ from app.domain.repository.tarifa_multa_repository_i import TarifaMultaRepositor
 
 
 _MOTIVO_POR_ESTADO: Dict[EstadoEjemplar, MotivoMulta] = {
+    EstadoEjemplar.DANADO: MotivoMulta.DANO,
     EstadoEjemplar.EXTRAVIADO: MotivoMulta.EXTRAVIO,
     EstadoEjemplar.DESTRUIDO: MotivoMulta.DESTRUCCION,
 }

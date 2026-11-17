@@ -1,7 +1,7 @@
 from contextlib import nullcontext
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
-from typing import Callable, ContextManager, Optional
+from typing import Callable, ContextManager, List, Optional
 from app.application.strategy.devolucion_ejemplar.core.devolucion_ejemplar_strategy_factory import (
     DevolucionEjemplarStrategyFactory,
 )
@@ -63,6 +63,7 @@ class CreateDevolucionUseCase:
         estadoDevuelto: Optional[EstadoEjemplar]
         anticipada: bool = False
         ejemplar_id: Optional[int] = None
+        ejemplar_ids: List[int] = field(default_factory=list)
 
     @dataclass(frozen=True)
     class Result:
@@ -109,10 +110,12 @@ class CreateDevolucionUseCase:
             if not pendientes:
                 raise ErrorHandler(ErrorType.EJEMPLAR_NOT_FOUND)
             ids = sorted(pendientes)
+        elif command.ejemplar_ids:
+            ids = command.ejemplar_ids
         elif command.ejemplar_id is not None:
             ids = [command.ejemplar_id]
         elif len(pendientes) > 1:
-            raise ErrorHandler(ErrorType.BAD_REQUEST, "Seleccioná el ejemplar a devolver.")
+            raise ErrorHandler(ErrorType.BAD_REQUEST, "Seleccioná al menos un ejemplar a devolver.")
         else:
             ids = pendientes or [None]
 

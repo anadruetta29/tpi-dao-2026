@@ -2,6 +2,9 @@ from typing import Dict, Optional
 from app.application.strategy.calculo_multa.core.calculo_multa_strategy import (
     CalculoMultaStrategy,
 )
+from app.application.strategy.calculo_multa.implementation.dano_multa_strategy import (
+    DanoMultaStrategy,
+)
 from app.application.strategy.calculo_multa.implementation.destruccion_multa_strategy import (
     DestruccionMultaStrategy,
 )
@@ -23,6 +26,7 @@ class CalculoMultaStrategyFactory:
         self.tarifa_multa_repository = tarifa_multa_repository
         self._strategies: Dict[MotivoMulta, type[CalculoMultaStrategy]] = {
             MotivoMulta.ENTREGA_TARDIA: EntregaTardiaMultaStrategy,
+            MotivoMulta.DANO: DanoMultaStrategy,
             MotivoMulta.EXTRAVIO: ExtravioMultaStrategy,
             MotivoMulta.DESTRUCCION: DestruccionMultaStrategy,
         }

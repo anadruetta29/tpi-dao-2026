@@ -6,6 +6,7 @@ import { type Devolucion } from "@/domain/entities/devolucion";
 export interface CreateDevolucionCommand {
     prestamoId: string;
     ejemplarId?: string;
+    ejemplarIds?: string[];
     fecha: string;
     observaciones?: string;
     estadoDevuelto: EstadoEjemplar;
@@ -28,6 +29,7 @@ export class CreateDevolucionUseCase {
         const response = await this.devolucionRepository.createDevolucion({
             prestamoId: command.prestamoId,
             ejemplarId: command.ejemplarId,
+            ejemplarIds: command.ejemplarIds,
             fecha: command.fecha,
             observaciones: command.observaciones,
             estadoDevuelto: command.estadoDevuelto,

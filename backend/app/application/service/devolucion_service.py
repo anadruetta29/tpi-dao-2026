@@ -50,6 +50,7 @@ class DevolucionService(DevolucionServiceI):
                 observaciones=dto.get_observaciones(),
                 estadoDevuelto=dto.get_estado_devuelto(),
                 ejemplar_id=dto.get_ejemplar_id(),
+                ejemplar_ids=dto.get_ejemplar_ids(),
             )
         )
         response = DevolucionMapper.to_response(result.devolucion)

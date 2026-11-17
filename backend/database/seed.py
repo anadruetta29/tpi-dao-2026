@@ -79,6 +79,7 @@ def seed() -> None:
         # 1. Tarifas de Multa
         tarifas = [
             TarifaMultaModel(motivo=MotivoMulta.ENTREGA_TARDIA.value, monto=1500.0),
+            TarifaMultaModel(motivo=MotivoMulta.DANO.value, monto=5000.0),
             TarifaMultaModel(motivo=MotivoMulta.EXTRAVIO.value, monto=18000.0),
             TarifaMultaModel(motivo=MotivoMulta.DESTRUCCION.value, monto=25000.0),
         ]
@@ -1087,7 +1088,7 @@ def seed() -> None:
         db.add_all(devoluciones)
         db.flush()
 
-        # 11. Multas (PENDIENTE, PAGADA, ANULADA y por los 3 motivos: ENTREGA_TARDIA, EXTRAVIO, DESTRUCCION)
+        # 11. Multas (PENDIENTE, PAGADA, ANULADA y por los 4 motivos: ENTREGA_TARDIA, DANO, EXTRAVIO, DESTRUCCION)
         multas = [
             # M1: PENDIENTE por ENTREGA_TARDIA (Santiago - 5 días * 1500 = 7500)
             MultaModel(
@@ -1158,6 +1159,16 @@ def seed() -> None:
                 fechaPago=None,
                 socio_id=soc_micaela.id,
                 prestamo_id=p_dev_revision.id,
+            ),
+            # M8: PAGADA por DANO (Agustina - daño leve en cubierta abonado)
+            MultaModel(
+                fechaEmision=hoy - timedelta(days=12),
+                motivo=MotivoMulta.DANO,
+                monto=5000.0,
+                estado=EstadoMulta.PAGADA,
+                fechaPago=hoy - timedelta(days=11),
+                socio_id=soc_agustina.id,
+                prestamo_id=p_dev_ok.id,
             ),
         ]
         db.add_all(multas)

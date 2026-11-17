@@ -4,6 +4,7 @@ import { type EstadoEjemplar } from "@/domain/entities/estado-ejemplar";
 export interface CreateDevolucionReq {
     prestamoId: string;
     ejemplarId?: string;
+    ejemplarIds?: string[];
     fecha: string;
     observaciones?: string;
     estadoDevuelto: EstadoEjemplar;

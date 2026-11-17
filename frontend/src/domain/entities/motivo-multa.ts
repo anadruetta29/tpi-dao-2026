@@ -2,6 +2,7 @@ import { BaseEntity } from "./base-entity";
 
 export class MotivoMulta extends BaseEntity {
     public static readonly ENTREGA_TARDIA = new MotivoMulta("ENTREGA_TARDIA", "Entrega tardía");
+    public static readonly DANO = new MotivoMulta("DANO", "Daño");
     public static readonly EXTRAVIO = new MotivoMulta("EXTRAVIO", "Extravío");
     public static readonly DESTRUCCION = new MotivoMulta("DESTRUCCION", "Destrucción");
 
@@ -29,6 +30,7 @@ export class MotivoMulta extends BaseEntity {
     public static values(): MotivoMulta[] {
         return [
             MotivoMulta.ENTREGA_TARDIA,
+            MotivoMulta.DANO,
             MotivoMulta.EXTRAVIO,
             MotivoMulta.DESTRUCCION
         ];

@@ -6,17 +6,17 @@ import { localDateISO } from "@/ui/forms/handlers/local-date";
 import { EstadoEjemplar, type Devolucion } from "@/domain/entities/devolucion";
 import { EstadoPrestamo } from "@/domain/entities/prestamo";
 import { createDevolucionAction, getAllDevolucionesAction, getDevolucionByIdAction } from "@/ui/actions/devolucion/devolucion.actions";
-import { useSelector } from "@/ui/hooks/use-selector";
+import { useMultipleSelector, useSelector } from "@/ui/hooks/use-selector";
 import { useSelectorCatalog } from "@/ui/hooks/use-selector-catalog";
 import { allOptions, info, statusInfo, pickData, useLibraryRecordsViewModel, type Field } from "@/ui/routes/use-library-records-viewmodel";
 import { readFields } from "@/ui/forms/handlers/record-fields";
-import { type ReadField } from "@/ui/forms/handlers/read-form";
+import { type ReadField, type ReadFieldValues } from "@/ui/forms/handlers/read-form";
 import { estados } from "@/core/utils/constants";
 
 export default function ViewModel(session: Session, prestamoInicialId?: string, onOpen?: (target: DestinoBandeja) => void) {
     const catalog = useSelectorCatalog(session, "prestamos", "socios", "ejemplares");
     const socioFilter = useSelector("socioId", "Socio", "Buscá por nombre o documento", false);
-    const ejemplar = useSelector("ejemplarId", "Ejemplar pendiente", "Buscá por título o código");
+    const ejemplares = useMultipleSelector("ejemplaresIds", "Ejemplares a devolver", "Buscá por título o código");
     const prestamo = useSelector("prestamoId", "Préstamo", "Buscá por libro, ejemplar o socio", true,
         prestamoInicialId ? { value: prestamoInicialId, label: `Préstamo #${prestamoInicialId}` } : undefined
     );
@@ -39,7 +39,7 @@ export default function ViewModel(session: Session, prestamoInicialId?: string, 
 
     const onOpenCreate = () => {
         prestamo.reset();
-        ejemplar.reset();
+        ejemplares.reset();
         catalog.refresh();
     };
 
@@ -49,17 +49,20 @@ export default function ViewModel(session: Session, prestamoInicialId?: string, 
         return readFields(field, "socioId", "estadoDevuelto");
     };
 
-    const handleCreateDevolucion = async (field: ReadField) => {
+    const handleCreateDevolucion = async (field: ReadField, values: ReadFieldValues) => {
+        const selectedIds = pendientes.length > 1
+            ? values("ejemplaresIds").filter(Boolean)
+            : pendientes;
         const result = await createDevolucionAction({
             session,
             prestamoId: field("prestamoId"),
-            ejemplarId: field("ejemplarId") || pendientes[0],
+            ejemplarIds: selectedIds,
             fecha: field("fecha"),
             observaciones: field("observaciones") || undefined,
             estadoDevuelto: EstadoEjemplar.fromString(field("estadoDevuelto"))
         });
         if (result.success) {
-            ejemplar.reset();
+            ejemplares.reset();
             catalog.refresh();
         }
         return result;
@@ -113,8 +116,8 @@ export default function ViewModel(session: Session, prestamoInicialId?: string, 
     ];
 
     const createFields: Field[] = [
-        prestamo.field(availablePrestamos ?? null, undefined, ejemplar.reset),
-        ...(pendientes.length > 1 ? [ejemplar.field({ success: true, data: copiasPendientes })] : []),
+        prestamo.field(availablePrestamos ?? null, undefined, ejemplares.reset),
+        ...(pendientes.length > 1 ? [ejemplares.field({ success: true, data: copiasPendientes })] : []),
         { name: "fecha", placeholder: "Seleccioná la fecha de devolución", label: "Fecha de devolución", type: "date",
             defaultValue: localDateISO(), max: localDateISO(), min: String(prestamoSeleccionado?.fechaInicio ?? "").slice(0, 10), required: true },
         { name: "observaciones", placeholder: "Agregá una observación", label: "Observaciones" },
@@ -139,7 +142,7 @@ export default function ViewModel(session: Session, prestamoInicialId?: string, 
         create: {
             label: "Registrar devolución",
             onOpen: onOpenCreate,
-            submitDisabled: !prestamoSeleccionado || (pendientes.length > 1 && !pendientes.includes(ejemplar.selected)),
+            submitDisabled: !prestamoSeleccionado || (pendientes.length > 1 && ejemplares.selected.length === 0),
             fields: createFields,
             submit: handleCreateDevolucion
         },

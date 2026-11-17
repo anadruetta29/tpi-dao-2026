@@ -4,6 +4,7 @@ from app.domain.entity.motivo_multa import MotivoMulta
 
 TARIFAS_MULTA_DEFAULT: Dict[MotivoMulta, float] = {
     MotivoMulta.ENTREGA_TARDIA: 1000.0,
+    MotivoMulta.DANO: 5000.0,
     MotivoMulta.EXTRAVIO: 15000.0,
     MotivoMulta.DESTRUCCION: 20000.0,
 }
