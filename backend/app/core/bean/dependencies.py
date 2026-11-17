@@ -40,7 +40,11 @@ from app.application.service import (
     UsuarioServiceI,
 )
 from app.application.use_case.auth import GetCurrentUserUseCase, LoginUseCase
-from app.application.use_case.autor import CreateAutorUseCase, GetAllAutoresUseCase
+from app.application.use_case.autor import (
+    CreateAutorUseCase,
+    GetAllAutoresUseCase,
+    UpdateAutorUseCase,
+)
 from app.application.use_case.devolucion import (
     CreateDevolucionUseCase,
     GetAllDevolucionesUseCase,
@@ -317,6 +321,7 @@ def get_autor_service(
     return AutorService(
         get_all_use_case=GetAllAutoresUseCase(autor_repo, usuario_repo),
         create_use_case=CreateAutorUseCase(autor_repo, usuario_repo),
+        update_use_case=UpdateAutorUseCase(autor_repo, usuario_repo),
     )
 
 
