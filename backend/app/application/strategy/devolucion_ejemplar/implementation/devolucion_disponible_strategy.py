@@ -6,7 +6,7 @@ from app.application.strategy.devolucion_ejemplar.core.devolucion_ejemplar_strat
 from app.application.state.ejemplar.core.ejemplar_factory import (
     EjemplarEstadoStateFactory,
 )
-from app.application.use_case.reserva.asignar_reserva_use_case import asignar_reserva
+from app.application.helper.asignar_reserva import asignar_reserva
 from app.domain.entity.ejemplar import Ejemplar
 from app.domain.entity.estado_ejemplar import EstadoEjemplar
 

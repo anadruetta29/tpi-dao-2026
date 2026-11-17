@@ -83,13 +83,16 @@ from app.application.use_case.prestamo import (
 from app.application.use_case.prestamo.cancelar_prestamo_use_case import CancelarPrestamoUseCase
 from app.application.service.aviso_service import AvisoService
 from app.application.use_case.aviso.generar_avisos_use_case import GenerarAvisosUseCase
-from app.application.use_case.aviso.gestionar_avisos_use_case import GestionarAvisosUseCase
+from app.application.use_case.aviso.get_all_avisos_use_case import GetAllAvisosUseCase
+from app.application.use_case.aviso.marcar_aviso_leido_use_case import (
+    MarcarAvisoLeidoUseCase,
+)
 from app.application.use_case.prestamo.renovar_prestamo_use_case import RenovarPrestamoUseCase
 from app.application.use_case.reserva.vencer_reservas_use_case import VencerReservasUseCase
 from app.domain.repository.aviso_repository_i import AvisoRepositoryI
 from app.infrastructure.postgres.repository.postgres_aviso_repository import PostgresAvisoRepository
 from app.infrastructure.repository_adapter.aviso_repository_adapter import AvisoRepositoryAdapter
-from app.application.use_case.reserva.gestionar_retiro_reserva import GestionarRetiroReserva
+from app.application.helper.gestionar_retiro_reserva import GestionarRetiroReserva
 from app.application.use_case.remito import (
     CreateRemitoUseCase,
     DespachoRemitoUseCase,
@@ -508,7 +511,12 @@ def get_aviso_service(
     avisos: AvisoRepositoryI = Depends(get_aviso_repository),
     usuarios: UsuarioRepositoryI = Depends(get_usuario_repository),
 ) -> AvisoService:
-    return AvisoService(GestionarAvisosUseCase(avisos, usuarios, lambda: atomic_write(db)))
+    return AvisoService(
+        get_all_use_case=GetAllAvisosUseCase(avisos, usuarios),
+        marcar_leido_use_case=MarcarAvisoLeidoUseCase(
+            avisos, usuarios, lambda: atomic_write(db)
+        ),
+    )
 
 
 def get_generar_avisos_use_case(db: Session) -> GenerarAvisosUseCase:

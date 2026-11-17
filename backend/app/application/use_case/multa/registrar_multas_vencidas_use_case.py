@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import date
 from typing import Callable, ContextManager, Optional
-from app.application.use_case.multa.registrar_multa_por_atraso import registrar_multa_por_atraso
+from app.application.helper.registrar_multa_por_atraso import registrar_multa_por_atraso
 from app.domain.entity.estado_prestamo import EstadoPrestamo
 from app.domain.repository.multa_repository_i import MultaRepositoryI
 from app.domain.repository.prestamo_repository_i import PrestamoRepositoryI

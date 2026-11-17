@@ -2,7 +2,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import date
 from typing import Dict, List, Optional
-from app.application.use_case.report._date_utils import validate_positive_id
+from app.core.utils.date_utils import validate_positive_id
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.estado_multa import EstadoMulta
 from app.domain.entity.estado_prestamo import EstadoPrestamo

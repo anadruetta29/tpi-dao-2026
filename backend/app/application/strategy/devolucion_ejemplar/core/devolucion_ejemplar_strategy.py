@@ -4,7 +4,7 @@ from typing import Optional
 from app.application.strategy.calculo_multa.core.calculo_multa_strategy_factory import (
     CalculoMultaStrategyFactory,
 )
-from app.application.use_case.multa.registrar_multa_por_atraso import registrar_multa_por_atraso
+from app.application.helper.registrar_multa_por_atraso import registrar_multa_por_atraso
 from app.domain.entity.ejemplar import Ejemplar
 from app.domain.entity.estado_ejemplar import EstadoEjemplar
 from app.domain.entity.estado_multa import EstadoMulta

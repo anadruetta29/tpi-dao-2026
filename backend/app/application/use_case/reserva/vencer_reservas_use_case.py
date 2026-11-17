@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import date
 from typing import Callable, ContextManager
-from app.application.use_case.reserva.gestionar_retiro_reserva import GestionarRetiroReserva
+from app.application.helper.gestionar_retiro_reserva import GestionarRetiroReserva
 from app.domain.entity.estado_reserva import EstadoReserva
 from app.domain.repository.reserva_repository_i import ReservaRepositoryI
 

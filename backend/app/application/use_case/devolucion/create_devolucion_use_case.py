@@ -5,7 +5,7 @@ from typing import Callable, ContextManager, List, Optional
 from app.application.strategy.devolucion_ejemplar.core.devolucion_ejemplar_strategy_factory import (
     DevolucionEjemplarStrategyFactory,
 )
-from app.application.use_case.reserva.asignar_reserva_use_case import registrar_aviso_reserva_lista
+from app.application.helper.asignar_reserva import registrar_aviso_reserva_lista
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.devolucion import Devolucion
 from app.domain.entity.estado_ejemplar import EstadoEjemplar

@@ -5,7 +5,7 @@ from typing import Callable, ContextManager, Optional
 from app.application.state.ejemplar.core.ejemplar_factory import (
     EjemplarEstadoStateFactory,
 )
-from app.application.use_case.reserva.asignar_reserva_use_case import asignar_reserva
+from app.application.helper.asignar_reserva import asignar_reserva
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.ejemplar import Ejemplar
 from app.domain.entity.estado_ejemplar import EstadoEjemplar

@@ -2,7 +2,7 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from datetime import date
 from typing import Dict, List, Optional
-from app.application.use_case.report._date_utils import as_date, validate_date_range, validate_positive_id
+from app.core.utils.date_utils import as_date, validate_date_range, validate_positive_id
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.estado_ejemplar import EstadoEjemplar
 from app.domain.entity.estado_envio import EstadoEnvio

@@ -6,7 +6,7 @@ from app.application.state.remito.core.remito_factory import (
     RemitoEstadoStateFactory,
 )
 from app.application.use_case.prestamo.create_prestamo_use_case import CreatePrestamoUseCase
-from app.application.use_case.reserva.asignar_reserva_use_case import asignar_reserva
+from app.application.helper.asignar_reserva import asignar_reserva
 from app.core.helper.auth_helper import AuthHelper
 from app.domain.entity.estado_ejemplar import EstadoEjemplar
 from app.domain.entity.estado_envio import EstadoEnvio
