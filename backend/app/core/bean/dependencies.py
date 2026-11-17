@@ -447,11 +447,6 @@ def get_solicitud_prestamo_service(
             crear_remito=crear_remito,
             transaction=lambda: atomic_write(db),
         ),
-        delete_use_case=DeleteEjemplarUseCase(
-            ejemplar_repo,
-            usuario_repo,
-            EjemplarEstadoStateFactory(),
-        ),
     )
 
 
