@@ -1,5 +1,6 @@
 import { useId, type ComponentPropsWithoutRef, type FormEventHandler, type HTMLInputTypeAttribute, type MouseEventHandler } from "react";
 import { LibraryChoices, type LibraryChoicesProps } from "@/ui/components/library-choices/library-choices";
+import { LibraryIncidencias, type LibraryIncidenciasProps } from "@/ui/components/library-incidencias/library-incidencias";
 import { LibrarySearchSelect, type LibrarySearchSelectProps } from "@/ui/components/library-search-select/library-search-select";
 import { LibraryIcon } from "@/ui/components/library-icon/library-icon";
 import styles from "./style.module.css";
@@ -38,12 +39,14 @@ interface SelectFieldProps extends CommonFieldProps {
 
 export type LibraryFieldProps = InputFieldProps | SelectFieldProps
     | (LibraryChoicesProps & { kind: "choices" })
-    | (LibrarySearchSelectProps & { kind: "search-select" });
+    | (LibrarySearchSelectProps & { kind: "search-select" })
+    | (LibraryIncidenciasProps & { kind: "incidencias" });
 
 export function LibraryField(field: LibraryFieldProps) {
     const id = useId();
     if (field.kind === "choices") return <LibraryChoices {...field} />;
     if (field.kind === "search-select") return <LibrarySearchSelect {...field} />;
+    if (field.kind === "incidencias") return <LibraryIncidencias {...field} />;
 
     const { name, label, defaultValue, onChange, required } = field;
     return (

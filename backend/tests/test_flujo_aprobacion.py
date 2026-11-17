@@ -199,3 +199,29 @@ class FlujoAprobacionTest(unittest.TestCase):
         self.assertEqual(reserva.ejemplar_id, 2)
         reservas.update.assert_called_once_with(20, reserva)
         avisos.crear_si_nuevo.assert_called_once()
+
+    def test_recepcion_con_incidencia_parcial_recibe_resto_disponible(self):
+        ejemplar_danado = Ejemplar(id=2, libro_id=9, sede_id=3, estado=EstadoEjemplar.EN_TRANSITO)
+        ejemplar_sano = Ejemplar(id=3, libro_id=9, sede_id=3, estado=EstadoEjemplar.EN_TRANSITO)
+        ejemplares_por_id = {2: ejemplar_danado, 3: ejemplar_sano}
+        self.ejemplares.get_by_id_for_update.side_effect = lambda ej_id: ejemplares_por_id.get(ej_id)
+        remito = Remito(id=5, sede_origen_id=3, sede_destino_id=4, solicitud_id=None, ejemplar_ids=[2, 3])
+        self.remitos.get_by_id_for_update.return_value = remito
+        from app.domain.entity.historial_estado_remito import HistorialEstadoRemito
+        self.historial.get_latest_by_remito_id.return_value = HistorialEstadoRemito(
+            id=1, estado=EstadoEnvio.EN_TRANSITO, remito_id=5, fechaInicio=date.today()
+        )
+        self.auth.return_value = Usuario(id=12, role=Rol.RECEPCIONISTA, sede_id=4)
+
+        self.recibir.execute(self.recibir.Command(
+            "token", 5, None, con_incidencia=True,
+            incidencias=[{"ejemplar_id": 2, "estado": "DANADO", "observacion": "Tapa rota"}],
+        ))
+
+        self.assertEqual(ejemplar_danado.estado, EstadoEjemplar.DANADO)
+        self.assertEqual(ejemplar_danado.sede_id, 4)
+        self.assertEqual(ejemplar_sano.estado, EstadoEjemplar.DISPONIBLE)
+        self.assertEqual(ejemplar_sano.sede_id, 4)
+        self.assertEqual(len(remito.incidencias), 1)
+        self.assertEqual(remito.incidencias[0].ejemplar_id, 2)
+        self.assertEqual(remito.incidencias[0].observacion, "Tapa rota")

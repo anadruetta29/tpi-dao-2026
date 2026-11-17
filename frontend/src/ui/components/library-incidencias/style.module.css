@@ -1,0 +1,103 @@
+.wrapper {
+    display: grid;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.empty {
+    margin: 0;
+    font-size: 0.84rem;
+    color: var(--muted);
+}
+
+.list {
+    display: grid;
+    gap: 0.65rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.card {
+    display: grid;
+    gap: 0.65rem;
+    min-width: 0;
+    padding: 0.75rem 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-control);
+    background: var(--surface-muted);
+}
+
+.cardHeader {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.cardTitle {
+    display: grid;
+    gap: 0.12rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.cardTitle strong {
+    font-size: 0.9rem;
+    color: var(--ink);
+}
+
+.cardTitle span {
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+.remove {
+    flex: 0 0 36px;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    margin: -0.25rem -0.25rem 0 0;
+    border: 0;
+    border-radius: var(--radius-control);
+    background: transparent;
+    color: var(--muted);
+}
+
+.remove:hover {
+    background: var(--primary-soft);
+    color: var(--ink);
+}
+
+.remove svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.cardFields {
+    display: grid;
+    grid-template-columns: minmax(9.5rem, 0.75fr) minmax(0, 1.25fr);
+    gap: 0.65rem 0.75rem;
+    min-width: 0;
+}
+
+@media (max-width: 540px) {
+    .cardFields {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .card {
+        animation: card-in var(--motion-fast) var(--ease-out) backwards;
+    }
+}
+
+@keyframes card-in {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+}

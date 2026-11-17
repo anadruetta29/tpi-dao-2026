@@ -26,13 +26,14 @@ import { receptionOptions, seguimientoOptions } from "@/core/utils/constants";
 
 export default function ViewModel(session: Session, initialRecordId?: string, onOpen?: (target: DestinoBandeja) => void) {
     const [recepcionConIncidencia, setRecepcionConIncidencia] = useState(false);
-    const estadosIncidencia = [EstadoEjemplar.DISPONIBLE, EstadoEjemplar.EN_REVISION, EstadoEjemplar.DANADO, EstadoEjemplar.EXTRAVIADO, EstadoEjemplar.DESTRUIDO].map((e) => e.toOption());
+    const estadosIncidencia = [EstadoEjemplar.EN_REVISION, EstadoEjemplar.DANADO, EstadoEjemplar.EXTRAVIADO, EstadoEjemplar.DESTRUIDO].map((e) => e.toOption());
     const catalog = useSelectorCatalog(session, "sedes", "ejemplares");
     const filterOrigen = useSelector("sedeOrigenId", "Sede de origen", "Buscá por nombre de sede", false);
     const filterDestino = useSelector("sedeDestinoId", "Sede de destino", "Buscá por nombre de sede", false);
     const origen = useSelector("sedeOrigenId", "Sede de origen", "Buscá una sede de origen");
     const destino = useSelector("sedeDestinoId", "Sede de destino", "Buscá una sede de destino");
     const ejemplares = useMultipleSelector("ejemplaresIds", "Ejemplares", "Buscá por título o código");
+    const incidenciaEjemplares = useMultipleSelector("incidenciaEjemplaresIds", "Ejemplares con incidencia", "Buscá por título o código");
 
     {/* ===== Fetch data ===== */ }
 
@@ -90,10 +91,24 @@ export default function ViewModel(session: Session, initialRecordId?: string, on
         return registrarDespachoRemitoAction({ session, id: remitoId });
     };
 
-    const handleRegistrarRecepcion = (remito: Remito, field: ReadField) => {
+    const resetRecepcion = () => {
+        setRecepcionConIncidencia(false);
+        incidenciaEjemplares.reset();
+    };
+
+    const handleRegistrarRecepcion = async (remito: Remito, field: ReadField, values: ReadFieldValues) => {
         const conIncidencia = field("conIncidencia") === "true";
-        const incidencias = conIncidencia ? remito.ejemplaresIds.map((ejId) => ({ ejemplar_id: Number(ejId), estado: field(`estado_${ejId}`), observacion: field(`observacion_${ejId}`).trim() })) : undefined;
-        return registrarRecepcionRemitoAction({ session, id: remito.id, conIncidencia, incidencias });
+        const selectedIds = conIncidencia ? values("incidenciaEjemplaresIds").filter(Boolean) : [];
+        const incidencias = conIncidencia
+            ? selectedIds.map((ejId) => ({
+                ejemplar_id: Number(ejId),
+                estado: field(`estado_${ejId}`),
+                observacion: field(`observacion_${ejId}`).trim()
+            }))
+            : undefined;
+        const result = await registrarRecepcionRemitoAction({ session, id: remito.id, conIncidencia, incidencias });
+        if (result.success) resetRecepcion();
+        return result;
     };
 
     type RemitoDetailData = {
@@ -113,6 +128,24 @@ export default function ViewModel(session: Session, initialRecordId?: string, on
 
         const detailCopies = new Map(copyList.map((copy) => [copy.id, copy]));
         const copyIds = new Set([...remito.ejemplaresIds, ...detailCopies.keys()]);
+        const copyInfo = (id: string) => {
+            const detailCopy = detailCopies.get(id);
+            const catalogCopy = catalogCopies.get(id);
+            const bookId = detailCopy?.libroId || catalogCopy?.libroId;
+            return {
+                title: (bookId && bookTitles.get(bookId)) || "Ejemplar",
+                code: detailCopy?.codigo || catalogCopy?.codigo || `#${id}`
+            };
+        };
+        const copyOptions = Array.from(copyIds, (id) => {
+            const { title, code } = copyInfo(id);
+            return { value: id, label: `${title} · ${code}` };
+        });
+        const selectorField = incidenciaEjemplares.field({ success: true, data: copyOptions });
+        const incidenciaItems = incidenciaEjemplares.selected.map(({ value }) => {
+            const { title, code } = copyInfo(value);
+            return { id: value, label: title, meta: `Ejemplar ${code}` };
+        });
 
         return {
             actions: onOpen && remito.solicitudId ? [{ label: "Abrir solicitud", onClick: () => onOpen({ modulo: "Solicitudes de préstamo", id: remito.solicitudId }) }] : [],
@@ -172,21 +205,30 @@ export default function ViewModel(session: Session, initialRecordId?: string, on
                 submit: () => handleRegistrarDespacho(remito.id)
             }] : canReceive ? [{
                 label: "Registrar recepción",
+                layout: "stack",
+                submitDisabled: recepcionConIncidencia && incidenciaEjemplares.selected.length === 0,
                 fields: [
-
-                    { name: "conIncidencia", label: "Resultado de la recepción", defaultValue: recepcionConIncidencia ? "true" : "false", options: receptionOptions, onChange: (value) => setRecepcionConIncidencia(value === "true") },
-                    ...(recepcionConIncidencia ? Array.from(copyIds).flatMap((ejId) => {
-                        const detailCopy = detailCopies.get(ejId);
-                        const catalogCopy = catalogCopies.get(ejId);
-                        const bookId = detailCopy?.libroId || catalogCopy?.libroId;
-                        const ejLabel = [(bookId && bookTitles.get(bookId)) || "Ejemplar", detailCopy?.codigo || catalogCopy?.codigo || `#${ejId}`].join(" · ");
-                        return [
-                            { name: `estado_${ejId}`, label: `${ejLabel} · Estado`, options: estadosIncidencia },
-                            { name: `observacion_${ejId}`, label: `${ejLabel} · Observación`, placeholder: "Detalle de la incidencia", required: true }
-                        ];
-                    }) : [])
+                    {
+                        name: "conIncidencia",
+                        label: "Resultado de la recepción",
+                        defaultValue: recepcionConIncidencia ? "true" : "false",
+                        options: receptionOptions,
+                        onChange: (value) => {
+                            const next = value === "true";
+                            setRecepcionConIncidencia(next);
+                            if (!next) incidenciaEjemplares.reset();
+                        }
+                    },
+                    ...(recepcionConIncidencia ? [{
+                        kind: "incidencias" as const,
+                        name: "incidenciaEjemplaresIds",
+                        selector: selectorField,
+                        items: incidenciaItems,
+                        estados: estadosIncidencia,
+                        onRemove: (id: string) => selectorField.onRemove?.(id)
+                    }] : [])
                 ],
-                submit: (field: ReadField) => handleRegistrarRecepcion(remito, field)
+                submit: (field: ReadField, values: ReadFieldValues) => handleRegistrarRecepcion(remito, field, values)
             }] : []
         };
     };
@@ -259,6 +301,7 @@ export default function ViewModel(session: Session, initialRecordId?: string, on
             fields: createFields,
             submit: handleCreateRemito
         },
+        onSelectRecord: resetRecepcion,
         describe: describeRemito
     });
 }

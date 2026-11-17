@@ -13,6 +13,7 @@ type Query<T> = () => Promise<ActionState<T>>;
 
 export interface FormSpec<T> {
     label: string;
+    layout?: "grid" | "stack" | "filters";
     fields: Field[];
     submit: (field: ReadField, values: ReadFieldValues) => T;
     submitDisabled?: boolean;
@@ -91,6 +92,7 @@ export interface RecordsOptions<T extends { id: string }, D, F> {
 
 export interface FormView {
     revision?: number;
+    layout?: "grid" | "stack" | "filters";
     onClear?: () => void;
     clearDisabled?: boolean;
     onChange?: FormEventHandler<HTMLFormElement>;
@@ -261,6 +263,7 @@ export function useLibraryRecordsViewModel<T extends { id: string }, D, F>(
     const writeForm = (form: FormSpec<ReturnType<Query<unknown>>>, scope: string): FormView => {
         return {
             label: form.label,
+            layout: form.layout,
             fields: formFields.fields(form.fields, scope),
             submitDisabled: form.submitDisabled,
             onSubmit: (event) => readForm(event, (field, values) => {

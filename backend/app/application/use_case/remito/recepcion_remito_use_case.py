@@ -101,7 +101,7 @@ class RecepcionRemitoUseCase:
         incidencias_por_ejemplar: Dict[int, RemitoIncidencia] = {}
         if nuevo_estado == EstadoEnvio.CON_INCIDENCIA:
             incidencias_por_ejemplar = self._parse_incidencias(remito, command.incidencias)
-            remito.incidencias = [incidencias_por_ejemplar[ej_id] for ej_id in sorted(remito.ejemplar_ids)]
+            remito.incidencias = [incidencias_por_ejemplar[ej_id] for ej_id in sorted(incidencias_por_ejemplar)]
 
         updated_remito = self.remito_repository.update(command.id, remito)
         if updated_remito is None:
@@ -131,8 +131,8 @@ class RecepcionRemitoUseCase:
                 self.solicitud_repository.update(solicitud.id, solicitud)
         elif nuevo_estado == EstadoEnvio.CON_INCIDENCIA:
             for ej_id in sorted(updated_remito.ejemplar_ids):
-                incidencia = incidencias_por_ejemplar[ej_id]
-                if incidencia.estado == EstadoEjemplar.DISPONIBLE:
+                incidencia = incidencias_por_ejemplar.get(ej_id)
+                if incidencia is None or incidencia.estado == EstadoEjemplar.DISPONIBLE:
                     self._recibir_ejemplar_disponible(ej_id, updated_remito.sede_destino_id, solicitud, fecha_recepcion)
                 else:
                     ejemplar = self.ejemplar_repository.get_by_id_for_update(ej_id)
@@ -176,7 +176,7 @@ class RecepcionRemitoUseCase:
         if not raw_incidencias:
             raise ErrorHandler(
                 ErrorType.BAD_REQUEST,
-                "Indicá el estado y la observación de cada ejemplar del remito.",
+                "Indicá al menos un ejemplar con incidencia, su estado y observación.",
             )
         resultado: Dict[int, RemitoIncidencia] = {}
         for item in raw_incidencias:
@@ -186,7 +186,7 @@ class RecepcionRemitoUseCase:
             if raw_id is None or not raw_estado or not observacion:
                 raise ErrorHandler(
                     ErrorType.BAD_REQUEST,
-                    "Cada ejemplar debe tener estado y observación al recibir con incidencia.",
+                    "Cada ejemplar con incidencia debe tener estado y observación.",
                 )
             ej_id = int(raw_id)
             if ej_id not in esperados or ej_id in resultado:
@@ -202,10 +202,5 @@ class RecepcionRemitoUseCase:
                 ejemplar_id=ej_id,
                 estado=estado,
                 observacion=observacion,
-            )
-        if set(resultado.keys()) != esperados:
-            raise ErrorHandler(
-                ErrorType.BAD_REQUEST,
-                "Debés informar el estado y la observación de todos los ejemplares del remito.",
             )
         return resultado
