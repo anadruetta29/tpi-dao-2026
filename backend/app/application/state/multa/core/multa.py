@@ -1,12 +1,13 @@
+from abc import ABC, abstractmethod
 from datetime import date
 from app.domain.entity.multa import Multa
-from app.domain.error.error_handler import ErrorHandler
-from app.domain.error.error_type import ErrorType
 
 
-class MultaEstadoState:
+class MultaEstadoState(ABC):
+    @abstractmethod
     def pagar(self, multa: Multa, fecha_pago: date) -> None:
-        raise ErrorHandler(ErrorType.MULTA_ALREADY_CLOSED)
+        pass
 
+    @abstractmethod
     def anular(self, multa: Multa) -> None:
-        raise ErrorHandler(ErrorType.MULTA_ALREADY_CLOSED)
+        pass

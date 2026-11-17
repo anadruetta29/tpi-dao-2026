@@ -1,61 +1,36 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from app.domain.entity.ejemplar import Ejemplar
 from app.domain.entity.estado_ejemplar import EstadoEjemplar
-from app.domain.error.error_handler import ErrorHandler
-from app.domain.error.error_type import ErrorType
 
 
 class EjemplarEstadoState(ABC):
-    def puede_prestarse(self) -> bool:
-        return False
-
-    def puede_enviarse(self) -> bool:
-        return False
-
-    def puede_reservarse(self) -> bool:
-        return False
-
-    def puede_devolverse(self) -> bool:
-        return False
-
-    def puede_resolver_revision(self) -> bool:
-        return False
-
-    def puede_eliminarse(self) -> bool:
-        return True
-
+    @abstractmethod
     def validar_eliminacion(
         self,
         mensaje: str = "No se puede eliminar un ejemplar prestado, reservado o en tránsito.",
     ) -> None:
-        if not self.puede_eliminarse():
-            raise ErrorHandler(ErrorType.CONFLICT, mensaje)
+        pass
 
+    @abstractmethod
     def validar_prestamo(self, ejemplar: Ejemplar) -> None:
-        if not self.puede_prestarse():
-            raise ErrorHandler(ErrorType.EJEMPLAR_NOT_AVAILABLE)
+        pass
 
+    @abstractmethod
     def validar_envio(self, ejemplar: Ejemplar) -> None:
-        if not self.puede_enviarse():
-            raise ErrorHandler(ErrorType.EJEMPLAR_NOT_AVAILABLE)
+        pass
 
+    @abstractmethod
     def validar_reserva(self, ejemplar: Ejemplar) -> None:
-        if not self.puede_reservarse():
-            raise ErrorHandler(ErrorType.EJEMPLAR_NOT_AVAILABLE)
+        pass
 
+    @abstractmethod
     def prestar(self, ejemplar: Ejemplar) -> None:
-        self.validar_prestamo(ejemplar)
-        ejemplar.estado = EstadoEjemplar.PRESTADO
+        pass
 
+    @abstractmethod
     def devolver(self, ejemplar: Ejemplar, nuevo_estado: EstadoEjemplar) -> None:
-        if not self.puede_devolverse():
-            raise ErrorHandler(ErrorType.INVALID_STATE_TRANSITION)
-        ejemplar.estado = nuevo_estado
+        pass
 
+    @abstractmethod
     def resolver_revision(self, ejemplar: Ejemplar, nuevo_estado: EstadoEjemplar) -> None:
-        if not self.puede_resolver_revision() or nuevo_estado not in (
-            EstadoEjemplar.DISPONIBLE,
-            EstadoEjemplar.DESTRUIDO,
-        ):
-            raise ErrorHandler(ErrorType.INVALID_STATE_TRANSITION)
-        ejemplar.estado = nuevo_estado
+        pass

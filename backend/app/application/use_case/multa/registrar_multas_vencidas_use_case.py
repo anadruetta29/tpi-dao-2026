@@ -28,7 +28,12 @@ class RegistrarMultasVencidasUseCase:
     class Command:
         fecha: date
 
-    def execute(self, command: Command) -> None:
+    @dataclass(frozen=True)
+    class Result:
+        procesados: int
+
+    def execute(self, command: Command) -> Result:
+        procesados = 0
         with self.transaction():
             prestamo_ids = self.prestamo_repository.get_ids_vencidos(command.fecha)
 
@@ -49,3 +54,5 @@ class RegistrarMultasVencidasUseCase:
                 if prestamo.estado == EstadoPrestamo.ACTIVO:
                     prestamo.estado = EstadoPrestamo.VENCIDO
                     self.prestamo_repository.update(prestamo_id, prestamo)
+                procesados += 1
+        return RegistrarMultasVencidasUseCase.Result(procesados=procesados)

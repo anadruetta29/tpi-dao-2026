@@ -1,7 +1,5 @@
 from datetime import date
-from app.application.state.multa.core.multa import (
-    MultaEstadoState,
-)
+from app.application.state.multa.core.multa import MultaEstadoState
 from app.domain.entity.multa import Multa
 
 

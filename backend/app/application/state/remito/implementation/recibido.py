@@ -1,7 +1,5 @@
 from datetime import date
-from app.application.state.remito.core.remito import (
-    RemitoEstadoState,
-)
+from app.application.state.remito.core.remito import RemitoEstadoState
 from app.domain.entity.estado_envio import EstadoEnvio
 from app.domain.entity.remito import Remito
 from app.domain.error.error_handler import ErrorHandler
@@ -9,6 +7,9 @@ from app.domain.error.error_type import ErrorType
 
 
 class RecibidoState(RemitoEstadoState):
+    def empacar(self) -> EstadoEnvio:
+        raise ErrorHandler(ErrorType.INVALID_STATE_TRANSITION)
+
     def despachar(self, remito: Remito, fecha_despacho: date) -> EstadoEnvio:
         raise ErrorHandler(ErrorType.INVALID_STATE_TRANSITION)
 

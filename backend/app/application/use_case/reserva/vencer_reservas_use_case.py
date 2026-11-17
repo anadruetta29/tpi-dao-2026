@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import date
 from typing import Callable, ContextManager
 from app.application.use_case.reserva.gestionar_retiro_reserva import GestionarRetiroReserva
@@ -16,7 +17,17 @@ class VencerReservasUseCase:
         self.retiro = retiro
         self.transaction = transaction
 
-    def execute(self, hoy: date) -> None:
+    @dataclass(frozen=True)
+    class Command:
+        hoy: date
+
+    @dataclass(frozen=True)
+    class Result:
+        vencidas: int
+
+    def execute(self, command: Command) -> Result:
+        hoy = command.hoy
+        vencidas = 0
         with self.transaction():
             ids = self.reserva_repository.get_ids_por_vencer_retiro(hoy)
 
@@ -27,3 +38,5 @@ class VencerReservasUseCase:
                     continue
                 if reserva.fecha_limite_retiro is not None and reserva.fecha_limite_retiro < hoy:
                     self.retiro.liberar(reserva, EstadoReserva.VENCIDA, hoy)
+                    vencidas += 1
+        return VencerReservasUseCase.Result(vencidas=vencidas)

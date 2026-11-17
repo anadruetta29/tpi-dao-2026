@@ -8,11 +8,14 @@ from app.application.state.reserva.implementation.activa_reserva import (
 from app.application.state.reserva.implementation.atendida_reserva import (
     AtendidaReservaState,
 )
+from app.application.state.reserva.implementation.cancelada_reserva import (
+    CanceladaReservaState,
+)
 from app.application.state.reserva.implementation.lista_para_retiro_reserva import (
     ListaParaRetiroReservaState,
 )
-from app.application.state.reserva.implementation.cancelada_reserva import (
-    CanceladaReservaState,
+from app.application.state.reserva.implementation.retirada_reserva import (
+    RetiradaReservaState,
 )
 from app.application.state.reserva.implementation.vencida_reserva import (
     VencidaReservaState,
@@ -28,7 +31,7 @@ class ReservaEstadoStateFactory:
             EstadoReserva.ACTIVA: ActivaReservaState(),
             EstadoReserva.ATENDIDA: AtendidaReservaState(),
             EstadoReserva.LISTA_PARA_RETIRO: ListaParaRetiroReservaState(),
-            EstadoReserva.RETIRADA: AtendidaReservaState(),
+            EstadoReserva.RETIRADA: RetiradaReservaState(),
             EstadoReserva.CANCELADA: CanceladaReservaState(),
             EstadoReserva.VENCIDA: VencidaReservaState(),
         }

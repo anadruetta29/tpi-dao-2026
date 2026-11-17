@@ -4,7 +4,9 @@ from contextlib import asynccontextmanager, suppress
 from datetime import date
 from typing import AsyncIterator
 from fastapi import FastAPI
+from app.application.use_case.aviso.generar_avisos_use_case import GenerarAvisosUseCase
 from app.application.use_case.multa.registrar_multas_vencidas_use_case import RegistrarMultasVencidasUseCase
+from app.application.use_case.reserva.vencer_reservas_use_case import VencerReservasUseCase
 from app.core.bean.dependencies import (
     get_generar_avisos_use_case,
     get_registrar_multas_vencidas_use_case,
@@ -23,12 +25,12 @@ def _registrar_multas_vencidas() -> None:
 
 def _vencer_reservas() -> None:
     with SessionLocal() as db:
-        get_vencer_reservas_use_case(db).execute(date.today())
+        get_vencer_reservas_use_case(db).execute(VencerReservasUseCase.Command(hoy=date.today()))
 
 
 def _generar_avisos() -> None:
     with SessionLocal() as db:
-        get_generar_avisos_use_case(db).execute(date.today())
+        get_generar_avisos_use_case(db).execute(GenerarAvisosUseCase.Command(hoy=date.today()))
 
 
 async def _ejecutar_periodicamente() -> None:

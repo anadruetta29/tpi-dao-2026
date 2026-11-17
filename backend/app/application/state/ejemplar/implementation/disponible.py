@@ -1,14 +1,31 @@
-from app.application.state.ejemplar.core.ejemplar import (
-    EjemplarEstadoState,
-)
+from app.application.state.ejemplar.core.ejemplar import EjemplarEstadoState
+from app.domain.entity.ejemplar import Ejemplar
+from app.domain.entity.estado_ejemplar import EstadoEjemplar
+from app.domain.error.error_handler import ErrorHandler
+from app.domain.error.error_type import ErrorType
 
 
 class DisponibleState(EjemplarEstadoState):
-    def puede_prestarse(self) -> bool:
-        return True
+    def validar_eliminacion(
+        self,
+        mensaje: str = "No se puede eliminar un ejemplar prestado, reservado o en tránsito.",
+    ) -> None:
+        return None
 
-    def puede_enviarse(self) -> bool:
-        return True
+    def validar_prestamo(self, ejemplar: Ejemplar) -> None:
+        return None
 
-    def puede_reservarse(self) -> bool:
-        return True
+    def validar_envio(self, ejemplar: Ejemplar) -> None:
+        return None
+
+    def validar_reserva(self, ejemplar: Ejemplar) -> None:
+        return None
+
+    def prestar(self, ejemplar: Ejemplar) -> None:
+        ejemplar.estado = EstadoEjemplar.PRESTADO
+
+    def devolver(self, ejemplar: Ejemplar, nuevo_estado: EstadoEjemplar) -> None:
+        raise ErrorHandler(ErrorType.INVALID_STATE_TRANSITION)
+
+    def resolver_revision(self, ejemplar: Ejemplar, nuevo_estado: EstadoEjemplar) -> None:
+        raise ErrorHandler(ErrorType.INVALID_STATE_TRANSITION)

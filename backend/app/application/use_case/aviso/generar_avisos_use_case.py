@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import date, timedelta
 from typing import Callable, ContextManager
 from app.core.config.settings import settings
@@ -22,7 +23,17 @@ class GenerarAvisosUseCase:
         self.prestamos = prestamos
         self.transaction = transaction
 
-    def execute(self, hoy: date) -> None:
+    @dataclass(frozen=True)
+    class Command:
+        hoy: date
+
+    @dataclass(frozen=True)
+    class Result:
+        generados: int
+
+    def execute(self, command: Command) -> Result:
+        hoy = command.hoy
+        generados = 0
         with self.transaction():
             for reserva in self.reservas.get_all_filtered(estado=EstadoReserva.LISTA_PARA_RETIRO):
                 if reserva.fecha_limite_retiro is None or reserva.fecha_limite_retiro < hoy:
@@ -32,6 +43,7 @@ class GenerarAvisosUseCase:
                     mensaje=f"La reserva #{reserva.id} está lista en la sede #{reserva.sede_id}. Podés retirarla hasta el {reserva.fecha_limite_retiro:%d/%m/%Y}.",
                     fecha=hoy, sede_id=reserva.sede_id, socio_id=reserva.socio_id, reserva_id=reserva.id,
                 ))
+                generados += 1
 
             prestamos = self.prestamos.get_all_filtered(estado=EstadoPrestamo.ACTIVO)
             prestamos += self.prestamos.get_all_filtered(estado=EstadoPrestamo.VENCIDO)
@@ -51,3 +63,5 @@ class GenerarAvisosUseCase:
                     clave=f"{tipo}:{prestamo.id}:{vencimiento}", tipo=tipo, mensaje=mensaje,
                     fecha=hoy, sede_id=prestamo.sede_id, socio_id=prestamo.socio_id, prestamo_id=prestamo.id,
                 ))
+                generados += 1
+        return GenerarAvisosUseCase.Result(generados=generados)
