@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class Settings:
@@ -14,9 +17,10 @@ class Settings:
     DB_PORT: str = os.getenv("DB_PORT", "5432")
     DB_NAME: str = os.getenv("DB_NAME", "dao")
 
-    JWT_SECRET: str = os.getenv("JWT_SECRET", "super-secret-jwt-key-change-in-prod")
+    JWT_SECRET: str = os.getenv("JWT_SECRET") or "super-secret-jwt-key-change-in-prod"
     JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
     JWT_EXPIRE_MINUTES: int = int(os.getenv("JWT_EXPIRE_MINUTES", "10080"))
 
 
 settings = Settings()
+
